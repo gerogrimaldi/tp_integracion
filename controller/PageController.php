@@ -62,3 +62,8 @@ if ( !empty($_POST['btEvento']) )
 {
 	require_once 'controller/eventController.php';
 }
+
+if ( !empty($_POST['btTest']) )
+{
+	require_once 'controller/testController.php';
+}
