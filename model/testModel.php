@@ -32,6 +32,22 @@ class Test{
         }
     }
 
+    public function borrarBD()
+    {
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            require_once 'includes/config.php';
+            $this->mysqli = mysqli_connect("$db[host]", "$db[username]", "$db[password]");
+            $this->mysqli->set_charset("utf8mb4");
+            $sql="DROP DATABASE granjas";
+            echo "<h1 class='bg-white'>BD borrada con éxito.</h1>";
+            $this->mysqli->query($sql);
+        } catch (mysqli_sql_exception $e) {
+            echo("Error: " . $e->getMessage());
+            exit; 
+        }
+    }
+
     public function cargarDatos()
     {
         try {

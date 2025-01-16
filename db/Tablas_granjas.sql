@@ -1,3 +1,13 @@
+CREATE TABLE usuarios (
+  idUsuario INT NOT NULL,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(500) NOT NULL,
+  direccion VARCHAR(500) NOT NULL,
+  telefono VARCHAR(20) NOT NULL,
+  password VARCHAR(100) NOT NULL,
+  fechaNac DATE NOT NULL
+);
+
 CREATE TABLE granja (
     idGranja INT NOT NULL,
     nombre VARCHAR(80) NOT NULL,

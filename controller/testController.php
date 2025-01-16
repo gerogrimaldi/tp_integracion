@@ -18,6 +18,13 @@ if ( !empty($_POST) )
         $oTest->crearBD();
     }
 
+    if ( $_POST['btTest'] == 'borrarDB' )
+    {
+        echo "<h1 class='bg-white'>Borrando base de datos...</h1>";
+        $oTest = new Test();
+        $oTest->borrarBD();
+    }
+
     if ( $_POST['btTest'] == 'cargarDatos' )
     {
         echo "<h1 class='bg-white'>Cargando datos de prueba...</h1>";
