@@ -17,6 +17,9 @@ print("Sector Testing");
                 <button type="submit" name="btTest" value="cargarDatos" class="btn btn-success">
                     Cargar Datos de prueba
                 </button>
+                <button type="submit" name="btTest" value="crearTablas" class="btn btn-success">
+                    Crear tablas
+                </button>
             </form>
         </div>
 </div>';

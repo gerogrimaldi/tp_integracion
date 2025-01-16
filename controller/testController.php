@@ -13,7 +13,7 @@ if ( !empty($_POST) )
 
     if ( $_POST['btTest'] == 'crearBD' )
     {
-        echo "<h1 class='bg-white'>Testeando conexión MariaDB</h1>";
+        echo "<h1 class='bg-white'>Creando base de datos...</h1>";
         $oTest = new Test();
         $oTest->crearBD();
     }
@@ -23,6 +23,13 @@ if ( !empty($_POST) )
         echo "<h1 class='bg-white'>Cargando datos de prueba...</h1>";
         $oTest = new Test();
         $oTest->cargarDatos();
+    }
+
+    if ( $_POST['btTest'] == 'crearTablas' )
+    {
+        echo "<h1 class='bg-white'>Creando tablas...</h1>";
+        $oTest = new Test();
+        $oTest->crearTablas();
     }
 
 }
