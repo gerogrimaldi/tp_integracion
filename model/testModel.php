@@ -12,17 +12,9 @@ class Test{
 
     public function testConnect()
     {
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-        try {
-            $this->mysqli = mysqli_connect("127.0.0.1", "root", "", "granjas");
-            $this->mysqli->set_charset("utf8mb4");
-            echo "<h1 class='bg-white'>Conexion Correcta</h1>";
-        } catch (mysqli_sql_exception $e) {
-            echo("Error de conexión a la base de datos: " . $e->getMessage());
-            //header("Location: index.php?opt=error_db");
-            exit; 
-        }
-
+        require_once 'model/conexion.php';  
+        //En caso de no conectar, aparece la página de error de BD.
+        echo "<h1 class='bg-white'>Conexion Correcta</h1>";
     }
 
     public function crearBD()
