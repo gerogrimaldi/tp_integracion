@@ -28,6 +28,13 @@ if ( !empty($_GET['opt']) )
         require_once('view/error_db.php');
 				
 	}
+
+	if ($_GET['opt']=='test')
+	{
+    
+        require_once('view/test.php');
+				
+	}
 }else{
 
 	$valueBt="login";
