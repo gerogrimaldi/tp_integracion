@@ -1,109 +1,83 @@
 <?php
 $mensaje = '';
 
-
-class Evento{
-	
-    private $idEvento;
-    private $fechaEvento;
-	private $lugarEvento;
-    private $nombreEvento;
-
+class granja{
+	//(idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion)
+    private $idGranja;
+    private $nombre;
+	private $habilitacionSenasa;
+    private $metrosCuadrados;
+    private $ubicacion;
     private $mysqli;
     
-
-	
     public function __construct()
-{
-    require_once 'model/conexion.php';  
-}
-
-    public function setIdEvento($idEvento)
     {
+        require_once 'model/conexion.php';  
+    }
 
-        if ( ctype_digit($idEvento)==true )
+    public function setIdEvento($idGranja)
+    {
+        if ( ctype_digit($idGranja)==true ) // Evalua que el ID sea positivo y entero
         {
-            $this->idEvento = $idEvento;
+            $this->idGranja = $idGranja;
         }
-
     }
 
-    public function setDate($fecha)
+    public function setNombre($nombre)
     {
-        $this->fechaEvento = new DateTime($fecha);
-
-        $this->fechaEvento = $this->fechaEvento->format('Y-m-d H:i:s');
+        $this->nombre = trim($nombre); // Eliminar espacios en blanco al inicio y al final y asignarlo al objeto.
     }
 
-    public function setLugarEvento($lugarEvento)
+    public function setHabilitacionSenasa($habilitacionSenasa)
     {
-        $this->lugarEvento = $lugarEvento;
-        
+        $this->$habilitacionSenasa = trim($habilitacionSenasa); 
     }
 
-    public function setNombreEvento($nombreEvento)
+    public function setMetrosCuadrados($metrosCuadrados)
     {
+        $this->metrosCuadrados = trim($metrosCuadrados); 
+    }
 
-        $nombreEvento = trim($nombreEvento); // Eliminar espacios en blanco al inicio y al final
-
-        // Verifica si el nombre no está vacío
-        if (!empty($nombreEvento)) {
-            $this->nombreEvento = $nombreEvento;
-        }
-
+    public function setUbicacion($ubicacion)
+    {
+        $this->ubicacion = trim($ubicacion); 
     }
 
     public function toArray()
     {
         $vEvento=array(
-            'idEvento'=>$this->idEvento,
-            'lugarEvento'=>$this->lugarEvento,
-            'nombreEvento'=>$this->nombreEvento,
-            'fechaEvento'=>$this->fechaEvento
+            'idGranja'=>$this->$dGranja,
+            'nombre'=>$this->nombre,
+            'habilitacionSenasa'=>$this->habilitacionSenasa,
+            'metrosCuadrados'=>$this->metrosCuadrados,
+            'ubicacion'=>$this->ubicacion
         );
-
         return $vEvento;
-
     }
-
 
     public function getall()
     {
-
-        if ($this->mysqli->connect_error) {
-            die("Conexión fallida: " . $this->mysqli->connect_error);
-
-        }
-        
-        // Leer datos de la tabla 'eventos'
-        $sql = "SELECT * FROM granja";
+        // Leer datos de la tabla 'granjas',
+        $sql = "SELECT idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion FROM granja";
         $result = $this->mysqli->query($sql);
-        
         $data = []; // Array para almacenar los datos
         
         if ($result->num_rows > 0) {
-            
             while($row = $result->fetch_assoc()) {
                 $data[] = $row;
             }
         } else {
             echo "0 resultados";
         }
-        
-        
         $this->mysqli->close();
-        
         // Convertir el array de datos a formato JSON
         $json_data = json_encode($data);
         return $json_data;
     }
 
-
-    public function getEventoPorId($idEvento)
+    public function getGranjaPorId($idEvento)
     {
-
-        $sql = "SELECT * FROM eventos WHERE idGranja=".$idEvento;
-
+        $sql = "SELECT idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion FROM granja WHERE idGranja=".$idGranja;
         if ( $resultado = $this->mysqli->query($sql) )
 		{
 			if ( $resultado->num_rows > 0 )
@@ -112,24 +86,18 @@ class Evento{
 			}else{
                 return false;
             }
-
         }
-        
         unset($resultado);
-		  
         $this->mysqli->close();
-        
     }
 
 //###########################################################################
 // CARGA; UPDATE, DELTE
 public function save()
 {
-    // echo "<h1 class='bg-white'>$this->nombreEvento<h1>";
-    // var_dump($this->nombreEvento, $this->lugarEvento, $this->fechaEvento);
 
     // Consulta para verificar si el Evento ya existe
-    $sqlCheck = "SELECT nombreEvento FROM eventos WHERE nombreEvento = ?";
+    $sqlCheck = "SELECT idGranja FROM granja WHERE idGranja = ?";
     $stmtCheck = $this->mysqli->prepare($sqlCheck);
 
     if (!$stmtCheck) {
@@ -137,73 +105,56 @@ public function save()
     }
 
     // Enlazar parametro
-    $stmtCheck->bind_param("s", $this->nombreEvento);
+    $stmtCheck->bind_param("s", $this->idGranja);
     $stmtCheck->execute();
     $stmtCheck->store_result();
 
     // Verificar
     if ($stmtCheck->num_rows > 0) {
-        echo '<script type="text/javascript">alert("Error: El Evento ya está registrado.");</script>';
+        echo '<script type="text/javascript">alert("Error: La granja ya existe.");</script>';
         $stmtCheck->close();
         $this->mysqli->close();
         return false; 
     }
-
     $stmtCheck->close();
 
     // Inserción del nuevo Evento
-    $sql = "INSERT INTO eventos (nombreEvento, lugarEvento, fechaEvento) 
+    $sql = "INSERT INTO granjas (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) 
             VALUES (?, ?, ?)";
-
     $stmt = $this->mysqli->prepare($sql);
-
     if (!$stmt) {
         die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
     }
 
     // Enlaza los parámetros y ejecuta la consulta
-    $stmt->bind_param("sss", $this->nombreEvento, $this->lugarEvento, $this->fechaEvento);
+    $stmt->bind_param("sss", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
     $stmt->execute();
-
-    echo '<script type="text/javascript">alert("Evento registrado con éxito.");</script>';
-
+    echo '<script type="text/javascript">alert("Granja registrada con éxito.");</script>';
+    
     // Cerrar la consulta y la conexión
     $stmt->close();
     $this->mysqli->close();
     return true;
 }
 
-    
-
 public function update()
 {
     // Preparar la consulta para actualizar los datos del evento
-    $sql = "UPDATE eventos SET lugarEvento = ?, nombreEvento = ?, fechaEvento = ? WHERE idEvento = ?";
+    $sql = "UPDATE granja SET nombre = ?, habilitacionSenasa = ?, metrosCuadrados = ?, ubicacion = ? WHERE idGranja = ?";
     $stmt = $this->mysqli->prepare($sql);
-
     if (!$stmt) {
         die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
     }
-
     // Enlazar parámetros y ejecutar la consulta
-    $stmt->bind_param("sssi", $this->lugarEvento, $this->nombreEvento, $this->fechaEvento, $this->idEvento);
+    $stmt->bind_param("sssi", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
     $stmt->execute();
-
     // Cerrar la consulta
     $stmt->close();
 }
 
-
-    
-    public function deleteEventoPorId($idEvento)
+public function deleteGranjaPorId($idGranja)
     {
-
-        $sql="DELETE FROM eventos WHERE idEvento=$idEvento"; 
-
+        $sql="DELETE FROM granja WHERE idGranja=$idGranja"; 
         $this->mysqli->query($sql);
-
     }
-
-    
-
 }
