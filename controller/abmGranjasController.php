@@ -13,7 +13,9 @@ if ( !empty($_POST) )
         $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
         $oGranja->setUbicacion($_POST['ubicacion']);
         $oGranja->save();
-        require_once('view/abmGranjas.php');
+        // Redirigir a la vista principal de ABM granjas
+        header("Location: index.php?opt=granjas");
+        exit();   
     }
 
     if ( $_POST['btGranja'] == 'editarGranja' )
