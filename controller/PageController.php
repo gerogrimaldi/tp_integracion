@@ -18,23 +18,26 @@ if ( !empty($_GET['opt']) )
 
 	if ($_GET['opt']=='error_db')
 	{
-        require_once('view/error_db.php');		
+        require_once 'view/error_db.php';		
 	}
 
 	if ($_GET['opt']=='test')
 	{
-        require_once('view/test.php');	
+		require_once 'controller/testController.php';
+        require_once 'view/test.php';	
 	}
 
 	if ($_GET['opt']=='granjas')
 	{
 		require_once 'controller/abmGranjasController.php';
-        require_once('view/abmGranjas.php');		
+        require_once 'view/abmGranjas.php';		
 	}
-}else{
+}/*else{
+
 	$valueBt="login";
 	require_once('view/login.php');
-}
+
+}*/
 
 
 if ( !empty($_POST['btFormulario']))
@@ -58,9 +61,4 @@ if ( !empty($_POST['btFormulario']))
 if ( !empty($_POST['btEvento']) )
 {
 	require_once 'controller/eventController.php';
-}
-
-if ( !empty($_POST['btTest']) )
-{
-	require_once 'controller/testController.php';
 }

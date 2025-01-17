@@ -7,12 +7,13 @@ if ( !empty($_POST) )
     if ( $_POST['btGranja'] == 'registrarGranja' )
     {
         $oGranja = new Granja();
+        $oGranja->setMaxID();
         $oGranja->setNombre($_POST['nombre']);
         $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
-        $oGranja->setMetrosCuadrados($_POST['date']);
+        $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
         $oGranja->setUbicacion($_POST['ubicacion']);
-        $todo_ok = $oGranja->save();
-        //require_once('view/msjNuevoEvento.php');
+        $oGranja->save();
+        require_once('view/abmGranjas.php');
     }
 
     if ( $_POST['btGranja'] == 'editarGranja' )

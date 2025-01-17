@@ -43,6 +43,21 @@ class granja{
         $this->ubicacion = trim($ubicacion); 
     }
 
+    public function setMaxID()
+    {
+        // Leer datos de la tabla 'granjas',
+        $sql = "SELECT MAX(idGranja) AS maxID FROM granja  ";
+        $result = $this->mysqli->query($sql);
+        $data = []; // Array para almacenar los datos
+        //La consulta devuelve un solo resultado.
+        if ($result && $row = $result->fetch_assoc()) {
+            $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
+            $this->idGranja = $maxID + 1; // Incrementa el ID máximo en 1
+        }else {
+            echo "Error al obtener el máximo idGranja: " . $this->mysqli->error;
+        }
+    }
+
     public function toArray()
     {
         $vEvento=array(
@@ -119,21 +134,21 @@ public function save()
     $stmtCheck->close();
 
     // Inserción del nuevo Evento
-    $sql = "INSERT INTO granjas (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) 
-            VALUES (?, ?, ?)";
+    $sql = "INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) 
+            VALUES (?, ?, ?, ?, ?)";
     $stmt = $this->mysqli->prepare($sql);
     if (!$stmt) {
         die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
     }
 
     // Enlaza los parámetros y ejecuta la consulta
-    $stmt->bind_param("sss", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
+    $stmt->bind_param("issss", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
     $stmt->execute();
     echo '<script type="text/javascript">alert("Granja registrada con éxito.");</script>';
     
     // Cerrar la consulta y la conexión
     $stmt->close();
-    $this->mysqli->close();
+    //$this->mysqli->close();
     return true;
 }
 
