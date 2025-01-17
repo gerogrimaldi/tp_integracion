@@ -17,6 +17,7 @@ $body = '
                 <th class="text-primary">m2</th>
                 <th class="text-primary">Ubicación</th> 
                 <th class="text-primary"></th> 
+                <th class="text-primary"></th> 
             </tr>
         </thead>
         <tbody id="granja">
