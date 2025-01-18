@@ -39,24 +39,24 @@ if ( !empty($_GET['opt']) )
 if ( !empty($_POST['btFormulario']))
 {
 
-	echo "<h1 class='bg-black'>EJECUTO VALIDACION<h1>";
+	echo '<script>console.log("'.$_POST['btFormulario'].'"); </script>'; 
 
     require_once 'controller/userController.php';
 
-	if ($validacion)
-	{
-		//si no marque el permanecer conectado, quito la validacion
-		// if (!isset($_POST['connected'])){
-		// 	$validacion = false;
-		// }
+	// if ($validacion)
+	// {
+	// 	//si no marque el permanecer conectado, quito la validacion
+	// 	// if (!isset($_POST['connected'])){
+	// 	// 	$validacion = false;
+	// 	// }
 	
-		require_once('view/home.php');
+	// 	require_once('view/home.php');
 				
-	}else{
-		$valueBt="login";
+	// }else{
+	// 	$valueBt="login";
     
-        require_once('view/login.php');
-	}
+    //     require_once('view/login.php');
+	// }
 }
 if ( !empty($_POST['btEvento']) )
 {

@@ -173,7 +173,7 @@ class Usuario{
     
         try {
             // Prepare the statement to prevent SQL injection
-            $sql = "SELECT id, nombre, password, estado FROM usuarios WHERE nombre = ? LIMIT 1";
+            $sql = "SELECT id, nombre, password FROM usuarios WHERE nombre = ? LIMIT 1";
             $stmt = $this->mysqli->prepare($sql);
             
             if (!$stmt) {

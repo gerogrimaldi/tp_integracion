@@ -1,7 +1,7 @@
 <?php
     $token = rand(5, 1500);
     $_SESSION ['token'] = $token;
-
+    echo '<script>console.log("Welcome to GeeksforGeeks!"); </script>'; 
     if (empty($idUsuario))
     {
         
@@ -56,4 +56,5 @@
 
     </div>
     ';
-?>
+
+    ?>

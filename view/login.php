@@ -2,6 +2,8 @@
 $token = rand(5, 1500);
 $_SESSION['token'] = $token;
 
+echo '<script>console.log("'.$valueBt.'"); </script>'; 
+
 if (empty($idUsuario)) {
     $idUsuario = '';
     $password = '';
@@ -20,7 +22,7 @@ $body = '
                 <p class="text-muted mb-4">Inicie sesión para acceder a la aplicación</p>
             </div>
             
-            <form id="loginForm" action="index.php" method="POST" class="needs-validation" novalidate>
+            <form id="loginForm" action="index.php" method="post" class="needs-validation" novalidate>
                 <div class="mb-4">
                     <div class="input-group has-validation">
                         <span class="input-group-text border-end-0">
