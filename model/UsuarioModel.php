@@ -18,27 +18,7 @@ class Usuario{
     public function __construct()
 {
     $this->config = require './includes/config.php';
-        
-    try {
-        $this->mysqli = new mysqli(
-            $this->config['db']['host'],
-            $this->config['db']['username'],
-            $this->config['db']['password'],
-            $this->config['db']['database']
-        );
-
-        if ($this->mysqli->connect_error) {
-            throw new Exception("Connection failed: " . $this->mysqli->connect_error);
-        }
-
-        $this->mysqli->set_charset("utf8");
-        
-    } catch (mysqli_sql_exception $e) {
-        error_log("Error de conexión a la base de datos: " . $e->getMessage());
-
-        header("Location: index.php?opt=error_db");
-        exit; 
-    }
+    require_once 'model/conexion.php';  
 
 }
 

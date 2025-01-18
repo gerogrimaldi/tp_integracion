@@ -1,9 +1,7 @@
 <?php
-return [
-    'db' => [
-        'host' => '127.0.0.1',
-        'username' => 'root',
-        'password' => '',
-        'database' => '2024_grupo2'
-    ]
+$db = [
+    'host' => '127.0.0.1',
+    'username' => 'root',
+    'password' => '',
+    'database' => 'granjas'
 ];

@@ -15,18 +15,7 @@ class Evento{
 	
     public function __construct()
 {
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-
-    try {
-        $this->mysqli = new mysqli("127.0.0.1", "2024_grupo2", "Grupo2_8964", "2024_grupo2");
-        $this->mysqli->set_charset("utf8mb4");
-    } catch (mysqli_sql_exception $e) {
-   
-        error_log("Error de conexión a la base de datos: " . $e->getMessage());
-
-        header("Location: index.php?opt=error_db");
-        exit; 
-    }
+    require_once 'model/conexion.php';  
 }
 
     public function setIdEvento($idEvento)
@@ -42,7 +31,7 @@ class Evento{
     public function setDate($fecha)
     {
         $this->fechaEvento = new DateTime($fecha);
-        
+
         $this->fechaEvento = $this->fechaEvento->format('Y-m-d H:i:s');
     }
 
@@ -83,10 +72,11 @@ class Evento{
 
         if ($this->mysqli->connect_error) {
             die("Conexión fallida: " . $this->mysqli->connect_error);
+
         }
         
         // Leer datos de la tabla 'eventos'
-        $sql = "SELECT * FROM eventos";
+        $sql = "SELECT * FROM granja";
         $result = $this->mysqli->query($sql);
         
         $data = []; // Array para almacenar los datos
@@ -112,7 +102,7 @@ class Evento{
     public function getEventoPorId($idEvento)
     {
 
-        $sql = "SELECT * FROM eventos WHERE idEvento=".$idEvento;
+        $sql = "SELECT * FROM eventos WHERE idGranja=".$idEvento;
 
         if ( $resultado = $this->mysqli->query($sql) )
 		{
