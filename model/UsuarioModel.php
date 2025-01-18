@@ -205,7 +205,7 @@ class Usuario{
                 {
     
                     // Store necessary user data in session
-                    $_SESSION['user_id'] = $usuario['id'];
+                    $_SESSION['user_id'] = $usuario['idUsuario'];
                     $_SESSION['user_email'] = $usuario['email'];
                     
                     // Optional: Update last login timestamp

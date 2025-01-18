@@ -6,7 +6,7 @@
     </div>  
         </div>
         <br>
-        <a href="index.php?opt=list_granja" class="btn btn-primary">Ver granjas</a>
+        <a href="index.php?opt=granjas" class="btn btn-primary">Ver granjas</a>
 </div>';
      
 ?>
