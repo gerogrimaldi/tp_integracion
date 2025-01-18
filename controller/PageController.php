@@ -32,12 +32,13 @@ if ( !empty($_GET['opt']) )
 		require_once 'controller/abmGranjasController.php';
         require_once 'view/abmGranjas.php';		
 	}
-}/*else{
+}
+else{
 
 	$valueBt="login";
 	require_once('view/login.php');
 
-}*/
+}
 
 
 if ( !empty($_POST['btFormulario']))

@@ -20,7 +20,7 @@ if ( !empty($_POST) )
 
     if ( $_POST['btGranja'] == 'editarGranja' )
     {
-        require_once 'model/GranjaModel.php';
+
         $oGranja = new Granja();
             $oGranja->setNombre($_POST['nombre']);
             $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
@@ -45,6 +45,7 @@ if ( !empty($_GET) )
         $resultado = $oGranja->getGranjaPorId($idGranja);
         if ( $resultado!=false )
         {
+            // que hace esto?
             $unaGranja = $resultado->fetch_array();
             $idGranja  = $unaGranja['idGranja'];
             $nombre   = $unaGranja['nombre'];
@@ -54,9 +55,12 @@ if ( !empty($_GET) )
         }
     }
 
-    if ($_GET['opt']=='edit')
+    if ($_GET['edit']==true)
     {
+        UNSET($_GET['edit']);
+
         $oGranja = new Granja();
+        $idGranja = (int)$_GET['idGranja'];
         $resultado = $oGranja->getGranjaPorId($idGranja);
         if ( $resultado!=false )
         {
@@ -69,9 +73,14 @@ if ( !empty($_GET) )
         }
     }
 
-    if ($_GET['opt']=='delete')
+    if ($_GET['delete'] = true)
     {
+        echo("<h2 class='bg-white text-black'>Delete true</h2>");
+
+        UNSET($_GET['delete']);
         $oGranja = new Granja();
-        $resultado = $oGranja->deleteGranjaPorId($idGranja);
+        $idGranja = (int)$_GET['idGranja'];
+
+        $oGranja->deleteGranjaPorId($idGranja);
     }
 }

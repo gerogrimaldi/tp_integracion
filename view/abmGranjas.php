@@ -49,8 +49,8 @@ $body = '
             <td>${granja.habilitacionSenasa}</td>
             <td>${granja.metrosCuadrados}</td>
             <td>${granja.ubicacion}</td>
-            <td><a href="index.php?opt=edit&idGranja=${granja.idGranja}" class="btn btn-warning btn-sm">editar</a></td>
-            <td><a href="index.php?opt=delete&idGranja=${granja.idGranja}" class="btn btn-danger btn-sm">borrar</a></td>
+            <td><a href="index.php?opt=granjas&edit=true&idGranja=${granja.idGranja}" class="btn btn-warning btn-sm">editar</a></td>
+            <td><a href="index.php?opt=granjas&delete=true&idGranja=${granja.idGranja}" class="btn btn-danger btn-sm">borrar</a></td>
         `;
         
         granjaTbody.appendChild(row);
@@ -109,17 +109,19 @@ $body = '
                     <label for="agregrarGranjaFormTextM2" class="form-label">Metros Cuadrados</label>
                     <div class="input-group has-validation">
                         <input type="number" 
-                               class="form-control" 
-                               id="metrosCuadrados" 
-                               name="metrosCuadrados" 
-                               placeholder="Tamaño de la granja"
-                               value="'.$metrosCuadrados.'"
-                               >
-                        <div class="invalid-feedback">
-                            Debe ser un número.
-                        </div>
+                            class="form-control" 
+                            id="metrosCuadrados" 
+                            name="metrosCuadrados" 
+                            placeholder="Tamaño de la granja"
+                            value="'.$metrosCuadrados.'" 
+                            min="1" 
+                            required>
+                            <div class="invalid-feedback">
+                                <?php echo $error ?? Debe ser un número positivo.; ?>
+                            </div>
                     </div>
                 </div>
+
                 <div class="mb-4">
                     <label for="agregrarGranjaFormTextUbicacion" class="form-label">Ubicación</label>
                     <div class="input-group has-validation">
@@ -145,6 +147,18 @@ $body = '
     </div>
   </div>
 </div>
+
+<script>
+document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
+    const input = e.target;
+    if (input.value < 1) {
+        input.setCustomValidity("El valor debe ser un número positivo.");
+    } else {
+        input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
+    }
+});
+</script>
+
 ';
 ?>
 

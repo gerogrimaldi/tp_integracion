@@ -12,14 +12,12 @@ class Usuario{
     private $fechaNac;
 
     private $mysqli;
-    private $config;
+
 
 	
     public function __construct()
 {
-    $this->config = require './includes/config.php';
     require_once 'model/conexion.php';  
-
 }
 
     public function setidUsuario($idUsuario)
