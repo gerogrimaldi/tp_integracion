@@ -13,21 +13,22 @@ if ( !empty($_POST) )
         $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
         $oGranja->setUbicacion($_POST['ubicacion']);
         $oGranja->save();
-        // Redirigir a la vista principal de ABM granjas
-        header("Location: index.php?opt=granjas");
-        exit();   
+        //Redirigir a la vista principal de ABM granjas
+        //header("Location: index.php?opt=granjas");
+        //exit();   
     }
 
     if ( $_POST['btGranja'] == 'editarGranja' )
     {
-
         $oGranja = new Granja();
-            $oGranja->setNombre($_POST['nombre']);
-            $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
-            $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
-            $oGranja->setUbicacion($_POST['ubicacion']);
+        $oGranja->setIdGranja ($_POST['idGranja']);
+        $oGranja->setNombre($_POST['nombre']);
+        $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
+        $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
+        $oGranja->setUbicacion($_POST['ubicacion']);
         $oGranja->update();
-        //require_once('view/msjEditoEvento.php');
+        header("Location: index.php?opt=granjas");
+        exit();   
     }
 }
 
@@ -39,23 +40,6 @@ if ( !empty($_GET) )
         $resultado = $oGranja->getall();
     }
 
-    if (isset($_GET['edit']) &&$_GET['edit']=='true')
-    {
-        UNSET($_GET['edit']);
-        $oGranja = new Granja();
-        $idGranja = (int)$_GET['idGranja'];
-        $resultado = $oGranja->getGranjaPorId($idGranja);
-        if ( $resultado!=false )
-        {
-            $unaGranja = $resultado->fetch_array();
-            $idGranja  = $unaGranja['idGranja'];
-            $nombre   = $unaGranja['nombre'];
-            $habilitacionSenasa    = $unaGranja['habilitacionSenasa'];
-            $metrosCuadrados   = $unaGranja['metrosCuadrados'];
-            $ubicacion   = $unaGranja['ubicacion'];
-        }
-    }
-
     if (isset($_GET['delete']) && $_GET['delete'] == 'true')
     {
         UNSET($_GET['delete']);
@@ -64,5 +48,6 @@ if ( !empty($_GET) )
         $oGranja->deleteGranjaPorId($idGranja);
         // Recargar página para mostrar resultados
         header("Location: index.php?opt=granjas");
+        exit();
     }
 }

@@ -38,7 +38,7 @@ class granja{
 
     public function setHabilitacionSenasa($habilitacionSenasa)
     {
-        $this->$habilitacionSenasa = trim($habilitacionSenasa); 
+        $this->habilitacionSenasa = trim($habilitacionSenasa); 
     }
 
     public function setMetrosCuadrados($metrosCuadrados)
@@ -136,7 +136,7 @@ public function save()
     }
 
     // Enlazar parametro
-    $stmtCheck->bind_param("s", $this->idGranja);
+    $stmtCheck->bind_param("i", $this->idGranja);
     $stmtCheck->execute();
     $stmtCheck->store_result();
 
@@ -158,19 +158,19 @@ public function save()
     }
 
     // Enlaza los parámetros y ejecuta la consulta
-    $stmt->bind_param("issss", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
-    $stmt->execute();
-    echo '<script type="text/javascript">alert("Granja registrada con éxito.");</script>';
+    $stmt->bind_param("issis", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
+    if (!$stmt->execute()) {
+        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+    }
     
     // Cerrar la consulta y la conexión
     $stmt->close();
-    //$this->mysqli->close();
+    $this->mysqli->close();
     return true;
 }
 
 public function update()
 {
-    echo("<h2 class='bg-white text-black'>EJECUTO UPDATE</h2>");
 
     // Preparar la consulta para actualizar los datos del Granja
     $sql = "UPDATE granja SET nombre = ?, habilitacionSenasa = ?, metrosCuadrados = ?, ubicacion = ? WHERE idGranja = ?";
@@ -179,10 +179,15 @@ public function update()
         die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
     }
     // Enlazar parámetros y ejecutar la consulta
-    $stmt->bind_param("sssi", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
-    $stmt->execute();
+    $stmt->bind_param("ssisi", $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion, $this->idGranja);
+    if (!$stmt->execute()) {
+        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+    }
     // Cerrar la consulta
     $stmt->close();
+    $this->mysqli->close();
+        echo("<h2 class='bg-white text-black'>EJECUTO UPDATE</h2>");
+        echo var_dump($this->idGranja);
 }
 
 public function deleteGranjaPorId($idGranja)
