@@ -1,5 +1,4 @@
 <?php
-// session_start();
 require_once 'model/UsuarioModel.php';
 $validacion = false;
 // echo '<h2 class="bg-white"> HOLA </h2> ';
@@ -25,17 +24,23 @@ if ( !empty($_POST) )
 
     if ( $_POST['btFormulario'] == 'login' )
     {
+        echo("<h2><script>console.log('Ingreso login user controller')</script></h2>"); 
+
         $oUsuario = new Usuario();
 
         $oUsuario->setPassword($_POST['password']);
-        $oUsuario->setNombre($_POST['username']);
+        $oUsuario->setEmail($_POST['email']);
+
+        unset($_POST['password']);
+        unset($_POST['email']);
 
         if ($validacion = $oUsuario->validar())
         {
-            // echo "<h1 class='bg-white'>VALIDACION OK<h1>";
+            echo("<h2><script>console.log('Ingreso correcto')</script></h2>"); 
             require_once 'controller/PageController.php';
         }else{
-            // echo "<h1 class='bg-white'>ERROR VALIDACION<h1>";
+            echo("<h2><script>console.log('Ingreso Erroneo')</script></h2>"); 
+            $_SESSION['login_error'] = "Invalid email or password. Please try again.";
             require_once 'controller/PageController.php';
         }
 

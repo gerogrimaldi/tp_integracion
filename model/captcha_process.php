@@ -2,12 +2,17 @@
     $error = '';
     $errMsg = '';
     $_SESSION ['captcha'] = false;
+    echo("<h2><script>console.log('entro captcha process')</script></h2>"); 
 
     //valido captcha
     if (isset($_POST['btFormulario'])) {
+        echo("<h2><script>console.log('entro captcha if')</script></h2>"); 
+
         // Verificar si el CAPTCHA está completado
         if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
             // Verificar el CAPTCHA
+            echo("<h2><script>console.log('entro captcha if 2')</script></h2>"); 
+
             $secret_key = "6LfMnkkqAAAAANcmx-vG5TPjL-p8WNY_nrgsPWft";
             $response = $_POST['g-recaptcha-response'];
             $remoteip = $_SERVER['REMOTE_ADDR'];

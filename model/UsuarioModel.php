@@ -16,9 +16,17 @@ class Usuario{
 
 	
     public function __construct()
-{
-    require_once 'model/conexion.php';  
-}
+    {
+        require_once 'model/conexion.php';  
+        
+        // Inicializar la conexión
+        $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
+    
+        // Verificar si la conexión fue exitosa
+        if ($this->mysqli->connect_error) {
+            die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
+        }
+    }
 
     public function setidUsuario($idUsuario)
     {
@@ -142,26 +150,36 @@ class Usuario{
     {
         require_once("captcha_process.php");
     
-        echo "<h1 class='bg-black'>EJECUTO VALIDACION<h1>";
+        // #############BORRAR#####################
+		echo("<h2><script>console.log('Ingreso validar()')</script></h2>"); 
 
+		// echo("<h2><script>console.log('email: ".$this->email."')</script></h2>"); 
+		// echo("<h2><script>console.log('password: ".$this->password."')</script></h2>"); 
+        // #############BORRAR#####################
+        
         if (!isset($_SESSION['captcha']) || !$_SESSION['captcha']) {
             $_SESSION["captcha_error"] = "Por favor complete el captcha";
+            echo("<h2><script>console.log('".$_SESSION["captcha_error"]."')</script></h2>"); 
             return false;
         }
     
         try {
+            echo("<h2><script>console.log('ingreso try')</script></h2>"); 
+
             // Prepare the statement to prevent SQL injection
-            $sql = "SELECT id, nombre, password FROM usuarios WHERE nombre = ? LIMIT 1";
+            $sql = "SELECT idUsuario, email, password FROM usuarios WHERE email = ? LIMIT 1";
             $stmt = $this->mysqli->prepare($sql);
-            
+            // echo("<h2><script>console.log('sigo')</script></h2>"); 
+
             if (!$stmt) {
-                error_log("Error preparing statement: " . $this->mysqli->error);
+             error_log("Error preparing statement: " . $this->mysqli->error);
                 $_SESSION["login_error"] = "Error en el sistema. Por favor intente más tarde.";
                 return false;
             }
-    
+            // echo("<h2><script>console.log('sigo')</script></h2>"); 
+
             // Bind the username parameter
-            $stmt->bind_param("s", $this->nombre);
+            $stmt->bind_param("s", $this->email);
             
             // Execute the query
             if (!$stmt->execute()) {
@@ -176,6 +194,11 @@ class Usuario{
             if ($result->num_rows === 1) {
                 $usuario = $result->fetch_assoc();
                 
+                // ###############BORRAR###################
+                // echo("<h2><script>console.log('email usuario BDD: ".$usuario['email']."')</script></h2>"); 
+                // echo("<h2><script>console.log('password usuario BDD: ".$usuario['password']."')</script></h2>"); 
+                // ##############BORRAR####################
+
                 // Verify the password (assuming you're using password_hash)
                 // if (password_verify($this->password, $usuario['password'])) 
                 if ($this->password === $usuario['password'])
@@ -183,7 +206,7 @@ class Usuario{
     
                     // Store necessary user data in session
                     $_SESSION['user_id'] = $usuario['id'];
-                    $_SESSION['user_name'] = $usuario['nombre'];
+                    $_SESSION['user_email'] = $usuario['email'];
                     
                     // Optional: Update last login timestamp
                     // $this->updateLastLogin($usuario['id']);
@@ -193,6 +216,8 @@ class Usuario{
             }
     
             // Invalid credentials
+            echo("<h2><script>console.log('error result')</script></h2>"); 
+
             $_SESSION["login_error"] = "Usuario y/o contraseña incorrectos";
             
             // Optional: Log failed attempt

@@ -44,6 +44,8 @@ else{
 if ( !empty($_POST['btFormulario']))
 {
 	echo "<h1 class='bg-black'>EJECUTO VALIDACION<h1>";
+	echo("<h2><script>console.log(".$_POST['btFormulario'].")</script></h2>"); 
+
     require_once 'controller/userController.php';
 	if ($validacion)
 	{
@@ -51,9 +53,12 @@ if ( !empty($_POST['btFormulario']))
 		// if (!isset($_POST['connected'])){
 		// 	$validacion = false;
 		// }
-	
+		echo("<h2><script>console.log('Ingreso Home')</script></h2>"); 
+
 		require_once('view/home.php');		
 	}else{
+		echo("<h2><script>console.log('validacion falsa')</script></h2>"); 
+
 		$valueBt="login";
         require_once('view/login.php');
 	}
