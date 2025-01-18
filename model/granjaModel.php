@@ -99,8 +99,6 @@ class granja{
             while($row = $result->fetch_assoc()) {
                 $data[] = $row;
             }
-        } else {
-            echo "0 resultados";
         }
         $this->mysqli->close();
         // Convertir el array de datos a formato JSON

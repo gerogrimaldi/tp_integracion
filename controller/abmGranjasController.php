@@ -39,26 +39,9 @@ if ( !empty($_GET) )
         $resultado = $oGranja->getall();
     }
 
-    if ($_GET['opt']=='addGranja')
-    {
-        $oGranja = new Granja();
-        $resultado = $oGranja->getGranjaPorId($idGranja);
-        if ( $resultado!=false )
-        {
-            // que hace esto?
-            $unaGranja = $resultado->fetch_array();
-            $idGranja  = $unaGranja['idGranja'];
-            $nombre   = $unaGranja['nombre'];
-            $habilitacionSenasa    = $unaGranja['habilitacionSenasa'];
-            $metrosCuadrados   = $unaGranja['metrosCuadrados'];
-            $ubicacion   = $unaGranja['ubicacion'];
-        }
-    }
-
-    if ($_GET['edit']==true)
+    if (isset($_GET['edit']) &&$_GET['edit']=='true')
     {
         UNSET($_GET['edit']);
-
         $oGranja = new Granja();
         $idGranja = (int)$_GET['idGranja'];
         $resultado = $oGranja->getGranjaPorId($idGranja);
@@ -73,14 +56,13 @@ if ( !empty($_GET) )
         }
     }
 
-    if ($_GET['delete'] = true)
+    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
     {
-        echo("<h2 class='bg-white text-black'>Delete true</h2>");
-
         UNSET($_GET['delete']);
         $oGranja = new Granja();
         $idGranja = (int)$_GET['idGranja'];
-
         $oGranja->deleteGranjaPorId($idGranja);
+        // Recargar página para mostrar resultados
+        header("Location: index.php?opt=granjas");
     }
 }
