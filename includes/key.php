@@ -1,5 +1,5 @@
-<php
+<?php
 
-$key='6LfMnkkqAAAAAI10IzlGrCVlcge0CAcxMozY_jBL';
+define('RECAPTCHA_KEY', '6LfMnkkqAAAAAI10IzlGrCVlcge0CAcxMozY_jBL');
 
 ?></php>

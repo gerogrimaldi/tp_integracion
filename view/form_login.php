@@ -1,7 +1,7 @@
 <?php
     $token = rand(5, 1500);
     $_SESSION ['token'] = $token;
-
+    echo '<script>console.log("Welcome to GeeksforGeeks!"); </script>'; 
     if (empty($idUsuario))
     {
         
@@ -24,12 +24,12 @@
        
     $body.='
         <div class="mb-4">
-            <label for="username" class="form-label">Usuario</label>
-            <input type="text" id="username" value="'.$idUsuario.'" name="nombre" class="form-control" required maxlength="20" pattern="[a-zA-Z0-9 ]+" title="Solo letras y números, hasta 10 caracteres.">
+            <label for="email" class="form-label">Usuario</label>
+            <input type="text" id="email" value="'.$idUsuario.'" name="email" class="form-control" required maxlength="20"">
         </div>
         <div class="mb-4">
             <label for="password" class="form-label">Contraseña</label>
-            <input type="password" id="password" value="'.$password.'" name="password" class="form-control" required maxlength="30" pattern="[a-zA-Z]+" title="Solo letras, hasta 30 caracteres.">
+            <input type="password" id="password" value="'.$password.'" name="password" class="form-control" required maxlength="30"">
         </div>
         <div class="mb-4 form-check">
             <input type="checkbox" id="connected" name="connected" class="form-check-input">
@@ -48,6 +48,7 @@
             <br/>
             <button type="submit" id="submit" name="btFormulario" value="'.$valueBt.'" class="btn btn-primary  text-wrap">Iniciar Sesión</button>
         </div>
+        
         <div class="my-3">
             <span>No tienes Cuenta? <a href="index.php?opt=new">Regístrate</a></span><br>
             <span><a href="#">Recuperar Password</a></span>
@@ -56,4 +57,7 @@
 
     </div>
     ';
-?>
+
+    echo("<h2><script>console.log(".$valueBt.")</script></h2>"); 
+
+    ?>
