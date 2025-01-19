@@ -1,84 +1,71 @@
 <?php
 
 $error = $error ?? ''; // Definir $error como cadena vacía si no está definido
-$idGranja = $idGranja ?? ''; // Definir $idGranja como cadena vacía si no está definido
 
 $body = <<<HTML
 <div class="container">
-    <h1>Granjas</h1>
+    <h1>Galpones</h1>
 
     <div class="text-center mb-3">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGranja">
-          Agregar nueva granja
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
+          Agregar galpón
         </button>
     </div>
 
     <table id="myTable" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
-                <th class="text-primary">ID Granja</th>
-                <th class="text-primary">Nombre</th>
-                <th class="text-primary">SENASA Nº</th>
-                <th class="text-primary">m²</th>
+                <th class="text-primary">ID Galpon</th>
+                <th class="text-primary">Identificacion</th>
+                <th class="text-primary">Capacidad</th>
+                <th class="text-primary">ID granja</th>
                 <th class="text-primary">Ubicación</th> 
-                <th class="text-primary"></th> 
                 <th class="text-primary"></th> 
                 <th class="text-primary"></th> 
             </tr>
         </thead>
-        <tbody id="granja">
+        <tbody id="galpon">
             <!-- Los datos se insertarán aquí -->
         </tbody>
     </table>
 </div>
 
 <script>
-    // Obtener los datos de PHP y asegurarse que es un array válido
-    // var granja = <?php echo json_encode($resultado ?? [], JSON_THROW_ON_ERROR); ?>;
-
-    // $resultado = $resultado ?? []; // Asegurar que $resultado siempre sea un array
-
-    var granja = $resultado;
+    var galpon = $resultado;
     
     // Procesar los datos y crear filas en la tabla
-    var granjaTbody = document.getElementById("granja");
+    var galponTbody = document.getElementById("galpon");
     
-    granja.forEach(function(granja) {
+    galpon.forEach(function(galpon) {
         var row = document.createElement("tr");
         row.className = "table-light";
-        
         row.innerHTML = 
-            '<td>' + granja.idGranja + '</td>' +
-            '<td>' + granja.nombre + '</td>' +
-            '<td>' + granja.habilitacionSenasa + '</td>' +
-            '<td>' + granja.metrosCuadrados + '</td>' +
-            '<td>' + granja.ubicacion + '</td>' +
+            '<td>' + galpon.idgalpon + '</td>' +
+            '<td>' + galpon.identificacion + '</td>' +
+            '<td>' + galpon.idTipoAve + '</td>' +
+            '<td>' + galpon.capacidad + '</td>' +
+            '<td>' + galpon.idGranja + '</td>' +
             '<td>' +
                 '<button type="button" ' +
                         'class="btn btn-warning btn-sm" ' +
                         'data-bs-toggle="modal" ' +
-                        'data-bs-target="#editarGranja" ' +
-                        'data-id="' + granja.idGranja + '" ' +
-                        'data-nombre="' + granja.nombre + '" ' +
-                        'data-habilitacion="' + granja.habilitacionSenasa + '" ' +
-                        'data-metros="' + granja.metrosCuadrados + '" ' +
-                        'data-ubicacion="' + granja.ubicacion + '">' +
+                        'data-bs-target="#editargalpon" ' +
+                        'data-id="' + galpon.idgalpon + '" ' +
+                        'data-identificacion="' + galpon.identificacion + '" ' +
+                        'data-idTipoAve="' + galpon.idTipoAve + '" ' +
+                        'data-capacidad="' + galpon.capacidad + '" ' +
+                        'data-idGranja="' + galpon.idGranja + '">' +
                     'Editar' +
                 '</button>' +
             '</td>' +
             '<td>' +
-                '<a href="index.php?opt=granjas&delete=true&idGranja=' + granja.idGranja + '" ' +
+                '<a href="index.php?opt=galpons&delete=true&idgalpon=' + galpon.idGalpon + '" ' +
                    'class="btn btn-danger btn-sm">' +
-                    'Borrar' +
-                '</a>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
-                   'class="btn btn-warning btn-sm">' +
-                    'Galpones' +
+                    'borrar' +
                 '</a>' +
             '</td>';
-        granjaTbody.appendChild(row);
+        
+        galponTbody.appendChild(row);
     });
 
     // Inicializar DataTable
@@ -86,37 +73,26 @@ $body = <<<HTML
         $("#myTable").DataTable();
     });
 </script>
-<!-- Modal popUp Agregar Granja -->
-<!-- Info de cómo lo hice: https://getbootstrap.com/docs/5.3/components/modal/ -->
-<div class="modal fade" id="agregarGranja" tabindex="-1" aria-labelledby="agregarGranjaModal" aria-hidden="true">
+
+
+</script>
+<!-- Modal popUp Agregar Galpon -->
+<div class="modal fade" id="agregarGalpon" tabindex="-1" aria-labelledby="agregarGalponModal" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="agregarGranjaModal">Agregar Granja</h1>
+        <h1 class="modal-title fs-5" id="agregarGalponModal">Agregar Galpon</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-      <form id="agregrarGranjaForm" action="index.php?opt=granjas" method="POST" class="needs-validation" novalidate>
+      <form id="agregrarGalponForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
     <div class="mb-4">
-        <label for="nombre" class="form-label">Nombre de la granja</label>
-        <input type="text" 
+        <label for="identificacion" class="form-label">Identificacion del galpón</label>
+        <input type="select" 
                class="form-control" 
-               id="nombre" 
-               name="nombre" 
-               placeholder="Nombre"
-               minlength="3"
-               required>
-        <div class="invalid-feedback">
-            El nombre debe tener al menos 3 caracteres.
-        </div>
-    </div>
-    <div class="mb-4">
-        <label for="metrosCuadrados" class="form-label">Metros Cuadrados</label>
-        <input type="number" 
-               class="form-control" 
-               id="metrosCuadrados" 
-               name="metrosCuadrados" 
-               placeholder="Tamaño de la granja"
+               id="identificacion" 
+               name="identificacion" 
+               placeholder="Identificador"
                min="1"
                required>
         <div class="invalid-feedback">
@@ -124,12 +100,25 @@ $body = <<<HTML
         </div>
     </div>
     <div class="mb-4">
-        <label for="agregrarGranjaFormTextSenasa" class="form-label">Número de habilitación de SENASA</label>
+        <label for="capacidad" class="form-label">Capacidad</label>
+        <input type="number" 
+               class="form-control" 
+               id="capacidad" 
+               name="capacidad" 
+               placeholder="Capacidad de aves"
+               min="1"
+               required>
+        <div class="invalid-feedback">
+            El valor debe ser un número positivo.
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="tipoAve" class="form-label">Tipo de Ave</label>
             <input type="text" 
                  class="form-control" 
-                 id="habilitacion" 
-                 name="habilitacion" 
-                 placeholder="SENASA N°"
+                 id="idTipoAve" 
+                 name="idTipoAve" 
+                 placeholder="Tipo de Ave"
                  required>
         <div class="invalid-feedback">
                 La habilitación debe tener al menos 3 caracteres.
@@ -239,6 +228,8 @@ $body = <<<HTML
     </div>
   </div>
 </div>
+
+
 
 <script src="js/validar_abm.js"></script>
 HTML;

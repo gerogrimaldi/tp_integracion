@@ -32,6 +32,12 @@ if ( !empty($_GET['opt']) )
 		require_once 'controller/abmGranjasController.php';
         require_once 'view/abmGranjas.php';		
 	}
+
+	if ($_GET['opt']=='galpones')
+	{
+		require_once 'controller/abmGalponesController.php';
+        require_once 'view/abmGalpones.php';		
+	}
 }
 else{
 

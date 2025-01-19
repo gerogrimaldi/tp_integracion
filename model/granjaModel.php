@@ -76,18 +76,6 @@ class granja{
         }
     }
 
-    public function toArray()
-    {
-        $vGranja=array(
-            'idGranja'=>$this->$idGranja,
-            'nombre'=>$this->nombre,
-            'habilitacionSenasa'=>$this->habilitacionSenasa,
-            'metrosCuadrados'=>$this->metrosCuadrados,
-            'ubicacion'=>$this->ubicacion
-        );
-        return $vGranja;
-    }
-
     public function getall()
     {
         // Leer datos de la tabla 'granjas',
@@ -186,8 +174,6 @@ public function update()
     // Cerrar la consulta
     $stmt->close();
     $this->mysqli->close();
-        echo("<h2 class='bg-white text-black'>EJECUTO UPDATE</h2>");
-        echo var_dump($this->idGranja);
 }
 
 public function deleteGranjaPorId($idGranja)
