@@ -34,20 +34,22 @@ if ( !empty($_POST) )
 
 if ( !empty($_GET) ) 
 {
+    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
+    {
+        UNSET($_GET['delete']);
+        $oGalpon = new Galpon();
+        $idGalpon = (int)$_GET['idGalpon'];
+        $oGalpon->deleteGalponPorId($idGalpon);
+        // Recargar página para mostrar resultados
+        header("Location: index.php?opt=galpones&idGranja=" .$_GET['idGranja']);
+        exit();
+    }
+
     if ($_GET['opt']=='galpones')
     {
         $oGalpon = new Galpon();
         $resultado = $oGalpon->getall( $_GET['idGranja'] );
     }
 
-    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
-    {
-        UNSET($_GET['delete']);
-        $oGalpon = new Granja();
-        $idGalpon = (int)$_GET['idGalpon'];
-        $oGalpon->deleteGalponPorId($idGalpon);
-        // Recargar página para mostrar resultados
-        header("Location: index.php?opt=granjas");
-        exit();
-    }
+
 }

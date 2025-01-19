@@ -88,7 +88,6 @@ class galpon{
         $this->mysqli->close();
         // Convertir el array de datos a formato JSON
         $json_data = json_encode($data);
-        echo var_dump($json_data);
         return $json_data;
     }
 
@@ -176,10 +175,7 @@ public function update()
 
 public function deleteGalponPorId($idGalpon)
 {
-    // Verificar que $idGalpon sea un entero
-    if (!is_numeric($idGranja)) {
-        throw new InvalidArgumentException('El ID del galpon debe ser un número.');
-    }
+
     if ($this->mysqli === null) {
         throw new RuntimeException('La conexión a la base de datos no está inicializada.');
     }
