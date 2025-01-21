@@ -9,13 +9,13 @@ if ( !empty($_POST) )
         $oGalpon = new Galpon();
         $oGalpon->setMaxID();
         $oGalpon->setIdentificacion($_POST['identificacion']);
-        $oGalpon->setIdTipoAve($_POST['idTipoAve']);
+        $oGalpon->setIdTipoAve($_POST['opciones']);
         $oGalpon->setCapacidad($_POST['capacidad']);
         $oGalpon->setIdGranja($_POST['idGranja']);
-        $oGranja->save();
-        //Redirigir a la vista principal de ABM granjas
-        //header("Location: index.php?opt=granjas");
-        //exit();   
+        $oGalpon->save();
+        // Recargar pï¿½gina para mostrar resultados
+        header("Location: index.php?opt=galpones&idGranja=" .$_POST['idGranja']);
+        exit();
     }
 
     if ( $_POST['btGalpon'] == 'editarGalpon' )
@@ -40,7 +40,7 @@ if ( !empty($_GET) )
         $oGalpon = new Galpon();
         $idGalpon = (int)$_GET['idGalpon'];
         $oGalpon->deleteGalponPorId($idGalpon);
-        // Recargar página para mostrar resultados
+        // Recargar pï¿½gina para mostrar resultados
         header("Location: index.php?opt=galpones&idGranja=" .$_GET['idGranja']);
         exit();
     }
@@ -49,6 +49,7 @@ if ( !empty($_GET) )
     {
         $oGalpon = new Galpon();
         $resultado = $oGalpon->getall( $_GET['idGranja'] );
+        $tiposAves = $oGalpon->getTiposAves();
     }
 
 

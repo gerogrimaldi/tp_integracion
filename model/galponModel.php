@@ -75,7 +75,7 @@ class galpon{
 
     public function getall($idGranja)
     {
-        // Leer datos de la tabla 'granjas',
+        // Leer datos de la tabla 'galpon',
         $sql = "SELECT idGalpon, identificacion, idTipoAve, capacidad, idGranja FROM galpon WHERE idGranja=".$idGranja;
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
@@ -85,7 +85,23 @@ class galpon{
                 $data[] = $row;
             }
         }
-        $this->mysqli->close();
+        // Convertir el array de datos a formato JSON
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
+    public function getTiposAves()
+    {
+        // Leer datos de la tabla tipoAve (idTipoAve, nombre)
+        $sql = "SELECT idTipoAve, nombre FROM tipoAve";
+        $result = $this->mysqli->query($sql);
+        $data = []; // Array para almacenar los resultados
+        
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
         // Convertir el array de datos a formato JSON
         $json_data = json_encode($data);
         return $json_data;

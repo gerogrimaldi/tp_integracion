@@ -10,12 +10,6 @@ if ( !empty($_GET['opt']) )
         require_once 'view/login.php';	
 	}
 
-	if ($_GET['opt']=='list')
-	{
-		require_once 'controller/eventController.php';
-        require_once 'view/listEventos.php';	
-	}
-
 	if ($_GET['opt']=='error_db')
 	{
         require_once 'view/error_db.php';		
