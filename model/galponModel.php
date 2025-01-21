@@ -76,7 +76,7 @@ class galpon{
     public function getall($idGranja)
     {
         // Leer datos de la tabla 'galpon',
-        $sql = "SELECT idGalpon, identificacion, idTipoAve, capacidad, idGranja FROM galpon WHERE idGranja=".$idGranja;
+        $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, galpon.capacidad, galpon.idGranja, tipoave.nombre FROM galpon INNER JOIN tipoave ON (tipoave.idTipoAve = galpon.idTipoAve) WHERE idGranja=".$idGranja;
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
         

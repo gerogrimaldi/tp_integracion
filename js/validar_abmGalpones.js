@@ -12,22 +12,26 @@ document.getElementById("editarGalpon").addEventListener("show.bs.modal", functi
     // Botón que activó el modal
     const button = event.relatedTarget;
 
-    // Extraer datos del atributo data-*
+    // Extraer datos del atributo data-* del botón que abrió el modal
     const idGalpon = button.getAttribute("data-id");
     const identificacion = button.getAttribute("data-identificacion");
     const idTipoAve = button.getAttribute("data-idTipoAve");
     const capacidad = button.getAttribute("data-capacidad");
-    const idGranja = button.getAttribute("data-idGranja");
+    const idGranja = button.getAttribute("data-idGranja");  // Asegúrate de tener este atributo en el botón
 
     // Asignar los valores a los campos del formulario
-    document.querySelector("#editarGalponForm #capacidad").value = capacidad;
     document.querySelector("#editarGalponForm #identificacion").value = identificacion;
+    document.querySelector("#editarGalponForm #capacidad").value = capacidad;
     document.querySelector("#editarGalponForm #idTipoAve").value = idTipoAve;
     document.querySelector("#editarGalponForm #idGalpon").value = idGalpon;
 
-    // Actualizar la acción del formulario
-    const form = document.getElementById("editarGranjaForm");
-    form.action = `index.php?opt=galpones&edit=true&idGalpon=${idGalpon}`;
+    // Asignar el valor del campo hidden idGranja
+    document.querySelector("#editarGalponForm #idGranja").value = idGranja;
+
+    // Actualizar la acción del formulario si es necesario
+    // Aquí te aseguras de que la acción esté correctamente configurada
+    const form = document.getElementById("editarGalponForm");
+    form.action = `index.php?opt=galpon&edit=true&idGalpon=${idGalpon}`;
 });
 
     // Activar validaciones al enviar el formulario

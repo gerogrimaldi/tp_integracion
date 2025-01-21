@@ -1,6 +1,7 @@
 <?php
 
 $error = $error ?? ''; // Definir $error como cadena vacía si no está definido
+$idGranja = isset($_GET['idGranja']) ? $_GET['idGranja'] : '';
 
 $body = <<<HTML
 <div class="container">
@@ -17,9 +18,8 @@ $body = <<<HTML
             <tr>
                 <th class="text-primary">ID Galpon</th>
                 <th class="text-primary">Identificación</th>
-                <th class="text-primary">ID Tipo Ave</th>
+                <th class="text-primary">Tipo de Ave</th>
                 <th class="text-primary">Capacidad</th>
-                <th class="text-primary">ID Granja</th>
                 <th class="text-primary"></th>
                 <th class="text-primary"></th>
             </tr>
@@ -32,6 +32,7 @@ $body = <<<HTML
 
 <script>
     var galpon = $resultado;
+    var idGranjaJava = $idGranja;
     // Procesar los datos y crear filas en la tabla
     var galponTbody = document.getElementById("galpon");
     
@@ -41,9 +42,8 @@ $body = <<<HTML
         row.innerHTML = 
             '<td>' + galpon.idGalpon + '</td>' +
             '<td>' + galpon.identificacion + '</td>' +
-            '<td>' + galpon.idTipoAve + '</td>' +
+            '<td>' + galpon.nombre + '</td>' +
             '<td>' + galpon.capacidad + '</td>' +
-            '<td>' + galpon.idGranja + '</td>' +
             '<td>' +
                 '<button type="button" ' +
                     'class="btn btn-warning btn-sm" ' +
@@ -139,8 +139,8 @@ $body = <<<HTML
             </div>
             <div class="modal-body">
                 <form id="editarGalponForm" action="index.php?opt=galpon" method="POST" class="needs-validation" novalidate>
-                    <div class="mb-4">
-                        <label for="identificacionG" class="form-label">Identificacion del galpón</label>
+                <div class="mb-4">
+                        <label for="identificacion" class="form-label">Identificador del galpón</label>
                         <input type="select" 
                                class="form-control" 
                                id="identificacion" 
@@ -153,7 +153,7 @@ $body = <<<HTML
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="capacidadG" class="form-label">Capacidad</label>
+                        <label for="capacidad" class="form-label">Capacidad</label>
                         <input type="number" 
                                class="form-control" 
                                id="capacidad" 
@@ -166,18 +166,15 @@ $body = <<<HTML
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="tipoAveG" class="form-label">Tipo de Ave</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="idTipoAve" 
-                               name="idTipoAve" 
-                               placeholder="Tipo de Ave"
-                               required>
+                        <label for="opciones" class="form-label">Tipo de aves</label>
+                        <select id="opcionesEditar" name="opcionesEditar" class="form-control">
+                            <!-- Las opciones se agregarán aquí con JavaScript -->
+                        </select>
                         <div class="invalid-feedback">
                             La habilitación debe tener al menos 3 caracteres.
                         </div>
                     </div>
-                    <input type="hidden" id="idGranja" name="idGranja" value="">
+                    <input type="hidden" id="idGranja" name="idGranja">
                 </form>
             </div>
             <div class="modal-footer">
@@ -189,9 +186,9 @@ $body = <<<HTML
 </div>
 
 <script>
+    document.getElementById('idGranja').value = idGranjaJava;
     var tiposAves = $tiposAves;
     function cargarOpciones() {
-        console.log(tiposAves);
         const select = document.getElementById('opciones'); // Obtener el select
 
         // Limpiar las opciones actuales
@@ -213,6 +210,9 @@ $body = <<<HTML
     // Llamar a la función para cargar las opciones al cargar la página
     window.onload = cargarOpciones;
 </script>
+
+
+
 
 <script src="js/validar_abmGalpones.js"></script>
 HTML;
