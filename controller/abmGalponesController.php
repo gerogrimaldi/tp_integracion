@@ -23,11 +23,11 @@ if ( !empty($_POST) )
         $oGalpon = new Galpon();
         $oGalpon->setIdGalpon ($_POST['idGalpon']);
         $oGalpon->setIdentificacion($_POST['identificacion']);
-        $oGalpon->setIdTipoAve($_POST['idTipoAve']);
+        $oGalpon->setIdTipoAve($_POST['opcionesEditar']);
         $oGalpon->setCapacidad($_POST['capacidad']);
         $oGalpon->setIdGranja($_POST['idGranja']);
         $oGalpon->update();
-        header("Location: index.php?opt=granjas");
+        header("Location: index.php?opt=galpones&idGranja=" .$_POST['idGranja']);
         exit();   
     }
 }

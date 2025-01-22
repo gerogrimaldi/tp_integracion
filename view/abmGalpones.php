@@ -138,7 +138,7 @@ $body = <<<HTML
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editarGalponForm" action="index.php?opt=galpon" method="POST" class="needs-validation" novalidate>
+                <form id="editarGalponForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
                 <div class="mb-4">
                         <label for="identificacion" class="form-label">Identificador del galpón</label>
                         <input type="select" 
@@ -175,6 +175,7 @@ $body = <<<HTML
                         </div>
                     </div>
                     <input type="hidden" id="idGranja" name="idGranja">
+                    <input type="hidden" id="idGalpon" name="idGalpon">
                 </form>
             </div>
             <div class="modal-footer">
@@ -211,8 +212,76 @@ $body = <<<HTML
     window.onload = cargarOpciones;
 </script>
 
+<script>
+function cargarOpciones() {
+    // Obtener los dos selects: uno para agregar y otro para editar
+    const selectAgregar = document.getElementById('opciones');
+    const selectEditar = document.getElementById('opcionesEditar');
 
+    // Limpiar las opciones actuales
+    selectAgregar.innerHTML = '';
+    selectEditar.innerHTML = '';
 
+    // Agregar la opción por defecto
+    const defaultOption = document.createElement('option');
+    defaultOption.text = 'Selecciona una opción';
+    defaultOption.value = '';
+    selectAgregar.appendChild(defaultOption);
+    selectEditar.appendChild(defaultOption.cloneNode(true));
+
+    // Agregar las opciones desde el array de tipos de aves (tiposAves)
+    tiposAves.forEach(function (item) {
+        const optionAgregar = document.createElement('option');
+        const optionEditar = document.createElement('option');
+
+        optionAgregar.value = item.idTipoAve;
+        optionAgregar.text = item.nombre;
+
+        optionEditar.value = item.idTipoAve;
+        optionEditar.text = item.nombre;
+
+        selectAgregar.appendChild(optionAgregar);
+        selectEditar.appendChild(optionEditar);
+    });
+}
+
+// Llama a cargarOpciones cuando la página cargue
+window.onload = cargarOpciones;
+
+// Lógica para rellenar el modal de edición
+document.addEventListener('click', function (event) {
+    if (event.target && event.target.matches('.btn-warning')) {
+        const button = event.target;
+
+        // Extrae los datos del botón
+        const idGalpon = button.getAttribute('data-id');
+        const identificacion = button.getAttribute('data-identificacion');
+        const idTipoAve = button.getAttribute('data-idTipoAve');
+        const capacidad = button.getAttribute('data-capacidad');
+        const idGranja = button.getAttribute('data-idGranja');
+
+        // Rellena los campos del formulario en el modal
+        document.querySelector('#editarGalponForm #identificacion').value = identificacion;
+        document.querySelector('#editarGalponForm #capacidad').value = capacidad;
+
+        // Selecciona la opción correcta en el select
+        const opcionesEditar = document.querySelector('#editarGalponForm #opcionesEditar');
+        opcionesEditar.value = idTipoAve; // Selecciona el valor correcto
+        if (opcionesEditar.value !== idTipoAve) {
+            // Si el valor no está presente, agrega la opción faltante
+            const nuevaOpcion = document.createElement('option');
+            nuevaOpcion.value = idTipoAve;
+            nuevaOpcion.text = 'Opción desconocida';
+            opcionesEditar.appendChild(nuevaOpcion);
+            opcionesEditar.value = idTipoAve;
+        }
+
+        // Asigna el ID de la granja (oculto)
+        document.querySelector('#editarGalponForm #idGranja').value = idGranja;
+        document.querySelector('#editarGalponForm #idGalpon').value = idGalpon;
+    }
+});
+</script>
 
 <script src="js/validar_abmGalpones.js"></script>
 HTML;
