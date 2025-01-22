@@ -1,43 +1,42 @@
 <?php
 include ('./includes/key.php');
-if ( !empty($_GET['opt']) ) 
-{
-	if ($_GET['opt']=='login')
-	{
-		$valueBt="login";
+$_GET['opt'] = $_GET['opt'] ?? '';
+
+switch ($_GET['opt']) {
+	case '':
+	case 'login': // Caso adicional para manejar 'login'
+		$valueBt = 'login';
 		require_once 'includes/key.php';
-		// $recaptcha_key = $key;
-        require_once 'view/login.php';	
-	}
+		require_once 'view/login.php';
+		break;
 
-	if ($_GET['opt']=='error_db')
-	{
-        require_once 'view/error_db.php';		
-	}
+	case 'error_db':
+		require_once 'view/error_db.php';
+		break;
 
-	if ($_GET['opt']=='test')
-	{
+	case 'test':
 		require_once 'controller/testController.php';
-        require_once 'view/test.php';	
-	}
+		require_once 'view/test.php';
+		break;
 
-	if ($_GET['opt']=='granjas')
-	{
+	case 'granjas':
 		require_once 'controller/abmGranjasController.php';
-        require_once 'view/abmGranjas.php';		
-	}
+		require_once 'view/abmGranjas.php';
+		break;
 
-	if ($_GET['opt']=='galpones')
-	{
+	case 'galpones':
 		require_once 'controller/abmGalponesController.php';
-        require_once 'view/abmGalpones.php';		
-	}
-}
-else{
+		require_once 'view/abmGalpones.php';
+		break;
 
-	$valueBt="login";
-	require_once('view/login.php');
+	case 'mantenimientos':
+		require_once 'controller/mantenimientosController.php';
+		require_once 'view/abmMantenimientos.php';
+		break;
 
+	default:
+		require_once 'view/error_404.php';
+		break;
 }
 
 

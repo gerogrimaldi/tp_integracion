@@ -49,7 +49,7 @@ CREATE TABLE tipoMantenimiento (
 
 CREATE TABLE mantenimientoGranja (
     idMantenimientoGranja INT NOT NULL,
-    nombre VARCHAR(80),
+    fecha DATETIME,
     idGranja INT,
     idTipoMantenimiento INT,
     FOREIGN KEY (idGranja) REFERENCES granja(idGranja),
@@ -59,7 +59,7 @@ CREATE TABLE mantenimientoGranja (
 
 CREATE TABLE mantenimientoGalpon (
     idMantenimientoGalpon INT NOT NULL,
-    nombre VARCHAR(80),
+    fecha DATETIME,
     idGalpon INT,
     idTipoMantenimiento INT,
     FOREIGN KEY (idGalpon) REFERENCES galpon(idGalpon),
