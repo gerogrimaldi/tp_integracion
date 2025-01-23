@@ -42,7 +42,7 @@ class Page
 
             </head>
             
-            <body class="bg-dark">
+            <body class="bg-dark text-white">
             <div class="container">';
 
             // // HEADER
@@ -104,7 +104,7 @@ class Page
                 
                 <link href="lib/DataTables/datatables.min.css" rel="stylesheet">
                 <script src="lib/DataTables/datatables.min.js"></script>
-                <script src="js/tables.js"></script>
+
                 </body>
             </html>';
         }

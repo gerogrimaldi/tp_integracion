@@ -7,12 +7,13 @@
         Repetir lo superior pero con la lista de los galpones, sin diferenciar por granja.
     */
 $idGranja = isset($_GET['idGranja']) ? $_GET['idGranja'] : '';
+$resultado = $resultado ?? '[]'; 
 
 $body = <<<HTML
 <div class="container">
     <h1>Mantenimientos</h1>
 
-    
+<!-- TIPOS DE MANTENIMIENTOS - DOS BOTONES COLAPSE DONDE SE ENCUENTRAN LAS OPCIONES -->    
 <p class="d-inline-flex gap-1">
   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#agregarMant" aria-expanded="false" aria-controls="collapseExample">
     Agregar tipos de Mantenimientos
@@ -21,7 +22,7 @@ $body = <<<HTML
     Ver tipos de mantenimientos
   </button>
 </p>
-<div class="collapse" id="agregarMant">
+<div class="collapse mb-4" id="agregarMant">
   <div class="card card-body">
     <form id="agregrarTipoMantenimiento" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
         <div class="mb-4">
@@ -38,7 +39,7 @@ $body = <<<HTML
     </form>
   </div>
 </div>
-<div class="collapse" id="verMant">
+<div class="collapse mb-4" id="verMant">
   <div class="card card-body">
     <table id="tablaTiposMant" class="table table-bordered bg-white">
             <thead class="table-light">
@@ -138,8 +139,44 @@ document.addEventListener('click', function (event) {
 </script>
 
 
-</div>
+<h2>Mantenimientos - Granjas</h2>
 
+<form id="editarTipoMantForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+    <div class="mb-4">
+        <label for="selectGranja" class="form-label">Seleccione la granja para ver mantenimientos realizados.</label>
+        <div class="input-group">
+            <select id="selectGranja" name="selectGranja" class="form-control" required>
+                <!-- Las opciones se agregan con JavaScript -->
+            </select>
+            <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGranja">Filtrar</button>
+            <div class="invalid-feedback">
+                Debe elegir una opción.
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
+<script>
+    function cargarSelectGranja() {
+       var granjasSelect = $granjasFiltradas;
+       const selectFiltrarGranja = document.getElementById('selectGranja');
+       selectFiltrarGranja.innerHTML = '';
+       const defaultOption = document.createElement('option');
+       defaultOption.text = 'Seleccione una granja';
+       defaultOption.value = '';
+       selectFiltrarGranja.appendChild(defaultOption);
+       granjasSelect.forEach(function (item) {
+           const optionAgregar = document.createElement('option');
+           optionAgregar.value = item.idGranja;
+           optionAgregar.text = item.nombre;
+           selectFiltrarGranja.appendChild(optionAgregar);
+        });
+    }
+    window.onload = cargarSelectGranja;
+</script>
+
+</div>
     <table id="tablaMantenimientos" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
@@ -172,31 +209,30 @@ document.addEventListener('click', function (event) {
         row.className = "table-light";
         // Crea los <td> (columnas). Están completas de los datos de la variable mantenimientos, o botones.
         row.innerHTML = 
-            '<td>' + galpon.idGalpon + '</td>' +
-            '<td>' + galpon.identificacion + '</td>' +
-            '<td>' + galpon.nombre + '</td>' +
-            '<td>' + galpon.capacidad + '</td>' +
+            '<td>' + mantenimientos.idMantenimientoGranja + '</td>' +
+            '<td>' + mantenimientos.fecha + '</td>' +
+            '<td>' + mantenimientos.idGranja + '</td>' +
+            '<td>' + mantenimientos.idTipoMantenimiento + '</td>' +
             '<td>' +
                 '<button type="button" ' +
                     'class="btn btn-warning btn-sm" ' +
                     'data-bs-toggle="modal" ' +
                     'data-bs-target="#editarGalpon" ' +
-                    'data-id="' + galpon.idGalpon + '" ' +
-                    'data-identificacion="' + galpon.identificacion + '" ' +
-                    'data-idTipoAve="' + galpon.idTipoAve + '" ' +
-                    'data-capacidad="' + galpon.capacidad + '" ' +
-                    'data-idGranja="' + galpon.idGranja + '">' +
+                    'data-id="' + mantenimientos.idMantenimientoGranja + '" ' +
+                    'data-fecha="' + mantenimientos.fecha + '" ' +
+                    'data-idGranja="' + mantenimientos.idGranja + '" ' +
+                    'data-idTipoMantenimiento="' + mantenimientos.idTipoMantenimiento + '">' +
                     'Editar' +
                 '</button>' +
             '</td>' +
             '<td>' +
-                '<a href="index.php?opt=galpones&delete=true&idGalpon=' + galpon.idGalpon + ' + &idGranja=' + galpon.idGranja + '" ' +
+                '<a href="index.php?opt=mantenimientos&delete=true&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '" ' +
                    'class="btn btn-danger btn-sm">' +
                     'Borrar' +
                 '</a>' +
             '</td>';
         // Agrega al TBody la línea de HTML completa.
-        galponTbody.appendChild(row);
+        mantenimientosTbody.appendChild(row);
     });
 
     // Inicializar DataTable - Es un "plugin" que le agrega la busqueda, ordenamiento, etc. a la tabla.

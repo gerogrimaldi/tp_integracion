@@ -67,7 +67,7 @@ class tipoMantenimiento{
         $stmt->bind_param("is", $this->idTipoMantenimiento, $this->nombreMantenimiento);
         if (!$stmt->execute()){
             throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
-    // Cerrar la consulta, NO DEBEMOS CERRAR LA CONEXIÓN
+    // Cerrar la consulta, NO DEBEMOS CERRAR LA CONEXIÓN, MIENTRAS EXISTA EL OBJETO.
         $stmt->close();
         return true;
     }
@@ -82,36 +82,29 @@ class tipoMantenimiento{
         if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
         $stmt->close(); 
     }
-
-
-
 }
 
-class mantenimiento{
+class mantenimientoGranja{
     // Mantenimientos de galpón o granja
-    private $idMantenimientoGalpon;
+    //private $idMantenimientoGalpon;
     private $idMantenimientoGranja;
     private $fecha;
 	private $idGranja;
-    private $idGalpon;
+    //private $idGalpon;
     private $mysqli;
     
     public function __construct()
     {
         require_once 'model/conexion.php';  
-        // Inicializar la conexión
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-        // Verificar si la conexión fue exitosa
-        if ($this->mysqli->connect_error) {
-            die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
-        }
+        if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
     }
     
-    public function setIdMantenimiento($idMantenimiento)
+    public function setIdMantGranja($idMantenimiento)
     {
-        if ( ctype_digit($idGalpon)==true ) // Evalua que el ID sea positivo y entero
+        if ( ctype_digit($idGalpon)==true )
         {
-            $this->idMantenimiento = $idMantenimiento;
+            $this->idMantenimientoGranja = $idMantenimiento;
         }
     }
 
@@ -130,7 +123,7 @@ class mantenimiento{
 
     public function setIdTipoMantenimiento($idTipoMantenimiento)
     {
-        if ( ctype_digit( $idTipoAve )==true ){
+        if ( ctype_digit( $idTipoMantenimiento )==true ){
             $this->idTipoMantenimiento = $idTipoMantenimiento;
         }  
     }
@@ -148,54 +141,35 @@ class mantenimiento{
         }
     }
 
-    public function setMaxIDMantGalpon()
+    public function getMantGranjas($idGranjaFiltro)
     {
-        $sql = "SELECT MAX(idMantenimientoGalpon) AS maxID FROM mantenimientoGalpon  ";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0;
-            $this->mantenimientoGalpon = $maxID + 1; 
-        }else {
-            echo "Error al obtener el máximo idMantenimiento: " . $this->mysqli->error;
-        }
-    }
-
-    public function getall()
-    {
-        // Leer datos de la tabla
-        $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, galpon.capacidad, galpon.idGranja, tipoave.nombre FROM galpon INNER JOIN tipoave ON (tipoave.idTipoAve = galpon.idTipoAve) WHERE idGranja=".$idGranja;
+        $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
+        mantenimientoGranja.idTipoMantenimiento FROM mantenimientoGranja WHERE mantenimientoGranja.idGranja=".$idGranjaFiltro;
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
-        
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 $data[] = $row;
             }
         }
-        // Convertir el array de datos a formato JSON
         $json_data = json_encode($data);
         return $json_data;
     }
 
-    public function getGalponPorId($idGalpon)
+    public function getGranjas()
     {
-        $sql = "SELECT idGalpon, identificacion, idTipoAve, capacidad, idGranja FROM galpon WHERE idGalpon=".$idGalpon;
-        if ( $resultado = $this->mysqli->query($sql) )
-		{
-			if ( $resultado->num_rows > 0 )
- 			{
-                 return $resultado;
-			}else{
-                return false;
+        $sql = "SELECT idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion FROM granja";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
             }
         }
-        unset($resultado);
-        $this->mysqli->close();
+        $json_data = json_encode($data);
+        return $json_data;
     }
 
-//###########################################################################
-// CARGA; UPDATE, DELTE
 public function save()
 {
 

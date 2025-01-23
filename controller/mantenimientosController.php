@@ -19,6 +19,12 @@ if ( !empty($_POST) )
         $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
         $oTipoMantenimiento->update();
     }
+
+    if ( $_POST['btMantenimientos'] == 'selectGranja')
+    {
+        $oMantenimientoGranja = new mantenimientoGranja();
+        $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
+    }
 }
 
 if ( !empty($_GET) ) 
@@ -37,6 +43,10 @@ if ( !empty($_GET) )
     {
         $oTipoMantenimiento = new tipoMantenimiento();
         $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
+
+        $oMantenimientoGranja = new mantenimientoGranja();
+        $granjasFiltradas = $oMantenimientoGranja->getGranjas();
+
     }
 
 
