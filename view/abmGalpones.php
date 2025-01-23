@@ -115,7 +115,7 @@ $body = <<<HTML
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
                         <div class="invalid-feedback">
-                            La habilitación debe tener al menos 3 caracteres.
+                            Ingrese un tipo de aves válido.
                         </div>
                     </div>
                     <input type="hidden" id="idGranja" name="idGranja">

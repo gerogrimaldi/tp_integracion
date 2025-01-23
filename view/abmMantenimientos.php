@@ -93,6 +93,9 @@ $body = <<<HTML
     $(document).ready(function() {
         $("#tablaTiposMant").DataTable();
     });
+
+
+
 </script>
 
 <!-- Modal editar Tipo Mantenimiento -->
@@ -185,7 +188,7 @@ document.addEventListener('click', function (event) {
            selectFiltrarGranja.appendChild(optionAgregar);
         });
     }
-    window.onload = cargarSelectGranja;
+    //window.onload = cargarSelectGranja;
 </script>
 
 </div>
@@ -263,27 +266,65 @@ document.addEventListener('click', function (event) {
             </div>
             <div class="modal-body">
                 <form id="newMantGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
-                <div class="mb-4">
-                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
-                    <input type="text" class="form-control" 
-                        id="nombreMantEdit" name="nombreMantEdit"
-                        placeholder="Ejemplo: Corte de césped"
-                        min="1" required>
-                    <div class="invalid-feedback">
-                        Debe contar con al menos 3 letras.
+                    <div class="mb-4">
+                        <label for="fechaMant" class="form-label">Fecha y hora de realización</label>
+                       <input type="datetime-local" class="form-control" 
+                            id="fechaMant" name="fechaMantenimiento"
+                            required>
+                        <div class="invalid-feedback">
+                            Seleccione una fecha y hora válidos.
+                        </div>
                     </div>
-                </div>
-                    <input type="hidden" id="idTipoMant" name="idTipoMant">
+                    <div class="mb-4">
+                        <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
+                        <select id="selectTipoMant" name="tipoMantenimiento" class="form-control">
+                            <!-- Las opciones se agregarán aquí con JavaScript -->
+                        </select>
+                        <div class="invalid-feedback">
+                            La habilitación debe tener al menos 3 caracteres.
+                        </div>
+                    </div>
+                    <input type="hidden" id="idGranja" name="idGranja">
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" name="btMantenimientos" value="editTipoMant" form="newMantGranjaForm">Finalizar</button>
+                <button type="submit" class="btn btn-primary" name="btMantenimientos" value="newMantGranja" form="newMantGranjaForm">Finalizar</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Script JS para rellenar las opciones de tipos de mantenimiento -->
+<script>
+    function cargarSelectTipoMant() {
+       //La variable con los tipos ya existe de una función anterior
+       var tipoMant = $tiposMant;
+       const selectTipoMant = document.getElementById('selectTipoMant'); 
+       selectTipoMant.innerHTML = '';
+       const defaultOption = document.createElement('option');
+       defaultOption.text = 'Seleccione';
+       defaultOption.value = '';
+       selectTipoMant.appendChild(defaultOption);
+       tipoMant.forEach(function (item) {
+           const optionAgregar = document.createElement('option');
+           optionAgregar.value = item.idTipoMantenimiento;
+           optionAgregar.text = item.nombre;
+           selectTipoMant.appendChild(optionAgregar);
+        });
+
+        //Además, aprovechamos la función para que el hidden idGranja se reemplace
+        var selectedGranja = $selectedGranja;
+        document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
+    }
+    
+    // Reemplaza las líneas window.onload individuales por:
+    window.addEventListener('load', function() {
+        cargarSelectGranja();
+        cargarSelectTipoMant();
+    });
+
+</script>
 
 HTML;
 

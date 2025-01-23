@@ -20,6 +20,16 @@ if ( !empty($_POST) )
         $oTipoMantenimiento->update();
     }
 
+    if ( $_POST['btMantenimientos'] == 'newMantGranja')
+    {
+        $oMantenimientoGranja = new mantenimientoGranja();
+        $oMantenimientoGranja->setMaxIDMantGranja();
+        $oMantenimientoGranja->setFecha( $_POST['fechaMantenimiento']);
+        $oMantenimientoGranja->setIdGranja( $_POST['idGranja'] );
+        $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
+        $oMantenimientoGranja->save();
+    }
+
     if ( $_POST['btMantenimientos'] == 'selectGranja')
     {
         if ( ctype_digit( $_POST['selectGranja'] )==true ) // Evalua que el ID sea positivo y entero
@@ -31,7 +41,6 @@ if ( !empty($_POST) )
             header("Location: index.php?opt=mantenimientos");
             exit();
         }
-        
     }
 }
 
@@ -51,7 +60,6 @@ if ( !empty($_GET) )
     {
         $oTipoMantenimiento = new tipoMantenimiento();
         $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
-
         $oMantenimientoGranja = new mantenimientoGranja();
         $granjasFiltradas = $oMantenimientoGranja->getGranjas();
 

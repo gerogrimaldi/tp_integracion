@@ -72,6 +72,20 @@ class tipoMantenimiento{
         return true;
     }
 
+    public function update()
+    {
+        $sql = "UPDATE tipoMantenimiento SET nombre = ? WHERE idTipoMantenimiento = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        }
+        $stmt->bind_param("si", $this->nombreMantenimiento, $this->idTipoMantenimiento);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        $stmt->close();
+    }
+
     public function deleteTipoMantID($idTipoMantenimiento)
     {
         if ($this->mysqli === null) { throw new RuntimeException('La conexión a la base de datos no está inicializada.'); }
@@ -174,46 +188,17 @@ class mantenimientoGranja{
 
 public function save()
 {
-
-    // Consulta para verificar si el Granja ya existe
-    $sqlCheck = "SELECT idGalpon FROM galpon WHERE idGalpon = ?";
-    $stmtCheck = $this->mysqli->prepare($sqlCheck);
-
-    if (!$stmtCheck) {
-        die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
-    }
-
-    // Enlazar parametro
-    $stmtCheck->bind_param("i", $this->idGalpon);
-    $stmtCheck->execute();
-    $stmtCheck->store_result();
-
-    // Verificar
-    if ($stmtCheck->num_rows > 0) {
-        echo '<script type="text/javascript">alert("Error: La granja ya existe.");</script>';
-        $stmtCheck->close();
-        $this->mysqli->close();
-        return false; 
-    }
-    $stmtCheck->close();
-
-    // Inserción
-    $sql = "INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) 
-            VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO mantenimientoGranja (idMantenimientoGranja, fecha, idGranja, idTipoMantenimiento) 
+            VALUES (?, ?, ?, ?)";
     $stmt = $this->mysqli->prepare($sql);
     if (!$stmt) {
         die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
     }
-
-    // Enlaza los parámetros y ejecuta la consulta
-    $stmt->bind_param("isiii", $this->idGalpon, $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja);
+    $stmt->bind_param("isii", $this->idMantenimientoGranja, $this->fecha, $this->idGranja, $this->idTipoMantenimiento);
     if (!$stmt->execute()) {
         throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
     }
-    
-    // Cerrar la consulta y la conexión
     $stmt->close();
-    $this->mysqli->close();
     return true;
 }
 
