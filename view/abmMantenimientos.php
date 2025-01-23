@@ -6,8 +6,11 @@
         Debajo: la tabla de las granjas (sin datos mientras no se seleccione nada)
         Repetir lo superior pero con la lista de los galpones, sin diferenciar por granja.
     */
-$idGranja = isset($_GET['idGranja']) ? $_GET['idGranja'] : '';
+
+// Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
 $resultado = $resultado ?? '[]'; 
+//Si no hay granja seleccionada, el valor es []. Si hay una, va a ser el ID de la opción.
+$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
 
 $body = <<<HTML
 <div class="container">
@@ -23,7 +26,7 @@ $body = <<<HTML
   </button>
 </p>
 <div class="collapse mb-4" id="agregarMant">
-  <div class="card card-body">
+  <div class="card card-body text-dark">
     <form id="agregrarTipoMantenimiento" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
         <div class="mb-4">
             <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
@@ -40,7 +43,7 @@ $body = <<<HTML
   </div>
 </div>
 <div class="collapse mb-4" id="verMant">
-  <div class="card card-body">
+  <div class="card card-body text-dark">
     <table id="tablaTiposMant" class="table table-bordered bg-white">
             <thead class="table-light">
                 <tr>
@@ -149,6 +152,9 @@ document.addEventListener('click', function (event) {
                 <!-- Las opciones se agregan con JavaScript -->
             </select>
             <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGranja">Filtrar</button>
+            <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGranja">
+            Agregar mantenimiento
+        </button>
             <div class="invalid-feedback">
                 Debe elegir una opción.
             </div>
@@ -159,6 +165,8 @@ document.addEventListener('click', function (event) {
 <!-- Script JS para rellenar las opciones con las Granjas disponibles -->
 <script>
     function cargarSelectGranja() {
+       // Recupero desde PHP la granja seleccionada en caso de existir
+       var selectedGranja = $selectedGranja;
        var granjasSelect = $granjasFiltradas;
        const selectFiltrarGranja = document.getElementById('selectGranja');
        selectFiltrarGranja.innerHTML = '';
@@ -170,6 +178,10 @@ document.addEventListener('click', function (event) {
            const optionAgregar = document.createElement('option');
            optionAgregar.value = item.idGranja;
            optionAgregar.text = item.nombre;
+           // Marcar como seleccionada si coincide con el valor recuperado
+           if (item.idGranja == selectedGranja) {
+               optionAgregar.selected = true;
+           }
            selectFiltrarGranja.appendChild(optionAgregar);
         });
     }
@@ -183,7 +195,6 @@ document.addEventListener('click', function (event) {
                 <th class="text-primary">ID</th>
                 <th class="text-primary">Fecha</th>
                 <th class="text-primary">Mantenimiento</th>
-                <th class="text-primary">Granja</th>
                 <th class="text-primary"></th>
                 <th class="text-primary"></th>
             </tr>
@@ -194,6 +205,7 @@ document.addEventListener('click', function (event) {
     </table>
 </div>
 
+<!-- Script JS para rellenar la tabla de mantenimientos de GRANJA -->
 <script>
     // Comentado para evitar el uso de GPT y empezar a razonar mejor el JS.
     // Recupera el resultado de PHP en JSON y lo almacena en una variable JS.
@@ -211,8 +223,7 @@ document.addEventListener('click', function (event) {
         row.innerHTML = 
             '<td>' + mantenimientos.idMantenimientoGranja + '</td>' +
             '<td>' + mantenimientos.fecha + '</td>' +
-            '<td>' + mantenimientos.idGranja + '</td>' +
-            '<td>' + mantenimientos.idTipoMantenimiento + '</td>' +
+            '<td>' + mantenimientos.nombre + '</td>' +
             '<td>' +
                 '<button type="button" ' +
                     'class="btn btn-warning btn-sm" ' +
@@ -241,6 +252,39 @@ document.addEventListener('click', function (event) {
         $("#tablaMantenimientos").DataTable();
     });
 </script>
+
+<!-- Modal agregar Mantenimiento GRANJA -->
+<div class="modal fade" id="newMantGranja" tabindex="-1" aria-labelledby="newMantGranjaModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="newMantGranjaModal">Agregar mantenimiento realizado</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newMantGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+                <div class="mb-4">
+                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
+                    <input type="text" class="form-control" 
+                        id="nombreMantEdit" name="nombreMantEdit"
+                        placeholder="Ejemplo: Corte de césped"
+                        min="1" required>
+                    <div class="invalid-feedback">
+                        Debe contar con al menos 3 letras.
+                    </div>
+                </div>
+                    <input type="hidden" id="idTipoMant" name="idTipoMant">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" name="btMantenimientos" value="editTipoMant" form="newMantGranjaForm">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 HTML;
 
 ?>

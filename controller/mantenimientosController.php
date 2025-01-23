@@ -22,8 +22,16 @@ if ( !empty($_POST) )
 
     if ( $_POST['btMantenimientos'] == 'selectGranja')
     {
-        $oMantenimientoGranja = new mantenimientoGranja();
-        $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
+        if ( ctype_digit( $_POST['selectGranja'] )==true ) // Evalua que el ID sea positivo y entero
+        {
+            $oMantenimientoGranja = new mantenimientoGranja();
+            $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
+            $selectedGranja = $_POST['selectGranja'];
+        }else{
+            header("Location: index.php?opt=mantenimientos");
+            exit();
+        }
+        
     }
 }
 

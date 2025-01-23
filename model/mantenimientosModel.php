@@ -144,7 +144,9 @@ class mantenimientoGranja{
     public function getMantGranjas($idGranjaFiltro)
     {
         $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
-        mantenimientoGranja.idTipoMantenimiento FROM mantenimientoGranja WHERE mantenimientoGranja.idGranja=".$idGranjaFiltro;
+        mantenimientoGranja.idTipoMantenimiento, TipoMantenimiento.nombre FROM mantenimientoGranja 
+        INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGranja.idTipoMantenimiento)
+        WHERE mantenimientoGranja.idGranja=".$idGranjaFiltro;
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
         if ($result->num_rows > 0) {
