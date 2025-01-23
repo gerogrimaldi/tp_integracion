@@ -1,43 +1,99 @@
 <?php
 $mensaje = '';
 
-class galpon{
-	/*
-    Tabla SQL al momento de crear este Model:
+class tipoMantenimiento{
+    private $idTipoMantenimiento;
+    private $nombreMantenimiento;
 
-    CREATE TABLE tipoMantenimiento (
-    idTipoMantenimiento INT NOT NULL,
-    nombre VARCHAR(80),
-    PRIMARY KEY (idTipoMantenimiento)
-);
+    public function __construct()
+    {
+        require_once 'model/conexion.php';  
+        $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
+        if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
+    }
 
-CREATE TABLE mantenimientoGranja (
-    idMantenimientoGranja INT NOT NULL,
-    fecha DATETIME,
-    idGranja INT,
-    idTipoMantenimiento INT,
-    FOREIGN KEY (idGranja) REFERENCES granja(idGranja),
-    FOREIGN KEY (idTipoMantenimiento) REFERENCES tipoMantenimiento(idTipoMantenimiento),
-    PRIMARY KEY (idMantenimientoGranja)
-);
+    public function setMaxIDTipoMant()
+    {
+        $sql = "SELECT MAX(idTipoMantenimiento) AS maxID FROM TipoMantenimiento";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result && $row = $result->fetch_assoc()) {
+            $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
+            $this->idTipoMantenimiento = $maxID + 1; // Incrementa el ID máximo en 1
+        }else {
+            echo "Error al obtener el máximo idTipoMantenimiento: " . $this->mysqli->error;
+        }
+    }
 
-CREATE TABLE mantenimientoGalpon (
-    idMantenimientoGalpon INT NOT NULL,
-    fecha DATETIME,
-    idGalpon INT,
-    idTipoMantenimiento INT,
-    FOREIGN KEY (idGalpon) REFERENCES galpon(idGalpon),
-    FOREIGN KEY (idTipoMantenimiento) REFERENCES tipoMantenimiento(idTipoMantenimiento),
-    PRIMARY KEY (idMantenimientoGalpon)
-);
-    */
+    public function setIDTipoMant($idTipoMantenimiento)
+    {
+        $this->idTipoMantenimiento = $idTipoMantenimiento; 
+    }
+
+    public function setNombreMantenimiento($nombreMantenimiento)
+    {
+        $this->nombreMantenimiento = $nombreMantenimiento; 
+    }
+
+    public function getTipoMantenimientos()
+    {
+        $sql = "SELECT idTipoMantenimiento, nombre FROM tipoMantenimiento";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) { while($row = $result->fetch_assoc()) { $data[] = $row; } }
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
+    public function save(){
+    // Verificar si ya existe
+        $sqlCheck = "SELECT tipoMantenimiento.nombre FROM tipoMantenimiento WHERE nombre = ?";
+        $stmtCheck = $this->mysqli->prepare($sqlCheck);
+        if (!$stmtCheck) { die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); }
+        $stmtCheck->bind_param("s", $this->nombreMantenimiento);
+        $stmtCheck->execute();
+        $stmtCheck->store_result();
+        if ($stmtCheck->num_rows > 0) {
+            echo '<script type="text/javascript">alert("Error: el tipo de mantenimiento ya existe.");</script>';
+            $stmtCheck->close();
+            return false; 
+        }
+        $stmtCheck->close();
+    // Insertar
+        $sql = "INSERT INTO tipoMantenimiento (idTipoMantenimiento, nombre) VALUES (?, ?)";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error); }
+    // Enlaza los parámetros y ejecuta la consulta
+        $stmt->bind_param("is", $this->idTipoMantenimiento, $this->nombreMantenimiento);
+        if (!$stmt->execute()){
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+    // Cerrar la consulta, NO DEBEMOS CERRAR LA CONEXIÓN
+        $stmt->close();
+        return true;
+    }
+
+    public function deleteTipoMantID($idTipoMantenimiento)
+    {
+        if ($this->mysqli === null) { throw new RuntimeException('La conexión a la base de datos no está inicializada.'); }
+        $sql = "DELETE FROM tipoMantenimiento WHERE idTipoMantenimiento = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if ($stmt === false) { throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); }
+        $stmt->bind_param('i', $idTipoMantenimiento);
+        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        $stmt->close(); 
+    }
+
+
+
+}
+
+class mantenimiento{
+    // Mantenimientos de galpón o granja
     private $idMantenimientoGalpon;
     private $idMantenimientoGranja;
     private $fecha;
 	private $idGranja;
     private $idGalpon;
-    private $idTipoMantenimiento;
-    private $nombreMantenimiento;
     private $mysqli;
     
     public function __construct()
@@ -79,11 +135,6 @@ CREATE TABLE mantenimientoGalpon (
         }  
     }
 
-    public function setNombreMantenimiento($nombreMantenimiento)
-    {
-        $this->nombreMantenimiento = $nombreMantenimiento; 
-    }
-
     public function setMaxIDMantGranja()
     {
         $sql = "SELECT MAX(idMantenimientoGranja) AS maxID FROM mantenimientoGranja  ";
@@ -110,40 +161,10 @@ CREATE TABLE mantenimientoGalpon (
         }
     }
 
-    public function setMaxIDTipoMant()
+    public function getall()
     {
-        $sql = "SELECT MAX(idTipoMantenimiento) AS maxID FROM TipoMantenimiento";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
-            $this->idTipoMantenimiento = $maxID + 1; // Incrementa el ID máximo en 1
-        }else {
-            echo "Error al obtener el máximo idTipoMantenimiento: " . $this->mysqli->error;
-        }
-    }
-
-    public function getall($idGranja)
-    {
-        // Leer datos de la tabla 'galpon',
+        // Leer datos de la tabla
         $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, galpon.capacidad, galpon.idGranja, tipoave.nombre FROM galpon INNER JOIN tipoave ON (tipoave.idTipoAve = galpon.idTipoAve) WHERE idGranja=".$idGranja;
-        $result = $this->mysqli->query($sql);
-        $data = []; // Array para almacenar los resultados
-        
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
-            }
-        }
-        // Convertir el array de datos a formato JSON
-        $json_data = json_encode($data);
-        return $json_data;
-    }
-
-    public function getTiposAves()
-    {
-        // Leer datos de la tabla tipoAve (idTipoAve, nombre)
-        $sql = "SELECT idTipoAve, nombre FROM tipoAve";
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
         

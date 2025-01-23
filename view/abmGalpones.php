@@ -187,33 +187,9 @@ $body = <<<HTML
 </div>
 
 <script>
+function cargarOpciones() {
     document.getElementById('idGranja').value = idGranjaJava;
     var tiposAves = $tiposAves;
-    function cargarOpciones() {
-        const select = document.getElementById('opciones'); // Obtener el select
-
-        // Limpiar las opciones actuales
-        select.innerHTML = '';
-
-        // Agregar la opción por defecto
-        const defaultOption = document.createElement('option');
-        defaultOption.text = 'Selecciona una opción';
-        select.appendChild(defaultOption);
-
-        // Agregar las opciones que vienen de PHP
-        tiposAves.forEach(function(item) {
-            const option = document.createElement('option');
-            option.value = item.idTipoAve; // Asignar el ID de tipo ave
-            option.text = item.nombre; // Mostrar el nombre del tipo de ave
-            select.appendChild(option); // Añadir la opción al select
-        });
-    }
-    // Llamar a la función para cargar las opciones al cargar la página
-    window.onload = cargarOpciones;
-</script>
-
-<script>
-function cargarOpciones() {
     // Obtener los dos selects: uno para agregar y otro para editar
     const selectAgregar = document.getElementById('opciones');
     const selectEditar = document.getElementById('opcionesEditar');

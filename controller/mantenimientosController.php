@@ -4,52 +4,39 @@ $validacion = false;
 
 if ( !empty($_POST) ) 
 {
-    if ( $_POST['btGalpon'] == 'registrarGalpon' )
+    if ( $_POST['btMantenimientos'] == 'addTipoMant')
     {
-        $oGalpon = new Galpon();
-        $oGalpon->setMaxID();
-        $oGalpon->setIdentificacion($_POST['identificacion']);
-        $oGalpon->setIdTipoAve($_POST['opciones']);
-        $oGalpon->setCapacidad($_POST['capacidad']);
-        $oGalpon->setIdGranja($_POST['idGranja']);
-        $oGalpon->save();
-        // Recargar p�gina para mostrar resultados
-        header("Location: index.php?opt=galpones&idGranja=" .$_POST['idGranja']);
-        exit();
+        $oTipoMantenimiento = new tipoMantenimiento();
+        $oTipoMantenimiento->setMaxIDTipoMant();
+        $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMant']);
+        $oTipoMantenimiento->save();
     }
 
-    if ( $_POST['btGalpon'] == 'editarGalpon' )
+    if ( $_POST['btMantenimientos'] == 'editTipoMant')
     {
-        $oGalpon = new Galpon();
-        $oGalpon->setIdGalpon ($_POST['idGalpon']);
-        $oGalpon->setIdentificacion($_POST['identificacion']);
-        $oGalpon->setIdTipoAve($_POST['opcionesEditar']);
-        $oGalpon->setCapacidad($_POST['capacidad']);
-        $oGalpon->setIdGranja($_POST['idGranja']);
-        $oGalpon->update();
-        header("Location: index.php?opt=galpones&idGranja=" .$_POST['idGranja']);
-        exit();   
+        $oTipoMantenimiento = new tipoMantenimiento();
+        $oTipoMantenimiento->setIDTipoMant($_POST['idTipoMant']);
+        $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
+        $oTipoMantenimiento->update();
     }
 }
 
 if ( !empty($_GET) ) 
 {
-    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
+    if (isset($_GET['deletetm']) && $_GET['deletetm'] == 'true')
     {
-        UNSET($_GET['delete']);
-        $oGalpon = new Galpon();
-        $idGalpon = (int)$_GET['idGalpon'];
-        $oGalpon->deleteGalponPorId($idGalpon);
+        $oTipoMantenimiento = new tipoMantenimiento();
+        $idTipoMant = (int)$_GET['idTipoMant'];
+        $oTipoMantenimiento->deleteTipoMantID($idTipoMant);
         // Recargar p�gina para mostrar resultados
-        header("Location: index.php?opt=galpones&idGranja=" .$_GET['idGranja']);
+        header("Location: index.php?opt=mantenimientos");
         exit();
     }
 
-    if ($_GET['opt']=='galpones')
+    if ($_GET['opt']=='mantenimientos')
     {
-        $oGalpon = new Galpon();
-        $resultado = $oGalpon->getall( $_GET['idGranja'] );
-        $tiposAves = $oGalpon->getTiposAves();
+        $oTipoMantenimiento = new tipoMantenimiento();
+        $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
     }
 
 
