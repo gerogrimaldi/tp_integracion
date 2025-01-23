@@ -76,7 +76,7 @@ $body = <<<HTML
 <!-- Modal popUp Agregar Galpon -->
 <div class="modal fade" id="agregarGalpon" tabindex="-1" aria-labelledby="agregarGalponModal" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+       <div class="modal-content bg-dark text-white">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="agregarGalponModal">Agregar Galpon</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -132,7 +132,7 @@ $body = <<<HTML
 <!-- Modal popUp editar Galpon -->
 <div class="modal fade" id="editarGalpon" tabindex="-1" aria-labelledby="editarGalponModal" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+       <div class="modal-content bg-dark text-white">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="editarGalponModal">Editar datos del galpón</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -98,7 +98,7 @@ $body = <<<HTML
 <!-- Modal editar Tipo Mantenimiento -->
 <div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
+       <div class="modal-content bg-dark text-white">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="editarTipoMantModal">Editar descripción del mantenimiento</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

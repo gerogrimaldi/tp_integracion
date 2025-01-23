@@ -90,7 +90,7 @@ $body = <<<HTML
 <!-- Info de cómo lo hice: https://getbootstrap.com/docs/5.3/components/modal/ -->
 <div class="modal fade" id="agregarGranja" tabindex="-1" aria-labelledby="agregarGranjaModal" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+   <div class="modal-content bg-dark text-white">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="agregarGranjaModal">Agregar Granja</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -161,7 +161,7 @@ $body = <<<HTML
 <!-- Modal popUp editar Granja -->
 <div class="modal fade" id="editarGranja" tabindex="-1" aria-labelledby="editarGranjaModal" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
+   <div class="modal-content bg-dark text-white">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="editarGranjaModal">Editar datos de la Granja</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
