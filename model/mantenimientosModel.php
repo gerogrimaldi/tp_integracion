@@ -232,21 +232,6 @@ public function updateMantenimientoGranja()
     $this->mysqli->close();
 }
 
-public function updateTipoMantenimiento()
-{
-    $sql = "UPDATE tipoMantenimiento SET idTipoMantenimiento = ?, nombre = ?";
-    $stmt = $this->mysqli->prepare($sql);
-    if (!$stmt) {
-        die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
-    }
-    $stmt->bind_param("is", $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja, $this->idGalpon);
-    if (!$stmt->execute()) {
-        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-    }
-    $stmt->close();
-    $this->mysqli->close();
-}
-
 public function deleteMantenimientoGranjaId($idMantenimientoGranja)
 {
     if ($this->mysqli === null) {

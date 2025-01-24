@@ -28,19 +28,8 @@ if ( !empty($_POST) )
         $oMantenimientoGranja->setIdGranja( $_POST['idGranja'] );
         $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
         $oMantenimientoGranja->save();
-    }
-
-    if ( $_POST['btMantenimientos'] == 'selectGranja')
-    {
-        if ( ctype_digit( $_POST['selectGranja'] )==true ) // Evalua que el ID sea positivo y entero
-        {
-            $oMantenimientoGranja = new mantenimientoGranja();
-            $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
-            $selectedGranja = $_POST['selectGranja'];
-        }else{
-            header("Location: index.php?opt=mantenimientos");
-            exit();
-        }
+        header("Location: index.php?opt=mantenimientos&selectGranja=" . $_POST['idGranja']);
+                
     }
 }
 
@@ -62,8 +51,26 @@ if ( !empty($_GET) )
         $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
         $oMantenimientoGranja = new mantenimientoGranja();
         $granjasFiltradas = $oMantenimientoGranja->getGranjas();
+        
+        if ( isset($_GET['selectGranja']) )
+        {
+            $resultado = $oMantenimientoGranja->getMantGranjas($_GET['selectGranja']);
+            $selectedGranja = $_GET['selectGranja'];
+        }
 
+        if ( isset($_POST['btMantenimientos']) && ($_POST['btMantenimientos'] == 'selectGranja') )
+        {
+            $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
+            $selectedGranja = $_POST['selectGranja'];
+        }
     }
 
+    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
+    {
+        $oMantenimientoGranja = new mantenimientoGranja();
+        $oMantenimientoGranja->deleteMantenimientoGranjaId($_GET['idMantenimientoGranja']);
+        header("Location: index.php?opt=mantenimientos&selectGranja=" . $_GET['selectGranja']);
+        exit();
+    }
 
 }

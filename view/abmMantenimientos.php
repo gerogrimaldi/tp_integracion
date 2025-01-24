@@ -9,8 +9,10 @@
 
 // Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
 $resultado = $resultado ?? '[]'; 
+$selectedGranja = $selectedGranja ?? '[]';
+
 //Si no hay granja seleccionada, el valor es []. Si hay una, va a ser el ID de la opción.
-$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
+//$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
 
 $body = <<<HTML
 <div class="container">
@@ -147,7 +149,7 @@ document.addEventListener('click', function (event) {
 
 <h2>Mantenimientos - Granjas</h2>
 
-<form id="editarTipoMantForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+<form id="selectGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
     <div class="mb-4">
         <label for="selectGranja" class="form-label">Seleccione la granja para ver mantenimientos realizados.</label>
         <div class="input-group">
@@ -188,7 +190,6 @@ document.addEventListener('click', function (event) {
            selectFiltrarGranja.appendChild(optionAgregar);
         });
     }
-    //window.onload = cargarSelectGranja;
 </script>
 
 </div>
@@ -198,7 +199,6 @@ document.addEventListener('click', function (event) {
                 <th class="text-primary">ID</th>
                 <th class="text-primary">Fecha</th>
                 <th class="text-primary">Mantenimiento</th>
-                <th class="text-primary"></th>
                 <th class="text-primary"></th>
             </tr>
         </thead>
@@ -227,20 +227,9 @@ document.addEventListener('click', function (event) {
             '<td>' + mantenimientos.idMantenimientoGranja + '</td>' +
             '<td>' + mantenimientos.fecha + '</td>' +
             '<td>' + mantenimientos.nombre + '</td>' +
-            '<td>' +
-                '<button type="button" ' +
-                    'class="btn btn-warning btn-sm" ' +
-                    'data-bs-toggle="modal" ' +
-                    'data-bs-target="#editarGalpon" ' +
-                    'data-id="' + mantenimientos.idMantenimientoGranja + '" ' +
-                    'data-fecha="' + mantenimientos.fecha + '" ' +
-                    'data-idGranja="' + mantenimientos.idGranja + '" ' +
-                    'data-idTipoMantenimiento="' + mantenimientos.idTipoMantenimiento + '">' +
-                    'Editar' +
-                '</button>' +
             '</td>' +
             '<td>' +
-                '<a href="index.php?opt=mantenimientos&delete=true&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '" ' +
+                '<a href="index.php?opt=mantenimientos&delete=true&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '&selectGranja=' + mantenimientos.idGranja + '" ' +
                    'class="btn btn-danger btn-sm">' +
                     'Borrar' +
                 '</a>' +
