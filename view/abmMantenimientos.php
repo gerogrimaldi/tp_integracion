@@ -9,7 +9,7 @@
 
 // Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
 $resultado = $resultado ?? '[]'; 
-$selectedGranja = $selectedGranja ?? '[]';
+
 
 //Si no hay granja seleccionada, el valor es []. Si hay una, va a ser el ID de la opción.
 //$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
@@ -58,7 +58,7 @@ $body = <<<HTML
             <tbody id="tipoMant">
                 <!-- Los datos se insertarán aquí -->
             </tbody>
-        </table>
+    </table>
   </div>
 </div>
 
@@ -146,6 +146,7 @@ document.addEventListener('click', function (event) {
 });
 </script>
 
+<div class="container">
 
 <h2>Mantenimientos - Granjas</h2>
 
@@ -229,7 +230,7 @@ document.addEventListener('click', function (event) {
             '<td>' + mantenimientos.nombre + '</td>' +
             '</td>' +
             '<td>' +
-                '<a href="index.php?opt=mantenimientos&delete=true&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '&selectGranja=' + mantenimientos.idGranja + '" ' +
+                '<a href="index.php?opt=mantenimientos&delete=granja&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '&selectGranja=' + mantenimientos.idGranja + '" ' +
                    'class="btn btn-danger btn-sm">' +
                     'Borrar' +
                 '</a>' +
@@ -244,6 +245,8 @@ document.addEventListener('click', function (event) {
         $("#tablaMantenimientos").DataTable();
     });
 </script>
+
+
 
 <!-- Modal agregar Mantenimiento GRANJA -->
 <div class="modal fade" id="newMantGranja" tabindex="-1" aria-labelledby="newMantGranjaModal" aria-hidden="true">
@@ -306,13 +309,61 @@ document.addEventListener('click', function (event) {
         var selectedGranja = $selectedGranja;
         document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
     }
-    
+
+</script>
+
+<div class="container">
+    <h2>Mantenimientos - Galpones</h2>
+
+    <form id="selectGalponForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="selectGalpon" class="form-label">Seleccione el galpón para ver mantenimientos realizados.</label>
+            <div class="input-group">
+                <select id="selectGalpon" name="selectGalpon" class="form-control" required>
+                    <!-- Las opciones se agregan con JavaScript -->
+                </select>
+                <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGalpon">Filtrar</button>
+                <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGalpon">
+                Agregar mantenimiento
+            </button>
+                <div class="invalid-feedback">
+                    Debe elegir una opción.
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
+<script>
+    function cargarSelectGalpon() {
+       // Recupero desde PHP el galpón seleccionada en caso de existir
+       var selectedGalpon = $selectedGalpon;
+       var galponesSelect = $galponesFiltrados;
+       const selectFiltrarGalpon = document.getElementById('selectGalpon');
+       selectFiltrarGalpon.innerHTML = '';
+       const defaultOption = document.createElement('option');
+       defaultOption.text = 'Seleccione un galpón';
+       defaultOption.value = '';
+       selectFiltrarGalpon.appendChild(defaultOption);
+       galponesSelect.forEach(function (item) {
+           const optionAgregar = document.createElement('option');
+           optionAgregar.value = item.idGalpon;
+            optionAgregar.text = item.identificacion + " - " + item.nombre;
+           // Marcar como seleccionada si coincide con el valor recuperado
+           if (item.idGalpon == selectedGalpon) {
+               optionAgregar.selected = true;
+           }
+           selectFiltrarGalpon.appendChild(optionAgregar);
+        });
+    }
+
     // Reemplaza las líneas window.onload individuales por:
     window.addEventListener('load', function() {
         cargarSelectGranja();
         cargarSelectTipoMant();
+        cargarSelectGalpon()
     });
-
 </script>
 
 HTML;

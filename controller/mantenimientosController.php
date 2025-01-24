@@ -28,8 +28,18 @@ if ( !empty($_POST) )
         $oMantenimientoGranja->setIdGranja( $_POST['idGranja'] );
         $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
         $oMantenimientoGranja->save();
-        header("Location: index.php?opt=mantenimientos&selectGranja=" . $_POST['idGranja']);
-                
+        header("Location: index.php?opt=mantenimientos&selectGranja=" . $_POST['idGranja']);     
+    }
+
+    if ( $_POST['btMantenimientos'] == 'newMantGalpon')
+    {
+        $oMantenimientoGranja = new mantenimientoGranja();
+        $oMantenimientoGranja->setMaxIDMantGalpon();
+        $oMantenimientoGranja->setFecha( $_POST['fechaMantenimiento']);
+        $oMantenimientoGranja->setIdGalpon( $_POST['idGranja'] );
+        $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
+        $oMantenimientoGranja->save();
+        header("Location: index.php?opt=mantenimientos&selectGalpon=" . $_POST['idGalpon']);     
     }
 }
 
@@ -51,7 +61,9 @@ if ( !empty($_GET) )
         $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
         $oMantenimientoGranja = new mantenimientoGranja();
         $granjasFiltradas = $oMantenimientoGranja->getGranjas();
-        
+        $oMantenimientoGalpon = new mantenimientoGalpon();
+        $galponesFiltrados = $oMantenimientoGalpon->getGalpones();
+
         if ( isset($_GET['selectGranja']) )
         {
             $resultado = $oMantenimientoGranja->getMantGranjas($_GET['selectGranja']);
@@ -60,12 +72,34 @@ if ( !empty($_GET) )
 
         if ( isset($_POST['btMantenimientos']) && ($_POST['btMantenimientos'] == 'selectGranja') )
         {
+            if ( ctype_digit( $_POST['selectGranja'] )==true ) // Evalua que el ID sea positivo y entero
+            {
             $resultado = $oMantenimientoGranja->getMantGranjas($_POST['selectGranja']);
             $selectedGranja = $_POST['selectGranja'];
+            }
         }
+        //Si no entró a ninguno de los dos if anteriores, cargar un array vacío.
+        $selectedGranja = $selectedGranja ?? '[]';
+
+        if ( isset($_GET['selectGalpon']) )
+        {
+            $resultado = $oMantenimientoGalpon->getMantGalpon($_GET['selectGalpon']);
+            $selectedGalpon = $_GET['selectGalpon'];
+        }
+
+        if ( isset($_POST['btMantenimientos']) && ($_POST['btMantenimientos'] == 'selectGalpon') )
+        {
+            if ( ctype_digit( $_POST['selectGalpon'] )==true ) // Evalua que el ID sea positivo y entero
+            {
+            $resultado = $oMantenimientoGalpon->getMantGalpon($_POST['selectGalpon']);
+            $selectedGalpon = $_POST['selectGalpon'];
+            }
+        }
+        //Si no entró a ninguno de los dos if anteriores, cargar un array vacío.
+        $selectedGalpon = $selectedGalpon ?? '[]';
     }
 
-    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
+    if (isset($_GET['delete']) && $_GET['delete'] == 'granja')
     {
         $oMantenimientoGranja = new mantenimientoGranja();
         $oMantenimientoGranja->deleteMantenimientoGranjaId($_GET['idMantenimientoGranja']);
@@ -73,4 +107,11 @@ if ( !empty($_GET) )
         exit();
     }
 
+    if (isset($_GET['delete']) && $_GET['delete'] == 'galpon')
+    {
+        $oMantenimientoGalpon = new mantenimientoGalpon();
+        $oMantenimientoGalpon->deleteMantenimientoGalponId($_GET['idMantenimientoGalpon']);
+        header("Location: index.php?opt=mantenimientos&selectGalpon=" . $_GET['selectGalpon']);
+        exit();
+    }
 }
