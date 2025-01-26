@@ -270,7 +270,7 @@ class mantenimientoGalpon{
         }  
     }
 
-    public function setMaxIDMantGranja()
+    public function setMaxIDMantGalpon()
     {
         $sql = "SELECT MAX(idMantenimientoGalpon) AS maxID FROM mantenimientoGalpon  ";
         $result = $this->mysqli->query($sql);
@@ -320,7 +320,7 @@ class mantenimientoGalpon{
         $sql = "INSERT INTO mantenimientoGalpon (idMantenimientoGalpon, fecha, idGalpon, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
         $stmt = $this->mysqli->prepare($sql);
         if (!$stmt) {die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);}
-        $stmt->bind_param("isii", $this->idMantenimientoGalpon, $this->fecha, $this->idGranja, $this->idTipoMantenimiento);
+        $stmt->bind_param("isii", $this->idMantenimientoGalpon, $this->fecha, $this->idGalpon, $this->idTipoMantenimiento);
         if (!$stmt->execute()) {throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
         $stmt->close();
         return true;

@@ -9,7 +9,7 @@
 
 // Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
 $resultado = $resultado ?? '[]'; 
-
+$resultadoGalp = $resultadoGalp ?? '[]'; 
 
 //Si no hay granja seleccionada, el valor es []. Si hay una, va a ser el ID de la opción.
 //$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
@@ -95,8 +95,6 @@ $body = <<<HTML
     $(document).ready(function() {
         $("#tablaTiposMant").DataTable();
     });
-
-
 
 </script>
 
@@ -246,9 +244,8 @@ document.addEventListener('click', function (event) {
     });
 </script>
 
-
-
 <!-- Modal agregar Mantenimiento GRANJA -->
+<!-- TO DO: SI NO SE FILTRA UNA GRANJA ANTES, DA ERROR EL SQL -->
 <div class="modal fade" id="newMantGranja" tabindex="-1" aria-labelledby="newMantGranjaModal" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content bg-dark text-white">
@@ -269,7 +266,7 @@ document.addEventListener('click', function (event) {
                     </div>
                     <div class="mb-4">
                         <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
-                        <select id="selectTipoMant" name="tipoMantenimiento" class="form-control">
+                        <select id="selectTipoMantGranja" name="tipoMantenimiento" class="form-control">
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
                         <div class="invalid-feedback">
@@ -287,28 +284,39 @@ document.addEventListener('click', function (event) {
     </div>
 </div>
 
-<!-- Script JS para rellenar las opciones de tipos de mantenimiento -->
+<!-- Script JS para rellenar las opciones de tipos de mantenimiento, en ambos modales -->
 <script>
-    function cargarSelectTipoMant() {
-       //La variable con los tipos ya existe de una función anterior
-       var tipoMant = $tiposMant;
-       const selectTipoMant = document.getElementById('selectTipoMant'); 
-       selectTipoMant.innerHTML = '';
-       const defaultOption = document.createElement('option');
-       defaultOption.text = 'Seleccione';
-       defaultOption.value = '';
-       selectTipoMant.appendChild(defaultOption);
-       tipoMant.forEach(function (item) {
-           const optionAgregar = document.createElement('option');
-           optionAgregar.value = item.idTipoMantenimiento;
-           optionAgregar.text = item.nombre;
-           selectTipoMant.appendChild(optionAgregar);
-        });
+function cargarSelectTipoMant() {
+    // La variable con los tipos ya existe de una función anterior
+    var tipoMant = $tiposMant;
+    // Rellenar el select de tipos de mantenimiento para granjas
+    const selectTipoMantGranja = document.getElementById('selectTipoMantGranja');
+    const selectTipoMantGalpon = document.getElementById('selectTipoMantGalpon');
+    selectTipoMantGranja.innerHTML = '';
+    selectTipoMantGalpon.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.text = 'Seleccione';
+    defaultOption.value = '';
+    selectTipoMantGranja.appendChild(defaultOption);
+    const defaultOptionClonado = defaultOption.cloneNode(true);
+    selectTipoMantGalpon.appendChild(defaultOptionClonado);
 
-        //Además, aprovechamos la función para que el hidden idGranja se reemplace
-        var selectedGranja = $selectedGranja;
-        document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
-    }
+    tipoMant.forEach(function (item) {
+        const optionAgregar = document.createElement('option');
+        optionAgregar.value = item.idTipoMantenimiento;
+        optionAgregar.text = item.nombre;
+        selectTipoMantGranja.appendChild(optionAgregar);
+        // Clonar opción para el segundo modal
+        const optionAgregarClonada = optionAgregar.cloneNode(true);
+        selectTipoMantGalpon.appendChild(optionAgregarClonada);
+    });
+
+    //Reemplazar el valor por el ID de la granja/galpon seleccionado en el formulario
+    var selectedGranja = $selectedGranja;
+    document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
+    var selectedGalpon = $selectedGalpon;
+    document.querySelector('#newMantGalponForm #idGalpon').value = selectedGalpon;
+}
 
 </script>
 
@@ -332,7 +340,92 @@ document.addEventListener('click', function (event) {
             </div>
         </div>
     </form>
+
+    </div>
+        <table id="tablaMantenimientosGalp" class="table table-bordered bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-primary">ID</th>
+                    <th class="text-primary">Fecha</th>
+                    <th class="text-primary">Mantenimiento</th>
+                    <th class="text-primary"></th>
+                </tr>
+            </thead>
+            <tbody id="mantenimientosGalp">
+                <!-- Los datos se insertarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal agregar Mantenimiento Galpon -->
+    <!-- TO DO: SI NO SE FILTRA UN GALPON ANTES, DA ERROR EL SQL -->
+    <div class="modal fade" id="newMantGalpon" tabindex="-1" aria-labelledby="newMantGalponModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="newMantGalponModal">Agregar mantenimiento realizado</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newMantGalponForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                            <label for="fechaMant" class="form-label">Fecha y hora de realización</label>
+                           <input type="datetime-local" class="form-control" 
+                                id="fechaMant" name="fechaMantenimiento"
+                                required>
+                            <div class="invalid-feedback">
+                                Seleccione una fecha y hora válidos.
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
+                            <select id="selectTipoMantGalpon" name="tipoMantenimiento" class="form-control">
+                                <!-- Las opciones se agregarán aquí con JavaScript -->
+                            </select>
+                            <div class="invalid-feedback">
+                                La habilitación debe tener al menos 3 caracteres.
+                            </div>
+                        </div>
+                        <input type="hidden" id="idGalpon" name="idGalpon">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" name="btMantenimientos" value="newMantGalpon" form="newMantGalponForm">Finalizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Script JS para rellenar la tabla de mantenimientos de GALPON -->
+<script>
+    var mantenimientosGalp = $resultadoGalp;
+    var mantenimientosGalpTbody = document.getElementById("mantenimientosGalp");
+    mantenimientosGalp.forEach(
+        function(mantenimientosGalp) {
+        var row = document.createElement("tr");
+        row.className = "table-light";
+        row.innerHTML = 
+            '<td>' + mantenimientosGalp.idMantenimientoGalpon + '</td>' +
+            '<td>' + mantenimientosGalp.fecha + '</td>' +
+            '<td>' + mantenimientosGalp.nombre + '</td>' +
+            '</td>' +
+            '<td>' +
+                '<a href="index.php?opt=mantenimientos&delete=galpon&idMantenimientoGalpon=' + mantenimientosGalp.idMantenimientoGalpon + '&selectGalpon=' + mantenimientosGalp.idGalpon + '" ' +
+                   'class="btn btn-danger btn-sm">' +
+                    'Borrar' +
+                '</a>' +
+            '</td>';
+        mantenimientosGalpTbody.appendChild(row);
+    });
+
+    // Inicializar DataTable - Es un "plugin" que le agrega la busqueda, ordenamiento, etc. a la tabla.
+    // Se le pasa como parámetro la tabla HTML que creamos.
+    $(document).ready(function() {
+        $("#tablaMantenimientosGalp").DataTable();
+    });
+</script>
 
 <!-- Script JS para rellenar las opciones con las Granjas disponibles -->
 <script>

@@ -33,12 +33,12 @@ if ( !empty($_POST) )
 
     if ( $_POST['btMantenimientos'] == 'newMantGalpon')
     {
-        $oMantenimientoGranja = new mantenimientoGranja();
-        $oMantenimientoGranja->setMaxIDMantGalpon();
-        $oMantenimientoGranja->setFecha( $_POST['fechaMantenimiento']);
-        $oMantenimientoGranja->setIdGalpon( $_POST['idGranja'] );
-        $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
-        $oMantenimientoGranja->save();
+        $oMantenimientoGalpon = new mantenimientoGalpon();
+        $oMantenimientoGalpon->setMaxIDMantGalpon();
+        $oMantenimientoGalpon->setFecha( $_POST['fechaMantenimiento']);
+        $oMantenimientoGalpon->setIdGalpon( $_POST['idGalpon'] );
+        $oMantenimientoGalpon->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
+        $oMantenimientoGalpon->save();
         header("Location: index.php?opt=mantenimientos&selectGalpon=" . $_POST['idGalpon']);     
     }
 }
@@ -83,7 +83,7 @@ if ( !empty($_GET) )
 
         if ( isset($_GET['selectGalpon']) )
         {
-            $resultado = $oMantenimientoGalpon->getMantGalpon($_GET['selectGalpon']);
+            $resultadoGalp = $oMantenimientoGalpon->getMantGalpon($_GET['selectGalpon']);
             $selectedGalpon = $_GET['selectGalpon'];
         }
 
@@ -91,7 +91,7 @@ if ( !empty($_GET) )
         {
             if ( ctype_digit( $_POST['selectGalpon'] )==true ) // Evalua que el ID sea positivo y entero
             {
-            $resultado = $oMantenimientoGalpon->getMantGalpon($_POST['selectGalpon']);
+            $resultadoGalp = $oMantenimientoGalpon->getMantGalpon($_POST['selectGalpon']);
             $selectedGalpon = $_POST['selectGalpon'];
             }
         }
