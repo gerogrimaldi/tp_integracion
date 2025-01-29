@@ -123,6 +123,21 @@ class galpon{
         $this->mysqli->close();
     }
 
+    public function getGalponesMasGranjas()
+    {
+        $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, galpon.capacidad, galpon.idGranja, granja.nombre FROM galpon
+        INNER JOIN granja ON (galpon.idGranja = granja.idGranja)";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
 //###########################################################################
 // CARGA; UPDATE, DELTE
 public function save()

@@ -1,5 +1,7 @@
 <?php
 require_once 'model/mantenimientosModel.php';
+require_once 'model/granjaModel.php';
+require_once 'model/galponModel.php';
 $validacion = false;
 
 if ( !empty($_POST) ) 
@@ -60,9 +62,11 @@ if ( !empty($_GET) )
         $oTipoMantenimiento = new tipoMantenimiento();
         $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
         $oMantenimientoGranja = new mantenimientoGranja();
-        $granjasFiltradas = $oMantenimientoGranja->getGranjas();
+        $oGranjas = new granja();
+        $granjasFiltradas = $oGranjas->getall();
         $oMantenimientoGalpon = new mantenimientoGalpon();
-        $galponesFiltrados = $oMantenimientoGalpon->getGalpones();
+        $oGalpon = new galpon();
+        $galponesFiltrados = $oGalpon->getGalponesMasGranjas();
 
         if ( isset($_GET['selectGranja']) )
         {

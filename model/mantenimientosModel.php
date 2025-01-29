@@ -169,20 +169,6 @@ class mantenimientoGranja{
         return $json_data;
     }
 
-    public function getGranjas()
-    {
-        $sql = "SELECT idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion FROM granja";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
-            }
-        }
-        $json_data = json_encode($data);
-        return $json_data;
-    }
-
     public function save()
     {
         $sql = "INSERT INTO mantenimientoGranja (idMantenimientoGranja, fecha, idGranja, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
@@ -291,21 +277,6 @@ class mantenimientoGalpon{
         WHERE mantenimientoGalpon.idGalpon=".$idGalponFiltro;
         $result = $this->mysqli->query($sql);
         $data = []; // Array para almacenar los resultados
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
-            }
-        }
-        $json_data = json_encode($data);
-        return $json_data;
-    }
-
-    public function getGalpones()
-    {
-        $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, galpon.capacidad, galpon.idGranja, granja.nombre FROM galpon
-        INNER JOIN granja ON (galpon.idGranja = granja.idGranja)";
-        $result = $this->mysqli->query($sql);
-        $data = [];
         if ($result->num_rows > 0) {
             while($row = $result->fetch_assoc()) {
                 $data[] = $row;

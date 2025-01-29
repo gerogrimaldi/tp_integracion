@@ -1,5 +1,6 @@
 <?php
 require_once 'model/galponModel.php';
+require_once 'model/granjaModel.php';
 $validacion = false;
 
 if ( !empty($_POST) ) 
@@ -48,9 +49,32 @@ if ( !empty($_GET) )
     if ($_GET['opt']=='galpones')
     {
         $oGalpon = new Galpon();
-        $resultado = $oGalpon->getall( $_GET['idGranja'] );
         $tiposAves = $oGalpon->getTiposAves();
+        $oGranja = new granja();
+        $granjasFiltradas = $oGranja->getAll();
+
+        $resultado = '[]';
+        $selectedGranja = '[]';
+
+        if ( isset($_POST['btGalpon']) && ($_POST['btGalpon'] == 'selectGranja') )
+        {
+            $idGranjaFiltro = $_POST['selectGranja'];
+        }
+
+        if ( isset($_GET['idGranja']) )
+        {
+            $idGranjaFiltro = $_GET['idGranja'];
+        }
+
+        if ( isset( $idGranjaFiltro ) )
+        {
+            if ( ctype_digit( $idGranjaFiltro )==true ) 
+            {
+                $resultado = $oGalpon->getall( $idGranjaFiltro );
+                $selectedGranja = $idGranjaFiltro; //Le indica al view qué item está seleccionado de la lista.
+            }
+        }else{
+            $idGranjaFiltro = '[]';
+        }
     }
-
-
 }

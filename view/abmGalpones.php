@@ -1,17 +1,54 @@
 <?php
 
 $error = $error ?? ''; // Definir $error como cadena vacía si no está definido
-$idGranja = isset($_GET['idGranja']) ? $_GET['idGranja'] : '';
 
 $body = <<<HTML
 <div class="container">
     <h1>Galpones</h1>
 
-    <div class="text-center mb-3">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
-            Agregar galpón
-        </button>
-    </div>
+    <form id="selectGranjaForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="selectGranja" class="form-label">Seleccione una granja para ver sus galpones.</label>
+            <div class="input-group">
+                <select id="selectGranja" name="selectGranja" class="form-control" required>
+                    <!-- Las opciones se agregan con JavaScript -->
+                </select>
+                <button type="submit" class="btn btn-primary rounded-end" name="btGalpon" value="selectGranja">Filtrar</button>
+                <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
+                Agregar galpón
+            </button>
+                <div class="invalid-feedback">
+                    Debe elegir una opción.
+                </div>
+            </div>
+        </div>
+    </form>
+
+<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
+    <script>
+        function cargarSelectGranja() {
+        // Recupero desde PHP la granja seleccionada en caso de existir
+        var selectedGranja = $selectedGranja;
+        var granjasSelect = $granjasFiltradas;
+        const selectFiltrarGranja = document.getElementById('selectGranja');
+        selectFiltrarGranja.innerHTML = '';
+        const defaultOption = document.createElement('option');
+        defaultOption.text = 'Seleccione una granja';
+        defaultOption.value = '';
+        selectFiltrarGranja.appendChild(defaultOption);
+        granjasSelect.forEach(function (item) {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = item.idGranja;
+            optionAgregar.text = item.nombre;
+            // Marcar como seleccionada si coincide con el valor recuperado
+            if (item.idGranja == selectedGranja) {
+                optionAgregar.selected = true;
+            }
+            selectFiltrarGranja.appendChild(optionAgregar);
+            });
+        }
+
+    </script>
 
     <table id="myTable" class="table table-bordered bg-white">
         <thead class="table-light">
@@ -32,7 +69,7 @@ $body = <<<HTML
 
 <script>
     var galpon = $resultado;
-    var idGranjaJava = $idGranja;
+    var idGranjaJava = $idGranjaFiltro;
     // Procesar los datos y crear filas en la tabla
     var galponTbody = document.getElementById("galpon");
     
@@ -221,8 +258,11 @@ function cargarOpciones() {
     });
 }
 
-// Llama a cargarOpciones cuando la página cargue
-window.onload = cargarOpciones;
+// Reemplaza las líneas window.onload individuales por:
+    window.addEventListener('load', function() {
+        cargarSelectGranja();
+        cargarOpciones();
+    });
 
 // Lógica para rellenar el modal de edición
 document.addEventListener('click', function (event) {
