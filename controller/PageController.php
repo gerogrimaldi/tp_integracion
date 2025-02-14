@@ -34,6 +34,11 @@ switch ($_GET['opt']) {
 		require_once 'view/abmMantenimientos.php';
 		break;
 
+	case 'vacunas':
+		require_once 'controller/vacunasController.php';
+		require_once 'view/abmVacunas.php';
+		break;
+
 	default:
 		require_once 'view/error_404.php';
 		break;

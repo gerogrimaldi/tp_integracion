@@ -146,7 +146,7 @@ document.addEventListener('click', function (event) {
 
 <div class="container">
 
-<h2>Mantenimientos - Granjas</h2>
+<h2>Granjas</h2>
 
 <form id="selectGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
     <div class="mb-4">
@@ -321,7 +321,7 @@ function cargarSelectTipoMant() {
 </script>
 
 <div class="container">
-    <h2>Mantenimientos - Galpones</h2>
+    <h2> Galpones</h2>
 
     <form id="selectGalponForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
         <div class="mb-4">

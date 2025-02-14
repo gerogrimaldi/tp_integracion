@@ -78,11 +78,19 @@ CREATE TABLE loteAves (
     PRIMARY KEY (idLoteAves)
 );
 
+CREATE TABLE viaAplicacion (
+    idViaAplicacion INT NOT NULL,
+    via VARCHAR(45),
+    PRIMARY KEY (idViaAplicacion)
+);
+
 CREATE TABLE vacuna (
     idVacuna INT NOT NULL,
-    nombre VARCHAR(20),
+    nombre VARCHAR(40),
     idViaAplicacion INT,
-    idMarca INT,
+    marca VARCHAR(40),
+    enfermedad VARCHAR(60),
+    FOREIGN KEY (idViaAplicacion) REFERENCES viaAplicacion(idViaAplicacion),
     PRIMARY KEY (idVacuna)
 );
 
@@ -93,7 +101,6 @@ CREATE TABLE loteVacuna (
     cantidad INT,
     vencimiento DATE,
     idVacuna INT,
-    idTipoAve INT,
     FOREIGN KEY (idVacuna) REFERENCES Vacuna(idVacuna),
     PRIMARY KEY (idLoteVacuna)
 );

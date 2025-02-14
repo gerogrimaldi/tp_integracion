@@ -20,9 +20,9 @@ INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) VA
 (2, '003-Medio', '1', '40000', '1');
 
 INSERT INTO tipoMantenimiento (idTipoMantenimiento, nombre) VALUES
-(0, 'Corte de césped'),
-(1, 'Fumigación contra plagas'),
-(2, 'Colocación de cebos para roedores');
+(0, 'Corte de cesped'),
+(1, 'Fumigacien contra plagas'),
+(2, 'Colocacien de cebos para roedores');
 
 INSERT INTO mantenimientoGranja (idMantenimientoGranja, fecha, idGranja, idTipoMantenimiento) VALUES
 (0, '2025-01-22', '0', '0'),
@@ -33,3 +33,23 @@ INSERT INTO mantenimientoGalpon (idMantenimientoGalpon, fecha, idGalpon, idTipoM
 (0, '2025-01-22', '0', '0'),
 (1, '2025-01-01', '0', '1'),
 (2, '2025-01-20', '1', '2');
+
+INSERT INTO viaAplicacion (idViaAplicacion, via) VALUES
+(0, 'SubcutÃ¡nea'),
+(1, 'Intramuscular'),
+(2, 'Alas'),
+(3, 'Spray'),
+(4, 'En agua'),
+(5, 'En alimento'),
+(6, 'Ocular'),
+(7, 'Nasal');
+
+INSERT INTO vacuna (idVacuna, nombre, idViaAplicacion, marca, enfermedad) VALUES
+(0, 'Pfizer', '0', 'Sun Microvirus', 'Gripe aviar'),
+(1, 'Covid-19', '1', 'Avast', 'Influenza aviar'),
+(2, 'Antitetanica', '1', 'AVG', 'Viruela aviar');
+
+INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna) VALUES
+(0, '00123-5482', '', '2025-03-01', '5200', '2028-01-01', '2'),
+(1, '129-2025', '1', '2025-01-25', '3560', '2028-02-01', '1'),
+(2, 'A12025', '1','2024-09-11','20000', '2028-03-01', '0');
