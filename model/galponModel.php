@@ -138,97 +138,94 @@ class galpon{
         return $json_data;
     }
 
-//###########################################################################
-// CARGA; UPDATE, DELTE
-public function save()
-{
+    public function save()
+    {
+        // Consulta para verificar si el galpon ya existe
+        $sqlCheck = "SELECT idGalpon FROM galpon WHERE idGalpon = ?";
+        $stmtCheck = $this->mysqli->prepare($sqlCheck);
 
-    // Consulta para verificar si el Granja ya existe
-    $sqlCheck = "SELECT idGalpon FROM galpon WHERE idGalpon = ?";
-    $stmtCheck = $this->mysqli->prepare($sqlCheck);
+        if (!$stmtCheck) {
+            die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
+        }
 
-    if (!$stmtCheck) {
-        die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
-    }
+        // Enlazar parametro
+        $stmtCheck->bind_param("i", $this->idGalpon);
+        $stmtCheck->execute();
+        $stmtCheck->store_result();
 
-    // Enlazar parametro
-    $stmtCheck->bind_param("i", $this->idGalpon);
-    $stmtCheck->execute();
-    $stmtCheck->store_result();
-
-    // Verificar
-    if ($stmtCheck->num_rows > 0) {
-        echo '<script type="text/javascript">alert("Error: La granja ya existe.");</script>';
+        // Verificar
+        if ($stmtCheck->num_rows > 0) {
+            echo '<script type="text/javascript">alert("Error: La granja ya existe.");</script>';
+            $stmtCheck->close();
+            $this->mysqli->close();
+            return false; 
+        }
         $stmtCheck->close();
+
+        // Inserción
+        $sql = "INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) 
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+        }
+
+        // Enlaza los parámetros y ejecuta la consulta
+        $stmt->bind_param("isiii", $this->idGalpon, $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        
+        // Cerrar la consulta y la conexión
+        $stmt->close();
         $this->mysqli->close();
-        return false; 
-    }
-    $stmtCheck->close();
-
-    // Inserción
-    $sql = "INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) 
-            VALUES (?, ?, ?, ?, ?)";
-    $stmt = $this->mysqli->prepare($sql);
-    if (!$stmt) {
-        die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+        return true;
     }
 
-    // Enlaza los parámetros y ejecuta la consulta
-    $stmt->bind_param("isiii", $this->idGalpon, $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja);
-    if (!$stmt->execute()) {
-        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-    }
-    
-    // Cerrar la consulta y la conexión
-    $stmt->close();
-    $this->mysqli->close();
-    return true;
-}
+    public function update()
+    {
 
-public function update()
-{
-
-    // Preparar la consulta para actualizar los datos del Granja
-    $sql = "UPDATE galpon SET identificacion = ?, idTipoAve = ?, capacidad = ?, idGranja = ? WHERE idGalpon = ?";
-    $stmt = $this->mysqli->prepare($sql);
-    if (!$stmt) {
-        die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
-    }
-    // Enlazar parámetros y ejecutar la consulta
-    $stmt->bind_param("siiii", $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja, $this->idGalpon);
-    if (!$stmt->execute()) {
-        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-    }
-    // Cerrar la consulta
-    $stmt->close();
-    $this->mysqli->close();
-}
-
-public function deleteGalponPorId($idGalpon)
-{
-
-    if ($this->mysqli === null) {
-        throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-    }
-    
-    // Usar una consulta preparada para evitar inyección SQL
-    $sql = "DELETE FROM galpon WHERE idGalpon = ?";
-    $stmt = $this->mysqli->prepare($sql);
-
-    if ($stmt === false) {
-        throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+        // Preparar la consulta para actualizar los datos del Granja
+        $sql = "UPDATE galpon SET identificacion = ?, idTipoAve = ?, capacidad = ?, idGranja = ? WHERE idGalpon = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        }
+        // Enlazar parámetros y ejecutar la consulta
+        $stmt->bind_param("siiii", $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja, $this->idGalpon);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        // Cerrar la consulta
+        $stmt->close();
+        $this->mysqli->close();
     }
 
-    // Enlazar el parámetro a la consulta
-    $stmt->bind_param('i', $idGalpon);
+    public function deleteGalponPorId($idGalpon)
+    {
 
-    // Ejecutar la consulta
-    if (!$stmt->execute()) {
-        throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        if ($this->mysqli === null) {
+            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        }
+        
+        // Usar una consulta preparada para evitar inyección SQL
+        $sql = "DELETE FROM galpon WHERE idGalpon = ?";
+        $stmt = $this->mysqli->prepare($sql);
+
+        if ($stmt === false) {
+            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+        }
+
+        // Enlazar el parámetro a la consulta
+        $stmt->bind_param('i', $idGalpon);
+
+        // Ejecutar la consulta
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+
+        // Cerrar el statement
+        $stmt->close();
     }
-
-    // Cerrar el statement
-    $stmt->close();
-}
 
 }

@@ -1,4 +1,3 @@
-
 document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
     const input = e.target;
     if (input.value < 1) {
