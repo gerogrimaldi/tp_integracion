@@ -74,7 +74,20 @@ class vacuna{
                 $data[] = $row;
             }
         }
-        $this->mysqli->close();
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
+    public function getAllViaAplicacion()
+    {
+        $sql = "SELECT viaAplicacion.idViaAplicacion, viaAplicacion.via FROM viaAplicacion";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
         $json_data = json_encode($data);
         return $json_data;
     }
