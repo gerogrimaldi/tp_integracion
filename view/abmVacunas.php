@@ -223,6 +223,38 @@ $body = <<<HTML
     </div>
 </div>
 
+<div class="container">
+    <h1>Lotes de vacunas</h1>
+
+    <div class="text-center mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newLoteVacuna">
+          Agregar nuevo lote
+        </button>
+    </div>
+
+    </div>
+        <table id="tablaLotesVacunas" class="table table-bordered bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-primary">ID</th>
+                    <th class="text-primary">Vacuna</th>
+                    <th class="text-primary">Identificador</th>
+                    <th class="text-primary">Compra</th>
+                    <th class="text-primary">Vencimiento</th>
+                    <th class="text-primary">Stock</th>
+                    <th class="text-primary"></th>
+                    <th class="text-primary"></th>
+                </tr>
+            </thead>
+            <tbody id="vacunas">
+                <!-- Los datos se insertarán aquí -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+
 <!-- Script JS para rellenar las opciones de via aplicacion en agregar y editar -->
 <script>
 function cargarSelectViaAplicacion() {

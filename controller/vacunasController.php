@@ -24,6 +24,30 @@ if ( !empty($_POST) )
         $oVacuna->setEnfermedad( $_POST['enfermedad'] );
         $oVacuna->update();
     }
+
+    if ( $_POST['btVacunas'] == 'editLoteVacuna')
+    {   
+        $oLoteVacuna = new loteVacuna();
+        $oLoteVacuna->setIdLoteVacuna($_POST['idLoteVacuna']);
+        $oLoteVacuna->numeroLote( $_POST['numeroLote'] );
+        $oLoteVacuna->fechaCompra( $_POST['fechaCompra'] );
+        $oLoteVacuna->cantidad( $_POST['cantidad'] );
+        $oLoteVacuna->vencimiento( $_POST['vencimiento'] );
+        $oLoteVacuna->idVacuna( $_POST['idVacuna'] );
+        $oLoteVacuna->update();
+    }
+
+    if ( $_POST['btVacunas'] == 'newLoteVacuna')
+    {   
+        $oLoteVacuna = new loteVacuna();
+        $oVacuna->setMaxIDLoteVacuna();
+        $oLoteVacuna->numeroLote( $_POST['numeroLote'] );
+        $oLoteVacuna->fechaCompra( $_POST['fechaCompra'] );
+        $oLoteVacuna->cantidad( $_POST['cantidad'] );
+        $oLoteVacuna->vencimiento( $_POST['vencimiento'] );
+        $oLoteVacuna->idVacuna( $_POST['idVacuna'] );
+        $oLoteVacuna->save();
+    }
 }
 
 if ( !empty($_GET) ) 
@@ -39,10 +63,24 @@ if ( !empty($_GET) )
         exit();
     }
 
+    if (isset($_GET['delete']) && $_GET['delete'] == 'lote')
+    {
+        $oLoteVacuna = new loteVacuna();
+        $idLoteVacuna = (int)$_GET['idLoteVacuna'];
+        $oLoteVacuna->deleteLoteVacunaPorId($idLoteVacuna);
+
+        // Recargar pagina para mostrar resultados
+        header("Location: index.php?opt=vacunas");
+        exit();
+    }
+
     if ($_GET['opt']=='vacunas')
     {
         $oVacuna = new vacuna();
         $vacunasJSON = $oVacuna->getall();
         $viaAplicacionJSON = $oVacuna->getAllViaAplicacion();
+
+        $oLoteVacuna = new loteVacuna();
+        $loteJSON = $oLoteVacuna->getall();
     }
 }

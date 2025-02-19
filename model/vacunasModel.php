@@ -173,3 +173,153 @@ class vacuna{
     }
 
 }
+
+class loteVacuna{
+	//(idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna)
+    private $idLoteVacuna;
+    private $numeroLote;
+    private $fechaCompra;
+    private $cantidad;
+    private $vencimiento;
+    private $idVacuna;
+    private $mysqli;
+    
+    public function __construct()
+    {
+        // Inicializar conexión a base de datos
+        require_once 'model/conexion.php';  
+        $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
+        if ($this->mysqli->connect_error) {
+            die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
+        }
+    }
+
+    public function setIdLoteVacuna($idLoteVacuna)
+    {
+        if ( ctype_digit($idLoteVacuna)==true )
+        {
+            $this->idLoteVacuna = $idLoteVacuna;
+        }
+    }
+
+    public function setIdVacuna($idVacuna)
+    {
+        if ( ctype_digit($idVacuna)==true )
+        {
+            $this->idVacuna = $idVacuna;
+        }
+    }
+
+    public function setNumeroLote($numeroLote)
+    {
+            $this->numeroLote = trim($numeroLote);
+    }
+
+    public function setCantidad($cantidad)
+    {
+        $this->cantidad = trim($cantidad);
+    }
+
+    public function setFechaCompra($fechaCompra)
+    {
+        $this->fechaCompra = $fechaCompra;
+    }
+
+    public function setVencimiento($vencimiento)
+    {
+        $this->vencimiento = $vencimiento;
+    }
+
+    public function getall()
+    {
+        $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
+                loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre,
+                vacuna.marca FROM loteVacuna INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna)";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
+    public function setMaxIDLoteVacuna()
+    {
+        $sql = "SELECT MAX(idLoteVacuna) AS maxID FROM loteVacuna  ";
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result && $row = $result->fetch_assoc()) {
+            $maxID = $row['maxID'] ?? 0;
+            $this->idLoteVacuna = $maxID + 1; 
+        }else {
+            echo "Error al obtener el máximo idLoteVacuna: " . $this->mysqli->error;
+        }
+    }
+
+    public function save()
+    {
+        $sqlCheck = "SELECT idLoteVacuna FROM loteVacuna WHERE idLoteVacuna = ?";
+        $stmtCheck = $this->mysqli->prepare($sqlCheck);
+        if (!$stmtCheck) { die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); }
+        $stmtCheck->bind_param("i", $this->idLoteVacuna);
+        $stmtCheck->execute();
+        $stmtCheck->store_result();
+        if ($stmtCheck->num_rows > 0) {
+            echo '<script type="text/javascript">alert("Error: el lote ya existe.");</script>';
+            $stmtCheck->close();
+            $this->mysqli->close();
+            return false; 
+        }
+        $stmtCheck->close();
+        // Inserción
+        $sql = "INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna) 
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+        }
+        $stmt->bind_param("issisi", $this->idLoteVacuna, $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        $stmt->close();
+        $this->mysqli->close();
+        return true;
+    }
+
+    public function update()
+    {
+        $sql = "UPDATE loteVacuna SET  numeroLote = ?, fechaCompra = ?, cantidad = ?, vencimiento = ?, idVacuna = ? WHERE idLoteVacuna = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        }
+        $stmt->bind_param("ssisii", $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna, $this->idLoteVacuna);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        $stmt->close();
+        $this->mysqli->close();
+    }
+
+    public function deleteLoteVacunaPorId($idLoteVacuna)
+    {
+        if ($this->mysqli === null) {
+            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        }
+        $sql = "DELETE FROM loteVacuna WHERE idLoteVacuna = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if ($stmt === false) {
+            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+        }
+        $stmt->bind_param('i', $idLoteVacuna);
+        if (!$stmt->execute()) {
+            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+        }
+        $stmt->close();
+    }
+
+}
