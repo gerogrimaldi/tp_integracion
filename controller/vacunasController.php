@@ -39,13 +39,14 @@ if ( !empty($_POST) )
 
     if ( $_POST['btVacunas'] == 'newLoteVacuna')
     {   
+        echo var_dump($_POST);
         $oLoteVacuna = new loteVacuna();
-        $oVacuna->setMaxIDLoteVacuna();
-        $oLoteVacuna->numeroLote( $_POST['numeroLote'] );
-        $oLoteVacuna->fechaCompra( $_POST['fechaCompra'] );
-        $oLoteVacuna->cantidad( $_POST['cantidad'] );
-        $oLoteVacuna->vencimiento( $_POST['vencimiento'] );
-        $oLoteVacuna->idVacuna( $_POST['idVacuna'] );
+        $oLoteVacuna->setMaxIDLoteVacuna();
+        $oLoteVacuna->setNumeroLote( $_POST['numeroLote'] );
+        $oLoteVacuna->setFechaCompra( $_POST['fechaCompra'] );
+        $oLoteVacuna->setCantidad( $_POST['cantidad'] );
+        $oLoteVacuna->setVencimiento( $_POST['fechaVencimiento'] );
+        $oLoteVacuna->setIdVacuna( $_POST['idVacuna'] );
         $oLoteVacuna->save();
     }
 }
@@ -81,6 +82,7 @@ if ( !empty($_GET) )
         $viaAplicacionJSON = $oVacuna->getAllViaAplicacion();
 
         $oLoteVacuna = new loteVacuna();
-        $loteJSON = $oLoteVacuna->getall();
+        $loteJSON = $oLoteVacuna->getLotes('1');
+
     }
 }

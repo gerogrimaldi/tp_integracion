@@ -1,6 +1,5 @@
 <?php
 $mensaje = '';
-
 class galpon{
 	/*
     Tabla SQL al momento de crear este Model:
@@ -227,5 +226,4 @@ class galpon{
         // Cerrar el statement
         $stmt->close();
     }
-
 }

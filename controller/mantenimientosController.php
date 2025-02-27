@@ -3,7 +3,6 @@ require_once 'model/mantenimientosModel.php';
 require_once 'model/granjaModel.php';
 require_once 'model/galponModel.php';
 $validacion = false;
-
 if ( !empty($_POST) ) 
 {
     if ( $_POST['btMantenimientos'] == 'addTipoMant')
@@ -59,8 +58,6 @@ if ( !empty($_GET) )
 
     if ($_GET['opt']=='mantenimientos')
     {
-        $oTipoMantenimiento = new tipoMantenimiento();
-        $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
         $oMantenimientoGranja = new mantenimientoGranja();
         $oGranjas = new granja();
         $granjasFiltradas = $oGranjas->getall();
@@ -116,6 +113,32 @@ if ( !empty($_GET) )
         $oMantenimientoGalpon = new mantenimientoGalpon();
         $oMantenimientoGalpon->deleteMantenimientoGalponId($_GET['idMantenimientoGalpon']);
         header("Location: index.php?opt=mantenimientos&selectGalpon=" . $_GET['selectGalpon']);
+        exit();
+    }
+
+    if (isset($_GET['delete']) && $_GET['delete'] == 'galpon')
+    {
+        $oMantenimientoGalpon = new mantenimientoGalpon();
+        $oMantenimientoGalpon->deleteMantenimientoGalponId($_GET['idMantenimientoGalpon']);
+        header("Location: index.php?opt=mantenimientos&selectGalpon=" . $_GET['selectGalpon']);
+        exit();
+    }
+
+    if (isset($_GET['ajax']) && $_GET['ajax'] == 'getTipoMant')
+    {
+        $oTipoMantenimiento = new tipoMantenimiento();
+        $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
+        if ($tiposMant) {
+            // Establecer el encabezado para indicar que la respuesta es JSON
+            header('Content-Type: application/json');
+            // Devolver los datos en formato JSON
+            echo json_encode($tiposMant);
+        }
+        else{
+            // Si no hay datos, devolver un mensaje de error en JSON
+            header('Content-Type: application/json');
+            echo json_encode(['error' => 'No se encontraron tipos de mantenimiento']);
+        }
         exit();
     }
 }

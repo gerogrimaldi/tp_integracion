@@ -1,6 +1,5 @@
 <?php
 $mensaje = '';
-
 class tipoMantenimiento{
     private $idTipoMantenimiento;
     private $nombreMantenimiento;
@@ -41,8 +40,9 @@ class tipoMantenimiento{
         $result = $this->mysqli->query($sql);
         $data = [];
         if ($result->num_rows > 0) { while($row = $result->fetch_assoc()) { $data[] = $row; } }
-        $json_data = json_encode($data);
-        return $json_data;
+        //$json_data = json_encode($data); 
+        // Esta mal devolver en JSON en un model según investigado, debe hacerlo el controlador.
+        return $data;
     }
 
     public function save(){
@@ -308,5 +308,3 @@ class mantenimientoGalpon{
         $stmt->close();
     }
 }
-
-

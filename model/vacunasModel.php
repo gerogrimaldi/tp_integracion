@@ -246,6 +246,22 @@ class loteVacuna{
         return $json_data;
     }
 
+    public function getLotes($idVacuna)
+    {
+        $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
+                loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre,
+                vacuna.marca FROM loteVacuna INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna) WHERE loteVacuna.idVacuna = ".$idVacuna;
+        $result = $this->mysqli->query($sql);
+        $data = [];
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+        }
+        $json_data = json_encode($data);
+        return $json_data;
+    }
+
     public function setMaxIDLoteVacuna()
     {
         $sql = "SELECT MAX(idLoteVacuna) AS maxID FROM loteVacuna  ";

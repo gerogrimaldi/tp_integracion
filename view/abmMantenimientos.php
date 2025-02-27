@@ -64,37 +64,52 @@ $body = <<<HTML
 
 <!-- JS Para rellenar tabla tipo mantenimientos -->
 <script>
-    var tipoMant = $tiposMant;
-    var tipoMantTbody = document.getElementById("tipoMant");
-    tipoMant.forEach(
-        function(tipoMant) {
-        var row = document.createElement("tr");
-        row.className = "table-light";
-        row.innerHTML = 
-    '<td>' + tipoMant.idTipoMantenimiento + '</td>' +
-    '<td>' + tipoMant.nombre + '</td>' +
-    '<td>' +
-        '<button type="button" ' +
-            'class="btn btn-warning btn-sm" ' +
-            'data-bs-toggle="modal" ' +
-            'data-bs-target="#editarTipoMant" ' +
-            'data-id="' + tipoMant.idTipoMantenimiento + '" ' +
-            'data-nombre="' + tipoMant.nombre + '">' +
-            'Editar' +
-        '</button>' +
-    '</td>' +
-    '<td>' +
-        '<a href="index.php?opt=mantenimientos&deletetm=true&idTipoMant=' + tipoMant.idTipoMantenimiento + '" ' +
-            'class="btn btn-danger btn-sm">' +
-            'Borrar' +
-        '</a>' +
-    '</td>';
+    function cargarTablaTiposMant() {
+        // Realizar la solicitud AJAX
+        fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
+            .then(response => response.json()) // Convertir la respuesta a JSON
+            .then(data => {
+                // Obtener el tbody de la tabla
+                var tipoMantTbody = document.getElementById("tipoMant");
 
-        tipoMantTbody.appendChild(row);
-    });
-    $(document).ready(function() {
-        $("#tablaTiposMant").DataTable();
-    });
+                // Limpiar el contenido actual de la tabla
+                tipoMantTbody.innerHTML = '';
+
+                // Recorrer los datos y crear las filas de la tabla
+                data.forEach(tipoMant => {
+                    var row = document.createElement("tr");
+                    row.className = "table-light";
+                    row.innerHTML = 
+                        '<td>' + tipoMant.idTipoMantenimiento + '</td>' +
+                        '<td>' + tipoMant.nombre + '</td>' +
+                        '<td>' +
+                            '<button type="button" ' +
+                                'class="btn btn-warning btn-sm" ' +
+                                'data-bs-toggle="modal" ' +
+                                'data-bs-target="#editarTipoMant" ' +
+                                'data-id="' + tipoMant.idTipoMantenimiento + '" ' +
+                                'data-nombre="' + tipoMant.nombre + '">' +
+                                'Editar' +
+                            '</button>' +
+                        '</td>' +
+                        '<td>' +
+                            '<a href="index.php?opt=mantenimientos&deletetm=true&idTipoMant=' + tipoMant.idTipoMantenimiento + '" ' +
+                                'class="btn btn-danger btn-sm">' +
+                                'Borrar' +
+                            '</a>' +
+                        '</td>';
+
+                    // Agregar la fila al tbody
+                    tipoMantTbody.appendChild(row);
+                });
+
+                // Inicializar DataTable (si estás utilizando esta librería)
+                $('#tablaTiposMant').DataTable();
+            })
+            .catch(error => {
+                console.error('Error al cargar los tipos de mantenimiento:', error);
+            });
+    }
 
 </script>
 
@@ -287,8 +302,10 @@ document.addEventListener('click', function (event) {
 <!-- Script JS para rellenar las opciones de tipos de mantenimiento, en ambos modales -->
 <script>
 function cargarSelectTipoMant() {
-    // La variable con los tipos ya existe de una función anterior
-    var tipoMant = $tiposMant;
+    // Realizar la solicitud AJAX para obtener los tipos de mantenimiento
+    fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
+        .then(response => response.json()) // Convertir la respuesta a JSON
+        .then(data => {
     // Rellenar el select de tipos de mantenimiento para granjas
     const selectTipoMantGranja = document.getElementById('selectTipoMantGranja');
     const selectTipoMantGalpon = document.getElementById('selectTipoMantGalpon');
@@ -300,7 +317,8 @@ function cargarSelectTipoMant() {
     selectTipoMantGranja.appendChild(defaultOption);
     const defaultOptionClonado = defaultOption.cloneNode(true);
     selectTipoMantGalpon.appendChild(defaultOptionClonado);
-
+    
+    tipoMant = data;
     tipoMant.forEach(function (item) {
         const optionAgregar = document.createElement('option');
         optionAgregar.value = item.idTipoMantenimiento;
@@ -316,6 +334,7 @@ function cargarSelectTipoMant() {
     document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
     var selectedGalpon = $selectedGalpon;
     document.querySelector('#newMantGalponForm #idGalpon').value = selectedGalpon;
+});
 }
 
 </script>
@@ -455,7 +474,8 @@ function cargarSelectTipoMant() {
     window.addEventListener('load', function() {
         cargarSelectGranja();
         cargarSelectTipoMant();
-        cargarSelectGalpon()
+        cargarSelectGalpon();
+        cargarTablaTiposMant()
     });
 </script>
 

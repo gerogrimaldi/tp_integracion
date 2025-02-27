@@ -50,6 +50,6 @@ INSERT INTO vacuna (idVacuna, nombre, idViaAplicacion, marca, enfermedad) VALUES
 (2, 'Antitetanica', '1', 'AVG', 'Viruela aviar');
 
 INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna) VALUES
-(0, '00123-5482', '', '2025-03-01', '5200', '2028-01-01', '2'),
-(1, '129-2025', '1', '2025-01-25', '3560', '2028-02-01', '1'),
-(2, 'A12025', '1','2024-09-11','20000', '2028-03-01', '0');
+(0, '00123-5482', '2025-03-01', '5200', '2028-01-01', '2'),
+(1, '129-2025', '2025-01-25', '3560', '2028-02-01', '1'),
+(2, 'A12025', '2024-09-11','20000', '2028-03-01', '0');

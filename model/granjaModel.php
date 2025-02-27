@@ -1,6 +1,5 @@
 <?php
 $mensaje = '';
-
 class granja{
 	//(idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion)
     private $idGranja;
@@ -207,5 +206,4 @@ class granja{
         // Cerrar el statement
         $stmt->close();
     }
-
 }

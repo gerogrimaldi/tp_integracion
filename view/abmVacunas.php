@@ -1,5 +1,5 @@
 <?php
-
+    echo var_dump($loteJSON);
 	/*
         Al cargar la página sin argumentos:
         - Boton: agregar vacuna
@@ -42,46 +42,6 @@ $body = <<<HTML
             </tbody>
         </table>
     </div>
-
-    <!-- Script JS para rellenar la tabla de vacunas -->
-    <script>
-        var vacunasSQL = $vacunasJSON;
-        var vacunasTbody = document.getElementById("vacunas");
-        vacunasSQL.forEach(
-            function(vacunasSQL) {
-            var row = document.createElement("tr");
-            row.className = "table-light";
-            row.innerHTML = 
-                '<td>' + vacunasSQL.idVacuna + '</td>' +
-                '<td>' + vacunasSQL.nombre + '</td>' +
-                '<td>' + vacunasSQL.via + '</td>' +
-                '<td>' + vacunasSQL.marca + '</td>' +
-                '<td>' + vacunasSQL.enfermedad + '</td>' +
-                '<td>' +
-                '<button type="button" ' +
-                    'class="btn btn-warning btn-sm" ' +
-                    'data-bs-toggle="modal" ' +
-                    'data-bs-target="#editVacuna" ' +
-                    'data-id="' + vacunasSQL.idVacuna + '" ' +
-                    'data-nombre="' + vacunasSQL.nombre + '" ' +
-                    'data-idViaAp="' + vacunasSQL.idViaAplicacion + '" ' +
-                    'data-marca="' + vacunasSQL.marca + '" ' +
-                    'data-enfermedad="' + vacunasSQL.enfermedad + '">' +
-                    'Editar' +
-                '</button>' +
-                '</td>' +
-                '<td>' +
-                    '<a href="index.php?opt=vacunas&delete=true&idVacuna=' + vacunasSQL.idVacuna + '" ' +
-                    'class="btn btn-danger btn-sm">' +
-                        'Borrar' +
-                    '</a>' +
-                '</td>';
-            vacunasTbody.appendChild(row);
-        });
-        $(document).ready(function() {
-            $("#tablaVacunas").DataTable();
-        });
-    </script>
 
     <!-- Modal agregar Vacuna -->
     <div class="modal fade" id="newVacuna" tabindex="-1" aria-labelledby="newVacunaModal" aria-hidden="true">
@@ -225,35 +185,179 @@ $body = <<<HTML
 
 <div class="container">
     <h1>Lotes de vacunas</h1>
-
+    <i>Seleccione una vacuna en la tabla superior para operar con sus lotes.</i>
     <div class="text-center mb-3">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newLoteVacuna">
           Agregar nuevo lote
         </button>
     </div>
-
-    </div>
-        <table id="tablaLotesVacunas" class="table table-bordered bg-white">
-            <thead class="table-light">
-                <tr>
-                    <th class="text-primary">ID</th>
-                    <th class="text-primary">Vacuna</th>
-                    <th class="text-primary">Identificador</th>
-                    <th class="text-primary">Compra</th>
-                    <th class="text-primary">Vencimiento</th>
-                    <th class="text-primary">Stock</th>
-                    <th class="text-primary"></th>
-                    <th class="text-primary"></th>
-                </tr>
-            </thead>
-            <tbody id="vacunas">
-                <!-- Los datos se insertarán aquí -->
-            </tbody>
-        </table>
-    </div>
-
+    <table id="tablaLotesVacunas" class="table table-bordered bg-white">
+        <thead class="table-light">
+            <tr>
+                <th class="text-primary">ID</th>
+                <th class="text-primary">Lote</th>
+                <th class="text-primary">F.Compra</th>
+                <th class="text-primary">Cantidad</th>
+                <th class="text-primary">Vencimiento</th>
+                <th class="text-primary">Nombre</th>
+                <th class="text-primary"></th>
+                <th class="text-primary"></th>
+            </tr>
+        </thead>
+        <tbody id="loteVacunas">
+            <!-- Los datos se insertarán aquí -->
+        </tbody>
+    </table>
 </div>
 
+<!-- Modal agregar Lote de vacuna -->
+<div class="modal fade" id="newLoteVacuna" tabindex="-1" aria-labelledby="newLoteVacunaModal" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="newLoteVacunaModal">Agregar Lote de vacuna</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newLoteVacunaForm" action="index.php?opt=vacunas" method="POST" class="needs-validation" novalidate>
+                        <div class="mb-4">
+                        <label for="nombre" class="form-label">Número de lote</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="numeroLote" 
+                               name="numeroLote" 
+                               placeholder="Identificación del lote"
+                               minlength="3"
+                               required>
+                            <div class="invalid-feedback">
+                                El nombre debe tener al menos 3 caracteres.
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                        <label for="fechaCompra" class="form-label">Fecha de compra</label>
+                        <input type="date" class="form-control" 
+                               id="fechaCompra" name="fechaCompra"
+                               required>
+                            <div class="invalid-feedback">
+                                Seleccione una fecha válida.
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                        <label for="fechaVencimiento" class="form-label">Fecha de vencimiento</label>
+                        <input type="date" class="form-control" 
+                               id="fechaVencimiento" name="fechaVencimiento"
+                               required>
+                            <div class="invalid-feedback">
+                                Seleccione una fecha válida.
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                        <label for="cantidad" class="form-label">Cantidad</label>
+                        <input type="number" 
+                                class="form-control" 
+                                id="cantidad" 
+                                name="cantidad" 
+                                placeholder="Lotes adquiridos"
+                                min="1"
+                                required>
+                            <div class="invalid-feedback">
+                                El valor debe ser un número positivo.
+                            </div>
+                        </div>
+                        <input type="hidden" id="idVacuna" name="idVacuna">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" name="btVacunas" value="newLoteVacuna" form="newLoteVacunaForm">Finalizar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script JS para rellenar la tabla de vacunas -->
+<script>
+       var vacunasSQL = $vacunasJSON;
+       var vacunasTbody = document.getElementById("vacunas");
+       vacunasSQL.forEach(
+           function(vacunasSQL) {
+           var row = document.createElement("tr");
+           row.className = "table-light";
+           row.innerHTML = 
+               '<td>' + vacunasSQL.idVacuna + '</td>' +
+               '<td>' + vacunasSQL.nombre + '</td>' +
+               '<td>' + vacunasSQL.via + '</td>' +
+               '<td>' + vacunasSQL.marca + '</td>' +
+               '<td>' + vacunasSQL.enfermedad + '</td>' +
+               '<td>' +
+               '<button type="button" ' +
+                    'class="btn btn-warning btn-sm" ' +
+                    'data-bs-toggle="modal" ' +
+                    'data-bs-target="#editVacuna" ' +
+                    'data-id="' + vacunasSQL.idVacuna + '" ' +
+                    'data-nombre="' + vacunasSQL.nombre + '" ' +
+                    'data-idViaAp="' + vacunasSQL.idViaAplicacion + '" ' +
+                    'data-marca="' + vacunasSQL.marca + '" ' +
+                    'data-enfermedad="' + vacunasSQL.enfermedad + '">' +
+                    'Editar' +
+                '</button>' +
+                '</td>' +
+                '<td>' +
+                    '<a href="index.php?opt=vacunas&delete=true&idVacuna=' + vacunasSQL.idVacuna + '" ' +
+                    'class="btn btn-danger btn-sm">' +
+                        'Borrar' +
+                    '</a>' +
+                '</td>';
+            vacunasTbody.appendChild(row);
+        });
+        $(document).ready(function() {
+            $("#tablaVacunas").DataTable();
+        });
+</script>
+ <!-- Script JS para rellenar la tabla de lotes de vacunas -->
+    <script>
+        var loteVacunasSQL = $loteJSON;
+        var loteVacunasTbody = document.getElementById("loteVacunas");
+        loteVacunasSQL.forEach(
+            function(loteVacunasSQL) {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+                '<td>' + loteVacunasSQL.idLoteVacuna + '</td>' +
+                '<td>' + loteVacunasSQL.numeroLote + '</td>' +
+                '<td>' + loteVacunasSQL.fechaCompra + '</td>' +
+                '<td>' + loteVacunasSQL.cantidad + '</td>' +
+                '<td>' + loteVacunasSQL.vencimiento + '</td>' +
+                '<td>' + loteVacunasSQL.nombre + '</td>' +
+                '<td>' +
+                '<button type="button" ' +
+                    'class="btn btn-warning btn-sm" ' +
+                    'data-bs-toggle="modal" ' +
+                    'data-bs-target="#editLoteVacuna" ' +
+                    'data-id="' + loteVacunasSQL.idLoteVacuna + '" ' +
+                    'data-numeroLote="' + loteVacunasSQL.numeroLote + '" ' +
+                    'data-fechaCompra="' + loteVacunasSQL.fechaCompra + '" ' +
+                    'data-cantidad="' + loteVacunasSQL.cantidad + '" ' +
+                    'data-vencimiento="' + loteVacunasSQL.vencimiento + '" ' +
+                    'data-nombre="' + loteVacunasSQL.nombre + '">' +
+                    'Editar' +
+                '</button>' +
+                '</td>' +
+                '<td>' +
+                    '<a href="index.php?opt=vacunas&delete=true&idLoteVacuna=' + loteVacunasSQL.idLoteVacuna + '" ' +
+                    'class="btn btn-danger btn-sm">' +
+                        'Borrar' +
+                    '</a>' +
+                '</td>';
+            loteVacunasTbody.appendChild(row);
+        });
+        $(document).ready(function() {
+            $("#tablaLotesVacunas").DataTable();
+        });
+
+        
+    </script>
 
 <!-- Script JS para rellenar las opciones de via aplicacion en agregar y editar -->
 <script>
