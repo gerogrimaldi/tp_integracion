@@ -13,14 +13,6 @@ if ( !empty($_POST) )
         $oTipoMantenimiento->save();
     }
 
-    if ( $_POST['btMantenimientos'] == 'editTipoMant')
-    {
-        $oTipoMantenimiento = new tipoMantenimiento();
-        $oTipoMantenimiento->setIDTipoMant($_POST['idTipoMant']);
-        $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
-        $oTipoMantenimiento->update();
-    }
-
     if ( $_POST['btMantenimientos'] == 'newMantGranja')
     {
         $oMantenimientoGranja = new mantenimientoGranja();
@@ -124,21 +116,45 @@ if ( !empty($_GET) )
         exit();
     }
 
-    if (isset($_GET['ajax']) && $_GET['ajax'] == 'getTipoMant')
+    if (isset($_GET['ajax']))
     {
-        $oTipoMantenimiento = new tipoMantenimiento();
-        $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
-        if ($tiposMant) {
+    switch ($_GET['ajax']) {
+        case '':
+        case 'delTipoMant': 
+            $valueBt = 'login';
+            $oTipoMantenimiento = new tipoMantenimiento();
+            $idTipoMant = (int)$_GET['idTipoMant'];
+            $oTipoMantenimiento->deleteTipoMantID($idTipoMant);
+            exit();
+        break;
+    
+        case 'editTipoMant':
+            $oTipoMantenimiento = new tipoMantenimiento();
+            $oTipoMantenimiento->setIDTipoMant($_POST['idTipoMant']);
+            $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
+            $oTipoMantenimiento->update();
+        break;
+    
+        case 'getTipoMant':
+            $oTipoMantenimiento = new tipoMantenimiento();
+            $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
             // Establecer el encabezado para indicar que la respuesta es JSON
             header('Content-Type: application/json');
-            // Devolver los datos en formato JSON
-            echo json_encode($tiposMant);
-        }
-        else{
-            // Si no hay datos, devolver un mensaje de error en JSON
-            header('Content-Type: application/json');
-            echo json_encode(['error' => 'No se encontraron tipos de mantenimiento']);
-        }
-        exit();
+            if ($tiposMant) {
+                http_response_code(200);
+                echo json_encode($tiposMant);
+            } else {
+                http_response_code(404);
+                echo json_encode(['error' => 'No se encontraron tipos de mantenimiento']);
+            }
+            exit();
+        break;
+
+        default:
+            exit();
+        break;
     }
+    }
+
+
 }

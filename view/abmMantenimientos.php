@@ -62,13 +62,123 @@ $body = <<<HTML
   </div>
 </div>
 
+<!-- Modal editar Tipo Mantenimiento -->
+<div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
+    <div class="modal-dialog">
+       <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editarTipoMantModal">Editar descripción del mantenimiento</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editarTipoMantForm" class="needs-validation" novalidate>
+                <div class="mb-4">
+                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
+                    <input type="text" class="form-control" 
+                        id="nombreMantEdit" name="nombreMantEdit"
+                        placeholder="Ejemplo: Corte de césped"
+                        min="1" required>
+                    <div class="invalid-feedback">
+                        Debe contar con al menos 3 letras.
+                    </div>
+                </div>
+                    <input type="hidden" id="idTipoMant" name="idTipoMant">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="btnEditarTipoMant">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS para rellenar el campo al editar un tipo de mantenimiento -->
+<script>
+document.addEventListener('click', function (event) {
+    if (event.target && event.target.matches('.btn-warning')) {
+        const button = event.target;
+        // Extrae los datos del botón
+        const idTipoMant = button.getAttribute('data-id');
+        const nombre = button.getAttribute('data-nombre');
+        // Rellena los campos del formulario en el modal
+        document.querySelector('#editarTipoMantForm #nombreMantEdit').value = nombre;
+        document.querySelector('#editarTipoMantForm #idTipoMant').value = idTipoMant;
+    }
+});
+
+document.getElementById('btnEditarTipoMant').addEventListener('click', function() {
+    editarTipoMant();
+});
+
+document.getElementById('editarTipoMantForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    editarTipoMant();
+});
+
+function editarTipoMant() {
+    const idTipoMant = document.getElementById('idTipoMant').value;
+    const nombreMantEdit = document.getElementById('nombreMantEdit').value;
+
+    fetch('index.php?opt=mantenimientos&ajax=editTipoMant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'idTipoMant=' + encodeURIComponent(idTipoMant) + '&nombreMantEdit=' + encodeURIComponent(nombreMantEdit)
+    })
+    .then(response => {
+        if (response.ok) {
+            // Recargar la tabla
+            cargarTablaTiposMant();
+            // Cerrar el modal
+            $('#editarTipoMant').modal('hide');
+
+        } else {
+            console.error('Error al editar el tipo de mantenimiento');
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+    });
+}
+
+    function eliminarTipoMantenimiento(idTipoMant) {
+        // Realizar la solicitud AJAX
+        fetch('index.php?opt=mantenimientos&ajax=delTipoMant&idTipoMant=' + idTipoMant, {
+           method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla
+                cargarTablaTiposMant();
+            } else {
+                console.error('Error al eliminar el tipo de mantenimiento');
+            }
+        })
+        .catch(error => {
+              console.error('Error en la solicitud AJAX:', error);
+        });
+    }
+</script>
+
 <!-- JS Para rellenar tabla tipo mantenimientos -->
 <script>
     function cargarTablaTiposMant() {
         // Realizar la solicitud AJAX
         fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
-            .then(response => response.json()) // Convertir la respuesta a JSON
-            .then(data => {
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        
+                if ($.fn.DataTable.isDataTable('#tablaTiposMant')) {
+                    $('#tablaTiposMant').DataTable().destroy();
+                }
+
                 // Obtener el tbody de la tabla
                 var tipoMantTbody = document.getElementById("tipoMant");
 
@@ -93,71 +203,22 @@ $body = <<<HTML
                             '</button>' +
                         '</td>' +
                         '<td>' +
-                            '<a href="index.php?opt=mantenimientos&deletetm=true&idTipoMant=' + tipoMant.idTipoMantenimiento + '" ' +
-                                'class="btn btn-danger btn-sm">' +
-                                'Borrar' +
-                            '</a>' +
-                        '</td>';
-
+                            '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarTipoMantenimiento(' + tipoMant.idTipoMantenimiento + ')">Borrar</button>' +
+                        '</td>'
                     // Agregar la fila al tbody
                     tipoMantTbody.appendChild(row);
                 });
 
-                // Inicializar DataTable (si estás utilizando esta librería)
                 $('#tablaTiposMant').DataTable();
+
             })
-            .catch(error => {
-                console.error('Error al cargar los tipos de mantenimiento:', error);
-            });
+    .catch(error => {
+        console.error('Error al cargar los tipos de mantenimiento:', error);
+    });
     }
 
 </script>
 
-<!-- Modal editar Tipo Mantenimiento -->
-<div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
-    <div class="modal-dialog">
-       <div class="modal-content bg-dark text-white">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="editarTipoMantModal">Editar descripción del mantenimiento</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editarTipoMantForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
-                <div class="mb-4">
-                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
-                    <input type="text" class="form-control" 
-                        id="nombreMantEdit" name="nombreMantEdit"
-                        placeholder="Ejemplo: Corte de césped"
-                        min="1" required>
-                    <div class="invalid-feedback">
-                        Debe contar con al menos 3 letras.
-                    </div>
-                </div>
-                    <input type="hidden" id="idTipoMant" name="idTipoMant">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" name="btMantenimientos" value="editTipoMant" form="editarTipoMantForm">Finalizar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- JS para rellenar el campo al editar un tipo de mantenimiento -->
-<script>
-document.addEventListener('click', function (event) {
-    if (event.target && event.target.matches('.btn-warning')) {
-        const button = event.target;
-        // Extrae los datos del botón
-        const idTipoMant = button.getAttribute('data-id');
-        const nombre = button.getAttribute('data-nombre');
-        // Rellena los campos del formulario en el modal
-        document.querySelector('#editarTipoMantForm #nombreMantEdit').value = nombre;
-        document.querySelector('#editarTipoMantForm #idTipoMant').value = idTipoMant;
-    }
-});
-</script>
 
 <div class="container">
 
