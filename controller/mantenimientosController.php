@@ -5,14 +5,6 @@ require_once 'model/galponModel.php';
 $validacion = false;
 if ( !empty($_POST) ) 
 {
-    if ( $_POST['btMantenimientos'] == 'addTipoMant')
-    {
-        $oTipoMantenimiento = new tipoMantenimiento();
-        $oTipoMantenimiento->setMaxIDTipoMant();
-        $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMant']);
-        $oTipoMantenimiento->save();
-    }
-
     if ( $_POST['btMantenimientos'] == 'newMantGranja')
     {
         $oMantenimientoGranja = new mantenimientoGranja();
@@ -38,15 +30,6 @@ if ( !empty($_POST) )
 
 if ( !empty($_GET) ) 
 {
-    if (isset($_GET['deletetm']) && $_GET['deletetm'] == 'true')
-    {
-        $oTipoMantenimiento = new tipoMantenimiento();
-        $idTipoMant = (int)$_GET['idTipoMant'];
-        $oTipoMantenimiento->deleteTipoMantID($idTipoMant);
-        // Recargar p�gina para mostrar resultados
-        header("Location: index.php?opt=mantenimientos");
-        exit();
-    }
 
     if ($_GET['opt']=='mantenimientos')
     {
@@ -118,42 +101,79 @@ if ( !empty($_GET) )
 
     if (isset($_GET['ajax']))
     {
-    switch ($_GET['ajax']) {
-        case '':
-        case 'delTipoMant': 
-            $valueBt = 'login';
-            $oTipoMantenimiento = new tipoMantenimiento();
-            $idTipoMant = (int)$_GET['idTipoMant'];
-            $oTipoMantenimiento->deleteTipoMantID($idTipoMant);
-            exit();
-        break;
-    
-        case 'editTipoMant':
-            $oTipoMantenimiento = new tipoMantenimiento();
-            $oTipoMantenimiento->setIDTipoMant($_POST['idTipoMant']);
-            $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
-            $oTipoMantenimiento->update();
-        break;
-    
-        case 'getTipoMant':
-            $oTipoMantenimiento = new tipoMantenimiento();
-            $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
-            // Establecer el encabezado para indicar que la respuesta es JSON
-            header('Content-Type: application/json');
-            if ($tiposMant) {
-                http_response_code(200);
-                echo json_encode($tiposMant);
-            } else {
-                http_response_code(404);
-                echo json_encode(['error' => 'No se encontraron tipos de mantenimiento']);
-            }
-            exit();
-        break;
+        switch ($_GET['ajax']) {
+            case '':
 
-        default:
-            exit();
-        break;
-    }
+            case 'addTipoMant':
+                try {
+                    $oTipoMantenimiento = new tipoMantenimiento();
+                    $oTipoMantenimiento->setMaxIDTipoMant();
+                    $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMant']);
+                    // Respuesta a JS
+                    header('Content-Type: application/json');
+                    if ($oTipoMantenimiento->save()) {
+                        http_response_code(200);
+                        echo json_encode(['okay' => 'Insertado correctamente']);
+                    } 
+                } catch (RuntimeException $e) {
+                        http_response_code(400);
+                        echo json_encode(['error' => $e->getMessage()]);
+                }
+                exit();
+            break;
+
+            case 'delTipoMant': 
+                try {
+                    $oTipoMantenimiento = new tipoMantenimiento();
+                    $idTipoMant = (int)$_GET['idTipoMant'];
+                    header('Content-Type: application/json');
+                    if ($oTipoMantenimiento->deleteTipoMantID($idTipoMant)) {
+                        http_response_code(200);
+                        echo json_encode(['okay' => 'Eliminado correctamente']);
+                    }
+                } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['error' => $e->getMessage()]);
+                }
+                exit();
+            break;
+        
+            case 'editTipoMant':
+                try {
+                    $oTipoMantenimiento = new tipoMantenimiento();
+                    $oTipoMantenimiento->setIDTipoMant($_POST['idTipoMant']);
+                    $oTipoMantenimiento->setNombreMantenimiento( $_POST['nombreMantEdit']);
+                    header('Content-Type: application/json');
+                    if ($oTipoMantenimiento->update()) {
+                        http_response_code(200);
+                        echo json_encode($tipoMant);
+                    } 
+                } catch (RuntimeException $e) {
+                        http_response_code(400);
+                        echo json_encode(['error' => $e->getMessage()]);
+                }
+            break;
+        
+            case 'getTipoMant':
+                try {
+                    $oTipoMantenimiento = new tipoMantenimiento();
+                    $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
+                    header('Content-Type: application/json');
+                    if ($tiposMant) {
+                        http_response_code(200);
+                        echo json_encode($tiposMant);
+                    } 
+                } catch (RuntimeException $e) {
+                        http_response_code(400);
+                        echo json_encode(['error' => $e->getMessage()]);
+                }
+                exit();
+            break;
+
+            default:
+                exit();
+            break;
+        }
     }
 
 

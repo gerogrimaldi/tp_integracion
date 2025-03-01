@@ -299,12 +299,33 @@ class mantenimientoGalpon{
 
     public function deleteMantenimientoGalponId($idMantenimientoGalpon)
     {
-        if ($this->mysqli === null) {throw new RuntimeException('La conexión a la base de datos no está inicializada.');}
-        $sql = "DELETE FROM mantenimientoGalpon WHERE idMantenimientoGalpon = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) {throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); }
-        $stmt->bind_param('i', $idMantenimientoGalpon);
-        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
-        $stmt->close();
+        if ($this->mysqli === null) {
+            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        }
+        try {
+            $sql = "DELETE FROM mantenimientoGalpon WHERE idMantenimientoGalpon = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            
+            $stmt->bind_param('i', $idMantenimientoGalpon);
+            
+            if (!$stmt->execute()) {
+                // Verificar si es un error de clave foránea
+                if ($this->mysqli->errno == 1451) {
+                    throw new RuntimeException('No se puede eliminar el mantenimiento porque está siendo utilizado en otros registros.');
+                }
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            
+            $stmt->close();
+            return true;
+            
+        } catch (RuntimeException $e) {
+            // Propagar el error para manejarlo en el controlador
+            throw $e;
+        }
     }
+
 }

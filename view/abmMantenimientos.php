@@ -1,50 +1,45 @@
 <?php
 
-	/*
-        Al cargar la página sin argumentos: Un colapse para los tipos de mantenimiento.
-        Luego, Opción de seleccionar la granja que se desea ver los mantenimientos.
-        Debajo: la tabla de las granjas (sin datos mientras no se seleccione nada)
-        Repetir lo superior pero con la lista de los galpones, sin diferenciar por granja.
-    */
+include 'view/toast.php';
 
 // Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
 $resultado = $resultado ?? '[]'; 
 $resultadoGalp = $resultadoGalp ?? '[]'; 
 
-//Si no hay granja seleccionada, el valor es []. Si hay una, va a ser el ID de la opción.
-//$selectedGranja = isset($_POST['selectGranja']) ? $_POST['selectGranja'] : '[]';
-
 $body = <<<HTML
 <div class="container">
     <h1>Mantenimientos</h1>
-
-<!-- TIPOS DE MANTENIMIENTOS - DOS BOTONES COLAPSE DONDE SE ENCUENTRAN LAS OPCIONES -->    
+<!-------------------------------------------------------------------> 
+<!-- TIPO MANTENIMIENTOS - AGREGAR/VER MANTENIMIENTOS -->
+<!------------------------------------------------------------------->  
 <p class="d-inline-flex gap-1">
-  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#agregarMant" aria-expanded="false" aria-controls="collapseExample">
-    Agregar tipos de Mantenimientos
-  </button>
   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#verMant" aria-expanded="false" aria-controls="collapseExample">
     Ver tipos de mantenimientos
   </button>
 </p>
-<div class="collapse mb-4" id="agregarMant">
-  <div class="card card-body text-dark">
-    <form id="agregrarTipoMantenimiento" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
-        <div class="mb-4">
-            <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
-            <input type="text" class="form-control" 
-                id="nombreMant" name="nombreMant"
-                placeholder="Ejemplo: Corte de césped"
-                min="1" required>
-            <div class="invalid-feedback">
-                Debe contar con al menos 3 letras.
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary" name="btMantenimientos" value="addTipoMant" form="agregrarTipoMantenimiento">Agregar</button>
-    </form>
-  </div>
-</div>
 <div class="collapse mb-4" id="verMant">
+<p class="d-inline-flex gap-1">
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#agregarMant" aria-expanded="false" aria-controls="collapseExample">
+        Agregar tipos de Mantenimientos
+    </button>
+    <p class="d-inline-flex gap-1">
+    <div class="collapse mb-4" id="agregarMant">
+        <div class="card card-body text-dark">
+            <form id="agregarTipoMantForm" class="needs-validation" novalidate>
+                <div class="mb-4">
+                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
+                    <input type="text" class="form-control" 
+                        id="nombreMant" name="nombreMant"
+                        placeholder="Ejemplo: Corte de césped"
+                        min="1" required>
+                    <div class="invalid-feedback">
+                        Debe contar con al menos 3 letras.
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="btnAgregarTipoMant">Agregar</button>
+            </form>
+        </div>
+    </div>
   <div class="card card-body text-dark">
     <table id="tablaTiposMant" class="table table-bordered bg-white">
             <thead class="table-light">
@@ -62,7 +57,9 @@ $body = <<<HTML
   </div>
 </div>
 
-<!-- Modal editar Tipo Mantenimiento -->
+<!-------------------------------------------------------------------> 
+<!-- MODAL: EDICIÓN DE UN TIPO DE MANTENIMIENTO -->
+<!-------------------------------------------------------------------> 
 <div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
     <div class="modal-dialog">
        <div class="modal-content bg-dark text-white">
@@ -93,28 +90,71 @@ $body = <<<HTML
     </div>
 </div>
 
-<!-- JS para rellenar el campo al editar un tipo de mantenimiento -->
 <script>
+<!------------------------------------------------------------------->
+<!--- Sección JavaScript de Tipos de Mantenimiento -->
+<!-------------------------------------------------------------------> 
+<!-- TIPOS DE MANTENIMIENTO - RELLENAR FORMULARIO DE EDICIÓN --> 
+<!-------------------------------------------------------------------> 
 document.addEventListener('click', function (event) {
     if (event.target && event.target.matches('.btn-warning')) {
         const button = event.target;
-        // Extrae los datos del botón
         const idTipoMant = button.getAttribute('data-id');
         const nombre = button.getAttribute('data-nombre');
-        // Rellena los campos del formulario en el modal
         document.querySelector('#editarTipoMantForm #nombreMantEdit').value = nombre;
         document.querySelector('#editarTipoMantForm #idTipoMant').value = idTipoMant;
     }
 });
-
+<!-------------------------------------------------------------------> 
+<!-- TIPO MANTENIMIENTOS - CAPTAR EL FORMULARIO AGREGAR -->  
+<!-------------------------------------------------------------------> 
+document.getElementById('btnAgregarTipoMant').addEventListener('click', function() {
+    agregarTipoMant();
+});
+document.getElementById('agregarTipoMantForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarTipoMant();
+});
+<!-------------------------------------------------------------------> 
+<!-- TIPO MANTENIMIENTOS - CAPTAR EL FORMULARIO DE EDICIÓN -->  
+<!-------------------------------------------------------------------> 
 document.getElementById('btnEditarTipoMant').addEventListener('click', function() {
     editarTipoMant();
 });
-
 document.getElementById('editarTipoMantForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent the default form submission
     editarTipoMant();
 });
+<!-------------------------------------------------------------------> 
+<!-- TIPOS DE MANTENIMIENTOS - FUNCIONES DE RESOLUCIÓN ABM -->  
+<!-------------------------------------------------------------------> 
+function agregarTipoMant() {
+    const nombreMant = document.getElementById('nombreMant').value;
+
+    fetch('index.php?opt=mantenimientos&ajax=addTipoMant', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'nombreMant=' + encodeURIComponent(nombreMant)
+    })
+    .then(response => {
+        if (response.ok) {
+            // Recargar la tabla
+            recargarTipoMant();
+            // Cerrar el modal
+            $('#agregarTipoMant').modal('hide');
+            showToastOkay('Nuevo tipo de mantenimiento agregado');
+        } else if (response.status == 400) {
+            showToastError('Error al agregar: ya existe');
+        } else {
+            showToastError('Error al agregar el tipo de mantenimiento');
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+    });
+}
 
 function editarTipoMant() {
     const idTipoMant = document.getElementById('idTipoMant').value;
@@ -129,13 +169,12 @@ function editarTipoMant() {
     })
     .then(response => {
         if (response.ok) {
-            // Recargar la tabla
-            cargarTablaTiposMant();
+            recargarTipoMant();
+            showToastOkay('Tipo de mantenimiento editado');
             // Cerrar el modal
             $('#editarTipoMant').modal('hide');
-
         } else {
-            console.error('Error al editar el tipo de mantenimiento');
+            showToastError('Error al editar el tipo de mantenimiento');
         }
     })
     .catch(error => {
@@ -143,30 +182,36 @@ function editarTipoMant() {
     });
 }
 
-    function eliminarTipoMantenimiento(idTipoMant) {
-        // Realizar la solicitud AJAX
-        fetch('index.php?opt=mantenimientos&ajax=delTipoMant&idTipoMant=' + idTipoMant, {
-           method: 'GET'
-        })
-        .then(response => {
-            if (response.ok) {
-                // Si la eliminación fue exitosa, recargar la tabla
-                cargarTablaTiposMant();
-            } else {
-                console.error('Error al eliminar el tipo de mantenimiento');
-            }
-        })
-        .catch(error => {
-              console.error('Error en la solicitud AJAX:', error);
-        });
-    }
-</script>
+function eliminarTipoMantenimiento(idTipoMant) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=delTipoMant&idTipoMant=' + idTipoMant, {
+        method: 'GET'
+    })
+    .then(response => {
+        if (response.ok) {
+            // Si la eliminación fue exitosa, recargar la tabla y los select
+            recargarTipoMant();
+            showToastOkay('Tipo de mantenimiento eliminado');
+        } else if (response.status == 400) {
+            showToastError('Error al eliminar: tiene mantenimientos asociados');
+        } else {
+            showToastError('Error al eliminar el tipo de mantenimiento');
+        }
+    })
+    .catch(error => {
+          console.error('Error en la solicitud AJAX:', error);
+    });
+}
+
+function recargarTipoMant() {
+    cargarTablaTipoMant();
+    cargarSelectTipoMant()
+}
 
 <!-- JS Para rellenar tabla tipo mantenimientos -->
-<script>
-    function cargarTablaTiposMant() {
-        // Realizar la solicitud AJAX
-        fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
+function cargarTablaTipoMant() {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
     .then(response => {
         if (!response.ok) {
             throw new Error('Error en la solicitud: ' + response.statusText);
@@ -174,54 +219,44 @@ function editarTipoMant() {
         return response.json();
     })
     .then(data => {
-        
-                if ($.fn.DataTable.isDataTable('#tablaTiposMant')) {
-                    $('#tablaTiposMant').DataTable().destroy();
-                }
-
-                // Obtener el tbody de la tabla
-                var tipoMantTbody = document.getElementById("tipoMant");
-
-                // Limpiar el contenido actual de la tabla
-                tipoMantTbody.innerHTML = '';
-
-                // Recorrer los datos y crear las filas de la tabla
-                data.forEach(tipoMant => {
-                    var row = document.createElement("tr");
-                    row.className = "table-light";
-                    row.innerHTML = 
-                        '<td>' + tipoMant.idTipoMantenimiento + '</td>' +
-                        '<td>' + tipoMant.nombre + '</td>' +
-                        '<td>' +
-                            '<button type="button" ' +
-                                'class="btn btn-warning btn-sm" ' +
-                                'data-bs-toggle="modal" ' +
-                                'data-bs-target="#editarTipoMant" ' +
-                                'data-id="' + tipoMant.idTipoMantenimiento + '" ' +
-                                'data-nombre="' + tipoMant.nombre + '">' +
-                                'Editar' +
-                            '</button>' +
-                        '</td>' +
-                        '<td>' +
-                            '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarTipoMantenimiento(' + tipoMant.idTipoMantenimiento + ')">Borrar</button>' +
-                        '</td>'
-                    // Agregar la fila al tbody
-                    tipoMantTbody.appendChild(row);
-                });
-
-                $('#tablaTiposMant').DataTable();
-
-            })
-    .catch(error => {
-        console.error('Error al cargar los tipos de mantenimiento:', error);
-    });
-    }
+        if ($.fn.DataTable.isDataTable('#tablaTiposMant')) {
+            $('#tablaTiposMant').DataTable().destroy();
+        }
+        var tipoMantTbody = document.getElementById("tipoMant");
+        tipoMantTbody.innerHTML = '';
+        // Recorrer los datos y crear las filas de la tabla
+        data.forEach(tipoMant => {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+                '<td>' + tipoMant.idTipoMantenimiento + '</td>' +
+                '<td>' + tipoMant.nombre + '</td>' +
+                '<td>' +
+                    '<button type="button" ' +
+                        'class="btn btn-warning btn-sm" ' +
+                        'data-bs-toggle="modal" ' +
+                        'data-bs-target="#editarTipoMant" ' +
+                        'data-id="' + tipoMant.idTipoMantenimiento + '" ' +
+                        'data-nombre="' + tipoMant.nombre + '">' +
+                        'Editar' +
+                    '</button>' +
+                '</td>' +
+                '<td>' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarTipoMantenimiento(' + tipoMant.idTipoMantenimiento + ')">Borrar</button>' +
+                '</td>'
+            tipoMantTbody.appendChild(row);
+        });
+        $('#tablaTiposMant').DataTable();
+    })
+        .catch(error => {
+            console.error('Error al cargar los tipos de mantenimiento:', error);
+        });
+}
 
 </script>
 
 
 <div class="container">
-
 <h2>Granjas</h2>
 
 <form id="selectGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
@@ -536,10 +571,13 @@ function cargarSelectTipoMant() {
         cargarSelectGranja();
         cargarSelectTipoMant();
         cargarSelectGalpon();
-        cargarTablaTiposMant()
+        cargarTablaTipoMant()
     });
 </script>
 
 HTML;
-
+// Agregar las funciones y el contenedor de los toast
+// Para mostrar notificaciones
+$body .= $toast;
 ?>
+
