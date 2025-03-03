@@ -44,15 +44,6 @@ class Page
             
             <body class="bg-dark text-white">
             <div class="container">';
-
-            // // HEADER
-            // $this->header .= 
-            // '<header class="bg-  bg-gradient header text-white text-center py-2 mb-0">
-            //     <div>
-            //         <h1>Pollos hnos</h2>
-            //     </div>
-            // </header>
-            // ';
                 
         }
     }
@@ -101,10 +92,17 @@ class Page
             </footer>
             </div>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-                
                 <link href="lib/DataTables/datatables.min.css" rel="stylesheet">
                 <script src="lib/DataTables/datatables.min.js"></script>
-
+                <script>
+                $(document).ready(function() {
+                    $.extend(true, $.fn.dataTable.defaults, {
+                        language: {
+                           url: "lib/DataTables/Spanish.json"
+                        }
+                    });
+                });
+                </script>
                 </body>
             </html>';
         }

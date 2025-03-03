@@ -19,8 +19,9 @@ class tipoMantenimiento{
         if ($result && $row = $result->fetch_assoc()) {
             $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
             $this->idTipoMantenimiento = $maxID + 1; // Incrementa el ID máximo en 1
+            return true;
         }else {
-            echo "Error al obtener el máximo idTipoMantenimiento: " . $this->mysqli->error;
+            return false;
         }
     }
 
@@ -31,7 +32,7 @@ class tipoMantenimiento{
 
     public function setNombreMantenimiento($nombreMantenimiento)
     {
-        $this->nombreMantenimiento = $nombreMantenimiento; 
+        $this->nombreMantenimiento = strip_tags($nombreMantenimiento);
     }
 
     public function getTipoMantenimientos()
@@ -46,30 +47,41 @@ class tipoMantenimiento{
     }
 
     public function save(){
-    // Verificar si ya existe
-        $sqlCheck = "SELECT tipoMantenimiento.nombre FROM tipoMantenimiento WHERE nombre = ?";
-        $stmtCheck = $this->mysqli->prepare($sqlCheck);
-        if (!$stmtCheck) { die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); }
-        $stmtCheck->bind_param("s", $this->nombreMantenimiento);
-        $stmtCheck->execute();
-        $stmtCheck->store_result();
-        if ($stmtCheck->num_rows > 0) {
-            echo '<script type="text/javascript">alert("Error: el tipo de mantenimiento ya existe.");</script>';
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+        // Verificar si ya existe el tipo de mantenimiento
+            $sqlCheck = "SELECT tipoMantenimiento.nombre FROM tipoMantenimiento WHERE nombre = ?";
+            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+            if (!$stmtCheck) { 
+                die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); 
+            }
+            $stmtCheck->bind_param("s", $this->nombreMantenimiento);
+            $stmtCheck->execute();
+            $stmtCheck->store_result();
+            if ($stmtCheck->num_rows > 0) {
+                throw new RuntimeException('Error, ya existe: ' . $this->mysqli->error);
+                $stmtCheck->close();
+                return false;
+            }
             $stmtCheck->close();
-            return false; 
+        // Insertar
+            $sql = "INSERT INTO tipoMantenimiento (idTipoMantenimiento, nombre) VALUES (?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException('Error al preparar consulta: ' . $this->mysqli->error);
+            }
+        // Enlaza los parámetros y ejecuta la consulta
+            $stmt->bind_param("is", $this->idTipoMantenimiento, $this->nombreMantenimiento);
+            if (!$stmt->execute()){
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+            $stmt->close();
+            return true;
+
+        }catch (RuntimeException $e) {
+            throw $e;
         }
-        $stmtCheck->close();
-    // Insertar
-        $sql = "INSERT INTO tipoMantenimiento (idTipoMantenimiento, nombre) VALUES (?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) { die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error); }
-    // Enlaza los parámetros y ejecuta la consulta
-        $stmt->bind_param("is", $this->idTipoMantenimiento, $this->nombreMantenimiento);
-        if (!$stmt->execute()){
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
-    // Cerrar la consulta, NO DEBEMOS CERRAR LA CONEXIÓN, MIENTRAS EXISTA EL OBJETO.
-        $stmt->close();
-        return true;
     }
 
     public function update()
@@ -77,24 +89,37 @@ class tipoMantenimiento{
         $sql = "UPDATE tipoMantenimiento SET nombre = ? WHERE idTipoMantenimiento = ?";
         $stmt = $this->mysqli->prepare($sql);
         if (!$stmt) {
-            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
         }
         $stmt->bind_param("si", $this->nombreMantenimiento, $this->idTipoMantenimiento);
         if (!$stmt->execute()) {
             throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
         }
         $stmt->close();
+        return true;
     }
 
     public function deleteTipoMantID($idTipoMantenimiento)
     {
-        if ($this->mysqli === null) { throw new RuntimeException('La conexión a la base de datos no está inicializada.'); }
+        if ($this->mysqli === null) { 
+            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        }
         $sql = "DELETE FROM tipoMantenimiento WHERE idTipoMantenimiento = ?";
         $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) { throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); }
+        if ($stmt === false) { 
+            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); 
+        }
         $stmt->bind_param('i', $idTipoMantenimiento);
-        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        if (!$stmt->execute()) { 
+            // Verificar si es un error de clave foránea
+            if ($this->mysqli->errno == 1451) {
+                throw new RuntimeException('El tipo de mantenimiento tiene registros asociados.');
+            }else{
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+            }
+        }
         $stmt->close(); 
+        return true;
     }
 }
 
@@ -299,10 +324,11 @@ class mantenimientoGalpon{
 
     public function deleteMantenimientoGalponId($idMantenimientoGalpon)
     {
-        if ($this->mysqli === null) {
-            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-        }
         try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
             $sql = "DELETE FROM mantenimientoGalpon WHERE idMantenimientoGalpon = ?";
             $stmt = $this->mysqli->prepare($sql);
             if ($stmt === false) {

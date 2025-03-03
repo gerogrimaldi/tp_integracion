@@ -9,9 +9,9 @@ $resultadoGalp = $resultadoGalp ?? '[]';
 $body = <<<HTML
 <div class="container">
     <h1>Mantenimientos</h1>
-<!-------------------------------------------------------------------> 
+<!------------------------------------------------------------------> 
 <!-- TIPO MANTENIMIENTOS - AGREGAR/VER MANTENIMIENTOS -->
-<!------------------------------------------------------------------->  
+<!------------------------------------------------------------------>  
 <p class="d-inline-flex gap-1">
   <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#verMant" aria-expanded="false" aria-controls="collapseExample">
     Ver tipos de mantenimientos
@@ -57,9 +57,9 @@ $body = <<<HTML
   </div>
 </div>
 
-<!-------------------------------------------------------------------> 
+<!------------------------------------------------------------------> 
 <!-- MODAL: EDICIÓN DE UN TIPO DE MANTENIMIENTO -->
-<!-------------------------------------------------------------------> 
+<!------------------------------------------------------------------> 
 <div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
     <div class="modal-dialog">
        <div class="modal-content bg-dark text-white">
@@ -139,20 +139,21 @@ function agregarTipoMant() {
         body: 'nombreMant=' + encodeURIComponent(nombreMant)
     })
     .then(response => {
-        if (response.ok) {
-            // Recargar la tabla
-            recargarTipoMant();
-            // Cerrar el modal
-            $('#agregarTipoMant').modal('hide');
-            showToastOkay('Nuevo tipo de mantenimiento agregado');
-        } else if (response.status == 400) {
-            showToastError('Error al agregar: ya existe');
-        } else {
-            showToastError('Error al agregar el tipo de mantenimiento');
-        }
+        return response.json().then(data => {
+            if (response.ok) {
+                // Recargar la tabla
+                recargarTipoMant();
+                // Cerrar el modal
+                $('#agregarTipoMant').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
     })
     .catch(error => {
         console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
     });
 }
 
@@ -165,20 +166,23 @@ function editarTipoMant() {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'idTipoMant=' + encodeURIComponent(idTipoMant) + '&nombreMantEdit=' + encodeURIComponent(nombreMantEdit)
+        body: 'idTipoMant=' + encodeURIComponent(idTipoMant) +
+        '&nombreMantEdit=' + encodeURIComponent(nombreMantEdit)
     })
     .then(response => {
-        if (response.ok) {
-            recargarTipoMant();
-            showToastOkay('Tipo de mantenimiento editado');
-            // Cerrar el modal
-            $('#editarTipoMant').modal('hide');
-        } else {
-            showToastError('Error al editar el tipo de mantenimiento');
-        }
+        return response.json().then(data => {
+            if (response.ok) {
+                recargarTipoMant();
+                showToastOkay(data.msg);
+                $('#editarTipoMant').modal('hide');
+            } else {
+                showToastError(data.msg);
+            }
+        });
     })
     .catch(error => {
         console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
     });
 }
 
@@ -188,18 +192,19 @@ function eliminarTipoMantenimiento(idTipoMant) {
         method: 'GET'
     })
     .then(response => {
-        if (response.ok) {
-            // Si la eliminación fue exitosa, recargar la tabla y los select
-            recargarTipoMant();
-            showToastOkay('Tipo de mantenimiento eliminado');
-        } else if (response.status == 400) {
-            showToastError('Error al eliminar: tiene mantenimientos asociados');
-        } else {
-            showToastError('Error al eliminar el tipo de mantenimiento');
-        }
+        return response.json().then(data => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla y los select
+                recargarTipoMant();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
     })
     .catch(error => {
-          console.error('Error en la solicitud AJAX:', error);
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
     });
 }
 
@@ -247,10 +252,12 @@ function cargarTablaTipoMant() {
             tipoMantTbody.appendChild(row);
         });
         $('#tablaTiposMant').DataTable();
+
     })
-        .catch(error => {
-            console.error('Error al cargar los tipos de mantenimiento:', error);
-        });
+    .catch(error => {
+        console.error('Error al cargar los tipos de mantenimiento:', error);
+        $('#tablaTiposMant').DataTable();
+    });
 }
 
 </script>
