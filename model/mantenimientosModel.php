@@ -8,7 +8,9 @@ class tipoMantenimiento{
     {
         require_once 'model/conexion.php';  
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-        if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
+        if ($this->mysqli->connect_error) { 
+            die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); 
+        }
     }
 
     public function setMaxIDTipoMant()
@@ -27,23 +29,35 @@ class tipoMantenimiento{
 
     public function setIDTipoMant($idTipoMantenimiento)
     {
-        $this->idTipoMantenimiento = $idTipoMantenimiento; 
+        if ( ctype_digit($idTipoMantenimiento)==true )
+        {
+            $this->idTipoMantenimiento = $idTipoMantenimiento; 
+        }
     }
 
     public function setNombreMantenimiento($nombreMantenimiento)
     {
-        $this->nombreMantenimiento = strip_tags($nombreMantenimiento);
+        $this->nombreMantenimiento = trim(strip_tags($nombreMantenimiento));
     }
 
     public function getTipoMantenimientos()
     {
-        $sql = "SELECT idTipoMantenimiento, nombre FROM tipoMantenimiento";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) { while($row = $result->fetch_assoc()) { $data[] = $row; } }
-        //$json_data = json_encode($data); 
-        // Esta mal devolver en JSON en un model según investigado, debe hacerlo el controlador.
-        return $data;
+        try {
+            $sql = "SELECT idTipoMantenimiento, nombre FROM tipoMantenimiento";
+            $result = $this->mysqli->query($sql);
+            if (!$result) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
+            }
+            $data = [];
+            if ($result->num_rows > 0) { 
+                while($row = $result->fetch_assoc()) { 
+                    $data[] = $row; 
+                } 
+            }
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
     }
 
     public function save(){
@@ -55,7 +69,7 @@ class tipoMantenimiento{
             $sqlCheck = "SELECT tipoMantenimiento.nombre FROM tipoMantenimiento WHERE nombre = ?";
             $stmtCheck = $this->mysqli->prepare($sqlCheck);
             if (!$stmtCheck) { 
-                die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); 
+                throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); 
             }
             $stmtCheck->bind_param("s", $this->nombreMantenimiento);
             $stmtCheck->execute();
@@ -86,40 +100,55 @@ class tipoMantenimiento{
 
     public function update()
     {
-        $sql = "UPDATE tipoMantenimiento SET nombre = ? WHERE idTipoMantenimiento = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "UPDATE tipoMantenimiento SET nombre = ? WHERE idTipoMantenimiento = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            $stmt->bind_param("si", $this->nombreMantenimiento, $this->idTipoMantenimiento);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $stmt->close();
+            return true;
+        }catch (RuntimeException $e) {
+            throw $e;
+            return false;
         }
-        $stmt->bind_param("si", $this->nombreMantenimiento, $this->idTipoMantenimiento);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
-        return true;
+        
     }
 
     public function deleteTipoMantID($idTipoMantenimiento)
     {
-        if ($this->mysqli === null) { 
-            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-        }
-        $sql = "DELETE FROM tipoMantenimiento WHERE idTipoMantenimiento = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) { 
-            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); 
-        }
-        $stmt->bind_param('i', $idTipoMantenimiento);
-        if (!$stmt->execute()) { 
-            // Verificar si es un error de clave foránea
-            if ($this->mysqli->errno == 1451) {
-                throw new RuntimeException('El tipo de mantenimiento tiene registros asociados.');
-            }else{
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
+            $sql = "DELETE FROM tipoMantenimiento WHERE idTipoMantenimiento = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) { 
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); 
+            }
+            $stmt->bind_param('i', $idTipoMantenimiento);
+            if (!$stmt->execute()) { 
+                // Verificar si es un error de clave foránea
+                if ($this->mysqli->errno == 1451) {
+                    throw new RuntimeException('El tipo de mantenimiento tiene registros asociados.');
+                }else{
+                    throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+                }
+            }
+            $stmt->close(); 
+            return true;
+        }catch (RuntimeException $e){
+            throw $e;
+            return false;
         }
-        $stmt->close(); 
-        return true;
     }
 }
 
@@ -154,12 +183,12 @@ class mantenimientoGranja{
 
     public function setFecha($fecha)
     {
-        $this->fecha = $fecha;
+        $this->fecha =  $fecha;
     }
 
     public function setIdTipoMantenimiento($idTipoMantenimiento)
     {
-        if ( ctype_digit( $idTipoMantenimiento )==true ){
+        if ( ctype_digit($idTipoMantenimiento)==true ){
             $this->idTipoMantenimiento = $idTipoMantenimiento;
         }  
     }
@@ -171,27 +200,45 @@ class mantenimientoGranja{
         $data = [];
         if ($result && $row = $result->fetch_assoc()) {
             $maxID = $row['maxID'] ?? 0;
-            $this->idMantenimientoGranja = $maxID + 1; 
+            $this->idMantenimientoGranja = $maxID + 1;
+            return true;
         }else {
-            echo "Error al obtener el máximo idMantenimiento: " . $this->mysqli->error;
+            //echo "Error al obtener el máximo idMantenimiento: " . $this->mysqli->error;
+            return false;
         }
     }
 
     public function getMantGranjas($idGranjaFiltro)
     {
-        $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
-        mantenimientoGranja.idTipoMantenimiento, TipoMantenimiento.nombre FROM mantenimientoGranja 
-        INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGranja.idTipoMantenimiento)
-        WHERE mantenimientoGranja.idGranja=".$idGranjaFiltro;
-        $result = $this->mysqli->query($sql);
-        $data = []; // Array para almacenar los resultados
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        try {
+            if (empty($idGranjaFiltro) || !ctype_digit($idGranjaFiltro)) {
+                throw new RuntimeException('El ID de la granja es inválido.');
             }
+            $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
+                mantenimientoGranja.idTipoMantenimiento, tipoMantenimiento.nombre 
+                FROM mantenimientoGranja 
+                INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGranja.idTipoMantenimiento)
+                WHERE mantenimientoGranja.idGranja = ?";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idGranjaFiltro);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $data = []; // Array para almacenar los resultados
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            $stmt->close();
+            return $data;
+            //$json_data = json_encode($data);
+        }  catch (RuntimeException $e) {
+            throw $e;
         }
-        $json_data = json_encode($data);
-        return $json_data;
     }
 
     public function save()
@@ -328,15 +375,12 @@ class mantenimientoGalpon{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-
             $sql = "DELETE FROM mantenimientoGalpon WHERE idMantenimientoGalpon = ?";
             $stmt = $this->mysqli->prepare($sql);
             if ($stmt === false) {
                 throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
             }
-            
             $stmt->bind_param('i', $idMantenimientoGalpon);
-            
             if (!$stmt->execute()) {
                 // Verificar si es un error de clave foránea
                 if ($this->mysqli->errno == 1451) {
@@ -344,10 +388,8 @@ class mantenimientoGalpon{
                 }
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
-            
             $stmt->close();
             return true;
-            
         } catch (RuntimeException $e) {
             // Propagar el error para manejarlo en el controlador
             throw $e;

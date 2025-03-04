@@ -3,8 +3,8 @@
 include 'view/toast.php';
 
 // Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
-$resultado = $resultado ?? '[]'; 
-$resultadoGalp = $resultadoGalp ?? '[]'; 
+$resultado = $resultado ?? []; 
+$resultadoGalp = $resultadoGalp ?? []; 
 
 $body = <<<HTML
 <div class="container">

@@ -1,5 +1,5 @@
 <?php
-
+include 'view/toast.php';
 $error = $error ?? ''; // Definir $error como cadena vacía si no está definido
 $idGranja = $idGranja ?? ''; // Definir $idGranja como cadena vacía si no está definido
 
@@ -13,7 +13,7 @@ $body = <<<HTML
         </button>
     </div>
 
-    <table id="myTable" class="table table-bordered bg-white">
+    <table id="tablaGranjas" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
                 <th class="text-primary">ID Granja</th>
@@ -26,77 +26,22 @@ $body = <<<HTML
                 <th class="text-primary"></th> 
             </tr>
         </thead>
-        <tbody id="granja">
+        <tbody id="granjas">
             <!-- Los datos se insertarán aquí -->
         </tbody>
     </table>
 </div>
 
-<script>
-    // Obtener los datos de PHP y asegurarse que es un array válido
-    // var granja = <?php echo json_encode($resultado ?? [], JSON_THROW_ON_ERROR); ?>;
-
-    // $resultado = $resultado ?? []; // Asegurar que $resultado siempre sea un array
-
-    var granja = $resultado;
-    
-    // Procesar los datos y crear filas en la tabla
-    var granjaTbody = document.getElementById("granja");
-    
-    granja.forEach(function(granja) {
-        var row = document.createElement("tr");
-        row.className = "table-light";
-        
-        row.innerHTML = 
-            '<td>' + granja.idGranja + '</td>' +
-            '<td>' + granja.nombre + '</td>' +
-            '<td>' + granja.habilitacionSenasa + '</td>' +
-            '<td>' + granja.metrosCuadrados + '</td>' +
-            '<td>' + granja.ubicacion + '</td>' +
-            '<td>' +
-                '<button type="button" ' +
-                        'class="btn btn-warning btn-sm" ' +
-                        'data-bs-toggle="modal" ' +
-                        'data-bs-target="#editarGranja" ' +
-                        'data-id="' + granja.idGranja + '" ' +
-                        'data-nombre="' + granja.nombre + '" ' +
-                        'data-habilitacion="' + granja.habilitacionSenasa + '" ' +
-                        'data-metros="' + granja.metrosCuadrados + '" ' +
-                        'data-ubicacion="' + granja.ubicacion + '">' +
-                    'Editar' +
-                '</button>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=granjas&delete=true&idGranja=' + granja.idGranja + '" ' +
-                   'class="btn btn-danger btn-sm">' +
-                    'Borrar' +
-                '</a>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
-                   'class="btn btn-warning btn-sm">' +
-                    'Galpones' +
-                '</a>' +
-            '</td>';
-        granjaTbody.appendChild(row);
-    });
-
-    // Inicializar DataTable
-    $(document).ready(function() {
-        $("#myTable").DataTable();
-    });
-</script>
 <!-- Modal popUp Agregar Granja -->
-<!-- Info de cómo lo hice: https://getbootstrap.com/docs/5.3/components/modal/ -->
 <div class="modal fade" id="agregarGranja" tabindex="-1" aria-labelledby="agregarGranjaModal" aria-hidden="true">
   <div class="modal-dialog">
-   <div class="modal-content bg-dark text-white">
+  <div class="modal-content bg-dark text-white">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="agregarGranjaModal">Agregar Granja</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-      <form id="agregrarGranjaForm" action="index.php?opt=granjas" method="POST" class="needs-validation" novalidate>
+    <form id="agregarGranjaForm" class="needs-validation" novalidate>
     <div class="mb-4">
         <label for="nombre" class="form-label">Nombre de la granja</label>
         <input type="text" 
@@ -132,7 +77,7 @@ $body = <<<HTML
                  placeholder="SENASA N°"
                  required>
         <div class="invalid-feedback">
-                La habilitación debe tener al menos 3 caracteres.
+            La habilitación debe tener al menos 3 caracteres.
         </div>
      </div>
     <div class="mb-4">
@@ -152,7 +97,7 @@ $body = <<<HTML
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary" name="btGranja" value="registrarGranja" form="agregrarGranjaForm">Agregar</button>
+        <button type="submit" class="btn btn-primary" id="btnAgregarGranja">Agregar</button>
       </div>
     </div>
   </div>
@@ -161,86 +106,317 @@ $body = <<<HTML
 <!-- Modal popUp editar Granja -->
 <div class="modal fade" id="editarGranja" tabindex="-1" aria-labelledby="editarGranjaModal" aria-hidden="true">
   <div class="modal-dialog">
-   <div class="modal-content bg-dark text-white">
+  <div class="modal-content bg-dark text-white">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="editarGranjaModal">Editar datos de la Granja</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-            <form id="editarGranjaForm" action="index.php?opt=granjas" method="POST" class="needs-validation" novalidate>
-                <div class="mb-4">
-                    <label for="editarGranjaFormTextNombre" class="form-label">Nombre de la granja</label>
-                    <div class="input-group has-validation">
-                        <input type="text" 
-                               class="form-control" 
-                               id="nombre" 
-                               name="nombre" 
-                               placeholder="Nombre"
-                               minlength="3"
-                               required>
-                        <div class="invalid-feedback">
-                            Nombre inválido (mínimo 3 caracteres)
-                        </div>
-                    </div>
+        <form id="editarGranjaForm" class="needs-validation" novalidate>
+            <div class="mb-4">
+                <label for="editarNombre" class="form-label">Nombre de la granja</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="editarNombre" 
+                       name="nombre" 
+                       placeholder="Nombre"
+                       minlength="3"
+                       required>
+                <div class="invalid-feedback">
+                    Nombre inválido (mínimo 3 caracteres)
                 </div>
-                <div class="mb-4">
-                    <label for="editarGranjaFormTextSenasa" class="form-label">Número de habilitación de SENASA</label>
-                    <div class="input-group has-validation">
-                        <input type="text" 
-                               class="form-control" 
-                               id="habilitacion" 
-                               name="habilitacion" 
-                               placeholder="SENASA N°"
-                               minlength="3"
-                               required>
-                        <div class="invalid-feedback">
-                            Nombre inválido (mínimo 3 caracteres)
-                        </div>
-                    </div>
+            </div>
+            <div class="mb-4">
+                <label for="editarHabilitacion" class="form-label">Número de habilitación de SENASA</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="editarHabilitacion" 
+                       name="habilitacion" 
+                       placeholder="SENASA N°"
+                       minlength="3"
+                       required>
+                <div class="invalid-feedback">
+                    Nombre inválido (mínimo 3 caracteres)
                 </div>
-                <div class="mb-4">
-                    <label for="editarGranjaFormTextM2" class="form-label">Metros Cuadrados</label>
-                    <div class="input-group has-validation">
-                        <input type="number" 
-                            class="form-control" 
-                            id="metrosCuadrados" 
-                            name="metrosCuadrados" 
-                            placeholder="Tamaño de la granja"
-                            min="1" 
-                            required>
-                            <div class="invalid-feedback">
-                                <?php echo $error ?: 'Debe ser un número positivo.'; ?>
-                            </div>
-
-                    </div>
+            </div>
+            <div class="mb-4">
+                <label for="editarMetros" class="form-label">Metros Cuadrados</label>
+                <input type="number" 
+                       class="form-control" 
+                       id="editarMetros" 
+                       name="metrosCuadrados" 
+                       placeholder="Tamaño de la granja"
+                       min="1" 
+                       required>
+                <div class="invalid-feedback">
+                    Debe ser un número positivo
                 </div>
-                <div class="mb-4">
-                    <label for="editarGranjaFormTextUbicacion" class="form-label">Ubicación</label>
-                    <div class="input-group has-validation">
-                        <input type="text" 
-                               class="form-control" 
-                               id="ubicacion" 
-                               name="ubicacion" 
-                               placeholder="Localidad"
-                               minlength="3"
-                               required>
-                        <div class="invalid-feedback">
-                            Nombre inválido (mínimo 3 caracteres)
-                        </div>
-                    </div>
+            </div>
+            <div class="mb-4">
+                <label for="editarUbicacion" class="form-label">Ubicación</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="editarUbicacion" 
+                       name="ubicacion" 
+                       placeholder="Localidad"
+                       minlength="3"
+                       required>
+                <div class="invalid-feedback">
+                    Nombre inválido (mínimo 3 caracteres)
                 </div>
-                <input type="hidden" id="idGranja" name="idGranja">
-            </form>
+            </div>
+            <input type="hidden" id="editarIdGranja" name="idGranja">
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary" name="btGranja" value="editarGranja" form="editarGranjaForm">Finalizar</button>
+        <button type="submit" class="btn btn-primary" id="btnEditarGranja">Finalizar</button>
       </div>
-    </div>
+  </div>
   </div>
 </div>
 
-<script src="js/validar_abm.js"></script>
+<script>
+<!------------------------------------------------->
+<!--- Sección JavaScript de Granjas -->
+<!-------------------------------------------------> 
+<!------- RELLENAR TABLA DE GRANJAS - AJAX -------->
+<!-------------------------------------------------> 
+function cargarTablaGranjas() {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=granjas&ajax=getGranjas')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if ($.fn.DataTable.isDataTable('#tablaGranjas')) {
+            $('#tablaGranjas').DataTable().destroy();
+        }
+        var tablaGranjasTbody = document.getElementById("granjas");
+        tablaGranjasTbody.innerHTML = '';
+        // Recorrer los datos y crear las filas de la tabla
+        data.forEach(granja => {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+                '<td>' + granja.idGranja + '</td>' +
+                '<td>' + granja.nombre + '</td>' +
+                '<td>' + granja.habilitacionSenasa + '</td>' +
+                '<td>' + granja.metrosCuadrados + '</td>' +
+                '<td>' + granja.ubicacion + '</td>' +
+                '<td>' +
+                    '<button type="button" ' +
+                            'class="btn btn-warning btn-sm" ' +
+                            'data-bs-toggle="modal" ' +
+                            'data-bs-target="#editarGranja" ' +
+                            'data-id="' + granja.idGranja + '" ' +
+                            'data-nombre="' + granja.nombre + '" ' +
+                            'data-habilitacion="' + granja.habilitacionSenasa + '" ' +
+                            'data-metros="' + granja.metrosCuadrados + '" ' +
+                            'data-ubicacion="' + granja.ubicacion + '">' +
+                        'Editar' +
+                    '</button>' +
+                '</td>' +
+                '<td>' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarGranja(' + granja.idGranja + ')">Borrar</button>' +
+                '</td>' +
+                '<td>' +
+                    '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
+                       'class="btn btn-warning btn-sm">' +
+                        'Galpones' +
+                    '</a>' +
+                '</td>';
+            tablaGranjasTbody.appendChild(row);
+        })
+        $('#tablaGranjas').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar los tipos de mantenimiento:', error);
+        $('#tablaGranjas').DataTable();
+    });
+}
+<!--------------------------------------------> 
+<!-- GRANJAS - CAPTAR EL FORMULARIO AGREGAR -->  
+<!--------------------------------------------> 
+document.getElementById('btnAgregarGranja').addEventListener('click', function() {
+    agregarGranja();
+});
+document.getElementById('agregarGranjaForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarGranja();
+});
+<!-----------------------------------------------> 
+<!-- GRANJAS - CAPTAR EL FORMULARIO DE EDICIÓN -->  
+<!-----------------------------------------------> 
+document.getElementById('btnEditarGranja').addEventListener('click', function() {
+    editarGranja();
+});
+document.getElementById('editarGranjaForm').addEventListener('submit', function(event) {
+   event.preventDefault(); // Prevent the default form submission
+   editarGranja();
+});
+<!-----------------------------------------------> 
+<!---------- GRANJAS - ELIMINAR ---------->  
+<!-----------------------------------------------> 
+function eliminarGranja(idGranja) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=granjas&ajax=delGranja&idGranja=' + idGranja, {
+        method: 'GET'
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla y los select
+                cargarTablaGranjas();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
+    });
+}
+<!-----------------------------------------------> 
+<!---------- GRANJAS - AGREGAR NUEVA ---------->  
+<!-----------------------------------------------> 
+function agregarGranja() {
+    const nombre = document.getElementById('nombre').value;
+    const metrosCuadrados = document.getElementById('metrosCuadrados').value;
+    const habilitacion = document.getElementById('habilitacion').value;
+    const ubicacion = document.getElementById('ubicacion').value;
+
+    fetch('index.php?opt=granjas&ajax=addGranja', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'nombre=' + encodeURIComponent(nombre) +
+              '&metrosCuadrados=' + encodeURIComponent(metrosCuadrados) +
+              '&habilitacion=' + encodeURIComponent(habilitacion) +
+              '&ubicacion=' + encodeURIComponent(ubicacion)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaGranjas();
+                $('#agregarGranja').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+
+<!-------------------------------------------------> 
+<!------- RELLENAR FORMULARIO DE EDICION   -------->
+<!-------------------------------------------------> 
+document.getElementById("editarGranja").addEventListener("show.bs.modal", function (event) {
+    // Botón que activó el modal
+    const button = event.relatedTarget;
+
+    // Extraer datos del atributo data-*
+    const idGranja = button.getAttribute("data-id");
+    const nombre = button.getAttribute("data-nombre");
+    const habilitacion = button.getAttribute("data-habilitacion");
+    const metros = button.getAttribute("data-metros");
+    const ubicacion = button.getAttribute("data-ubicacion");
+
+    // Asignar los valores a los campos del formulario
+    document.querySelector("#editarGranjaForm #editarNombre").value = nombre;
+    document.querySelector("#editarGranjaForm #editarHabilitacion").value = habilitacion;
+    document.querySelector("#editarGranjaForm #editarMetros").value = metros;
+    document.querySelector("#editarGranjaForm #editarUbicacion").value = ubicacion;
+    document.querySelector("#editarGranjaForm #editarIdGranja").value = idGranja;
+});
+
+function editarGranja() {
+    const idGranja = document.getElementById('editarIdGranja').value;
+    const nombre = document.getElementById('editarNombre').value;
+    const metrosCuadrados = document.getElementById('editarMetros').value;
+    const habilitacion = document.getElementById('editarHabilitacion').value;
+    const ubicacion = document.getElementById('editarUbicacion').value;
+
+    fetch('index.php?opt=granjas&ajax=editGranja', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'idGranja=' + encodeURIComponent(idGranja) +
+              '&nombre=' + encodeURIComponent(nombre) +
+              '&metrosCuadrados=' + encodeURIComponent(metrosCuadrados) +
+              '&habilitacion=' + encodeURIComponent(habilitacion) +
+              '&ubicacion=' + encodeURIComponent(ubicacion)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaGranjas();
+                $('#editarGranja').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+
+    // Activar validaciones al enviar el formulario
+    document.querySelectorAll('.needs-validation').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        }, false);
+    });
+
+    // Validar campos en tiempo real
+    document.querySelectorAll('input, select, textarea').forEach(function (input) {
+        input.addEventListener('input', function () {
+            if (input.checkValidity()) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+            } else {
+                input.classList.remove('is-valid');
+                input.classList.add('is-invalid');
+            }
+        });
+    });
+    
+    document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
+        const input = e.target;
+        if (input.value < 1) {
+            input.setCustomValidity("El valor debe ser un número positivo.");
+        } else {
+            input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
+        }
+    });
+
+window.addEventListener('load', function() {
+        cargarTablaGranjas()
+});
+</script>
+
 HTML;
 ;
+
+// Agregar las funciones y el contenedor de los toast
+// Para mostrar notificaciones
+$body .= $toast;
 ?>

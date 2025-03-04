@@ -12,11 +12,8 @@ class granja{
     public function __construct()
     {
         require_once 'model/conexion.php';  
-        
         // Inicializar la conexión
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-    
-        // Verificar si la conexión fue exitosa
         if ($this->mysqli->connect_error) {
             die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
         }
@@ -32,32 +29,31 @@ class granja{
 
     public function setNombre($nombre)
     {
-        $this->nombre = trim($nombre); // Eliminar espacios en blanco al inicio y al final y asignarlo al objeto.
+        $this->nombre = strip_tags(trim($nombre)); // Eliminar espacios en blanco al inicio y al final y asignarlo al objeto.
     }
 
     public function setHabilitacionSenasa($habilitacionSenasa)
     {
-        $this->habilitacionSenasa = trim($habilitacionSenasa); 
+        $this->habilitacionSenasa = strip_tags(trim($habilitacionSenasa)); 
     }
 
     public function setMetrosCuadrados($metrosCuadrados)
     {
+        $metrosCuadrados = strip_tags(trim($metrosCuadrados));
         if (empty($metrosCuadrados)) {
-            $error = "El campo Metros Cuadrados es obligatorio.";
+            $error = "El campo es nulo.";
         } elseif (!is_numeric($metrosCuadrados) || $metrosCuadrados <= 0) {
             $error = "Debe ser un número positivo.";
         } else {
             // Procesar el dato si es válido
             $metrosCuadrados = intval($metrosCuadrados);
         }
-        
-        
-        $this->metrosCuadrados = trim($metrosCuadrados); 
+        $this->metrosCuadrados = $metrosCuadrados;
     }
 
     public function setUbicacion($ubicacion)
     {
-        $this->ubicacion = trim($ubicacion); 
+        $this->ubicacion = strip_tags(trim($ubicacion)); 
     }
 
     public function setMaxID()
@@ -88,9 +84,7 @@ class granja{
             }
         }
         $this->mysqli->close();
-        // Convertir el array de datos a formato JSON
-        $json_data = json_encode($data);
-        return $json_data;
+        return $data;
     }
 
     public function getGranjaPorId($idGranja)
@@ -111,99 +105,105 @@ class granja{
 
     public function save()
     {
-
-        // Consulta para verificar si el Granja ya existe
-        $sqlCheck = "SELECT idGranja FROM granja WHERE idGranja = ?";
-        $stmtCheck = $this->mysqli->prepare($sqlCheck);
-
-        if (!$stmtCheck) {
-            die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
-        }
-
-        // Enlazar parametro
-        $stmtCheck->bind_param("i", $this->idGranja);
-        $stmtCheck->execute();
-        $stmtCheck->store_result();
-
-        // Verificar
-        if ($stmtCheck->num_rows > 0) {
-            echo '<script type="text/javascript">alert("Error: La granja ya existe.");</script>';
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Consulta para verificar si el Granja ya existe
+            $sqlCheck = "SELECT idGranja FROM granja WHERE idGranja = ?";
+            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+            if (!$stmtCheck) {
+                throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
+            }
+            // Enlazar parametro
+            $stmtCheck->bind_param("i", $this->idGranja);
+            $stmtCheck->execute();
+            $stmtCheck->store_result();
+            // Verificar
+            if ($stmtCheck->num_rows > 0) {
+                $stmtCheck->close();
+                throw new RuntimeException("Error, ya existe: " . $this->mysqli->error);
+                return false; 
+            }
             $stmtCheck->close();
-            $this->mysqli->close();
-            return false; 
+            // Inserción de Granja
+            $sql = "INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) 
+                    VALUES (?, ?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+            }
+            // Enlaza los parámetros y ejecuta la consulta
+            $stmt->bind_param("issis", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        }catch(RuntimeException $e) {
+            throw $e;
+            return false;
         }
-        $stmtCheck->close();
-
-        // Inserción del nuevo Granja
-        $sql = "INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) 
-                VALUES (?, ?, ?, ?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-        }
-
-        // Enlaza los parámetros y ejecuta la consulta
-        $stmt->bind_param("issis", $this->idGranja, $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        
-        // Cerrar la consulta y la conexión
-        $stmt->close();
-        $this->mysqli->close();
-        return true;
     }
 
     public function update()
     {
-
-        // Preparar la consulta para actualizar los datos del Granja
-        $sql = "UPDATE granja SET nombre = ?, habilitacionSenasa = ?, metrosCuadrados = ?, ubicacion = ? WHERE idGranja = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Preparar la consulta para actualizar los datos del Granja
+            $sql = "UPDATE granja SET nombre = ?, habilitacionSenasa = ?, metrosCuadrados = ?, ubicacion = ? WHERE idGranja = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            // Enlazar parámetros y ejecutar la consulta
+            $stmt->bind_param("ssisi", $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion, $this->idGranja);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        } catch (RuntimeException $e) {
+            throw $e;
+            return false;
         }
-        // Enlazar parámetros y ejecutar la consulta
-        $stmt->bind_param("ssisi", $this->nombre, $this->habilitacionSenasa, $this->metrosCuadrados, $this->ubicacion, $this->idGranja);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        // Cerrar la consulta
-        $stmt->close();
-        $this->mysqli->close();
     }
 
     public function deleteGranjaPorId($idGranja)
     {
-        // echo("<h2><script>console.log(".$idGranja.")</script></h2>"); el id granja llega bien
-        echo("<h2 class='bg-white text-black'>EJECUTO BORRAR</h2>");
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Verificar que $idGranja sea un entero
+            if (!is_numeric($idGranja)) {
+                throw new RuntimeException('El ID de la granja debe ser un número.');
+            }
 
-        // Verificar que $idGranja sea un entero
-        if (!is_numeric($idGranja)) {
-            throw new InvalidArgumentException('El ID de la granja debe ser un número.');
+            $sql = "DELETE FROM granja WHERE idGranja = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idGranja);
+            if (!$stmt->execute()) {
+                // Verificar si es un error de clave foránea
+                if ($this->mysqli->errno == 1451) {
+                    throw new RuntimeException('El tipo de mantenimiento tiene registros asociados.');
+                }else{
+                    throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+                }
+            }
+            // Cerrar el statement
+            $stmt->close();
+            return true;
+        } catch (runtimeException $e) {
+            throw $e;
+            return false;
         }
-
-        if ($this->mysqli === null) {
-            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-        }
-        
-        // Usar una consulta preparada para evitar inyección SQL
-        $sql = "DELETE FROM granja WHERE idGranja = ?";
-        $stmt = $this->mysqli->prepare($sql);
-
-        if ($stmt === false) {
-            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
-        }
-
-        // Enlazar el parámetro a la consulta
-        $stmt->bind_param('i', $idGranja);
-
-        // Ejecutar la consulta
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-
-        // Cerrar el statement
-        $stmt->close();
     }
 }

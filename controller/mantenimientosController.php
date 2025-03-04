@@ -104,6 +104,9 @@ if ( !empty($_GET) )
     if (isset($_GET['ajax']))
     {
         switch ($_GET['ajax']) {
+        // ------------------------------------
+        // SOLICITUDES AJAX - TIPO DE MANTENIMIENTOS
+        // ------------------------------------
             case 'addTipoMant':
                 header('Content-Type: application/json');
                 try {
@@ -179,6 +182,28 @@ if ( !empty($_GET) )
                 }
                 exit();
             break;
+
+        // ------------------------------------
+        // SOLICITUDES AJAX - MANTENIMIENTOS DE GRANJA
+        // ------------------------------------
+
+            case 'getMantGranjas':
+                header('Content-Type: application/json');
+                /*try {
+                    $oTipoMantenimiento = new tipoMantenimiento();
+                    $tiposMant = $oTipoMantenimiento->getTipoMantenimientos();
+                   
+                    if ($tiposMant) {
+                        http_response_code(200);
+                        echo json_encode($tiposMant);
+                    }else{
+                        echo '[]';
+                    }
+                } catch (RuntimeException $e) {
+                        http_response_code(400);
+                        echo json_encode(['error' => $e->getMessage()]);
+                }*/
+                exit();
 
             default:
                 exit();

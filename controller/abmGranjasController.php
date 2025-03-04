@@ -1,53 +1,96 @@
 <?php
 require_once 'model/granjaModel.php';
-$validacion = false;
 
-if ( !empty($_POST) ) 
+if (isset($_GET['ajax']))
 {
-    if ( $_POST['btGranja'] == 'registrarGranja' )
-    {
-        $oGranja = new Granja();
-        $oGranja->setMaxID();
-        $oGranja->setNombre($_POST['nombre']);
-        $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
-        $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
-        $oGranja->setUbicacion($_POST['ubicacion']);
-        $oGranja->save();
-        //Redirigir a la vista principal de ABM granjas
-        //header("Location: index.php?opt=granjas");
-        //exit();   
-    }
+    switch ($_GET['ajax']) {
+    // ------------------------------------
+    // SOLICITUDES AJAX - GRANJAS
+    // ------------------------------------
+        case 'getGranjas':
+            header('Content-Type: application/json');
+            try {
+                $oGranja = new Granja();
+                $granjas = $oGranja->getall();
+                   
+                if ($granjas) {
+                    http_response_code(200);
+                    echo json_encode($granjas);
+                }else{
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['error' => $e->getMessage()]);
+            }
+            exit();
 
-    if ( $_POST['btGranja'] == 'editarGranja' )
-    {
-        $oGranja = new Granja();
-        $oGranja->setIdGranja ($_POST['idGranja']);
-        $oGranja->setNombre($_POST['nombre']);
-        $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
-        $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
-        $oGranja->setUbicacion($_POST['ubicacion']);
-        $oGranja->update();
-        header("Location: index.php?opt=granjas");
-        exit();   
-    }
-}
+        case 'delGranja': 
+            header('Content-Type: application/json');
+            try {
+                $oGranja = new Granja();
+                $idGranja = (int)$_GET['idGranja'];
 
-if ( !empty($_GET) ) 
-{
-    if ($_GET['opt']=='granjas')
-    {
-        $oGranja = new Granja();
-        $resultado = $oGranja->getall();
-    }
+                if ($oGranja->deleteGranjaPorId($idGranja)) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Eliminado correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                //No pasar los errores el JS, enviar uno personalizado.
+                //echo json_encode(['msg' => $e->getMessage()]);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
+            }
+            exit();
+        break;
 
-    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
-    {
-        UNSET($_GET['delete']);
-        $oGranja = new Granja();
-        $idGranja = (int)$_GET['idGranja'];
-        $oGranja->deleteGranjaPorId($idGranja);
-        // Recargar página para mostrar resultados
-        header("Location: index.php?opt=granjas");
-        exit();
+        case 'addGranja':
+            header('Content-Type: application/json');
+            try {
+                $oGranja = new Granja();
+                $oGranja->setMaxID();
+                $oGranja->setNombre($_POST['nombre']);
+                $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
+                $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
+                $oGranja->setUbicacion($_POST['ubicacion']);
+                // Respuesta al frontend
+                if ($oGranja->save()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Granja agregada correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    // echo json_encode(['error' => $e->getMessage()]);
+                    echo json_encode(['msg' => 'Error al añadir.']);
+            }
+            exit();
+        break;
+
+        case 'editGranja':
+            header('Content-Type: application/json');
+            try {
+                $oGranja = new Granja();
+                $oGranja->setIdGranja ($_POST['idGranja']);
+                $oGranja->setNombre($_POST['nombre']);
+                $oGranja->setHabilitacionSenasa($_POST['habilitacion']);
+                $oGranja->setMetrosCuadrados($_POST['metrosCuadrados']);
+                $oGranja->setUbicacion($_POST['ubicacion']);
+                // Respuesta al frontend
+                if ($oGranja->update()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                    //echo json_encode(['msg' => $e->getMessage()]);
+                } 
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    // echo json_encode(['msg' => $e->getMessage()]);
+                    echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
+
+        default:
+            exit();
+        break;
     }
 }
