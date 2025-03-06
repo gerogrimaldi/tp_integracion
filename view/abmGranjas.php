@@ -1,6 +1,4 @@
 <?php
-include 'view/toast.php';
-
 $body = <<<HTML
 <div class="container">
     <h1>Granjas</h1>
@@ -21,7 +19,6 @@ $body = <<<HTML
                 <th class="text-primary">Ubicación</th> 
                 <th class="text-primary">Editar</th> 
                 <th class="text-primary">Borrar</th> 
-                <th class="text-primary">Galpones</th> 
             </tr>
         </thead>
         <tbody id="granjas">
@@ -222,12 +219,6 @@ function cargarTablaGranjas() {
                 '</td>' +
                 '<td>' +
                     '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarGranja(' + granja.idGranja + ')">Borrar</button>' +
-                '</td>' +
-                '<td>' +
-                    '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
-                       'class="btn btn-warning btn-sm">' +
-                        'Galpones' +
-                    '</a>' +
                 '</td>';
             tablaGranjasTbody.appendChild(row);
         })
@@ -420,9 +411,9 @@ window.addEventListener('load', function() {
 </script>
 
 HTML;
-;
 
 // Agregar las funciones y el contenedor de los toast
 // Para mostrar notificaciones
+include 'view/toast.php';
 $body .= $toast;
 ?>

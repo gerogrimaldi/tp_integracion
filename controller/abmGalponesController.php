@@ -70,7 +70,7 @@ if (isset($_GET['ajax']))
                 $oGalpon = new Galpon();
                 $oGalpon->setMaxID();
                 $oGalpon->setIdentificacion($_POST['identificacion']);
-                $oGalpon->setIdTipoAve($_POST['opciones']);
+                $oGalpon->setIdTipoAve($_POST['idTipoAve']);
                 $oGalpon->setCapacidad($_POST['capacidad']);
                 $oGalpon->setIdGranja($_POST['idGranja']);
                 
@@ -93,7 +93,7 @@ if (isset($_GET['ajax']))
                 $oGalpon = new Galpon();
                 $oGalpon->setIdGalpon ($_POST['idGalpon']);
                 $oGalpon->setIdentificacion($_POST['identificacion']);
-                $oGalpon->setIdTipoAve($_POST['opcionesEditar']);
+                $oGalpon->setIdTipoAve($_POST['idTipoAve']);
                 $oGalpon->setCapacidad($_POST['capacidad']);
                 $oGalpon->setIdGranja($_POST['idGranja']);
                 

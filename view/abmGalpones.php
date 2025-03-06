@@ -1,22 +1,14 @@
 <?php
-
-$error = $error ?? ''; // Definir $error como cadena vacía si no está definido
-
 $body = <<<HTML
 <div class="container">
     <h1>Galpones</h1>
-
-    <form id="selectGranjaForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
+    <form id="selectGranjaForm" class="needs-validation" novalidate>
         <div class="mb-4">
             <label for="selectGranja" class="form-label">Seleccione una granja para ver sus galpones.</label>
             <div class="input-group">
                 <select id="selectGranja" name="selectGranja" class="form-control" required>
-                    <!-- Las opciones se agregan con JavaScript -->
+                    <!-- Listado de granjas -->
                 </select>
-                <button type="submit" class="btn btn-primary rounded-end" name="btGalpon" value="selectGranja">Filtrar</button>
-                <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
-                Agregar galpón
-            </button>
                 <div class="invalid-feedback">
                     Debe elegir una opción.
                 </div>
@@ -24,18 +16,24 @@ $body = <<<HTML
         </div>
     </form>
 
-    <table id="myTable" class="table table-bordered bg-white">
+    <div class="text-center mb-3">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
+          Agregar galpón
+        </button>
+    </div>
+    
+    <table id="tablaGalpones" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
-                <th class="text-primary">ID Galpon</th>
+                <th class="text-primary">ID</th>
                 <th class="text-primary">Identificación</th>
-                <th class="text-primary">Tipo de Ave</th>
+                <th class="text-primary">Tipo de Aves</th>
                 <th class="text-primary">Capacidad</th>
-                <th class="text-primary"></th>
-                <th class="text-primary"></th>
+                <th class="text-primary">Editar</th>
+                <th class="text-primary">Borrar</th>
             </tr>
         </thead>
-        <tbody id="galpon">
+        <tbody id="galpones">
             <!-- Los datos se insertarán aquí -->
         </tbody>
     </table>
@@ -50,7 +48,7 @@ $body = <<<HTML
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="agregrarGalponForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
+                <form id="agregarGalponForm" class="needs-validation" novalidate>
                     <div class="mb-4">
                         <label for="identificacion" class="form-label">Identificador del galpón</label>
                         <input type="select" 
@@ -78,8 +76,8 @@ $body = <<<HTML
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="opciones" class="form-label">Tipo de aves</label>
-                        <select id="opciones" name="opciones" class="form-control">
+                        <label for="idTipoAve" class="form-label">Tipo de aves</label>
+                        <select id="idTipoAve" name="idTipoAve" class="form-control">
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
                         <div class="invalid-feedback">
@@ -91,7 +89,7 @@ $body = <<<HTML
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" name="btGalpon" value="registrarGalpon" form="agregrarGalponForm">Agregar</button>
+                <button type="submit" class="btn btn-primary" id="btnAgregarGalpon">Finalizar</button>
             </div>
         </div>
     </div>
@@ -106,12 +104,12 @@ $body = <<<HTML
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editarGalponForm" action="index.php?opt=galpones" method="POST" class="needs-validation" novalidate>
+                <form id="editarGalponForm" class="needs-validation" novalidate>
                 <div class="mb-4">
-                        <label for="identificacion" class="form-label">Identificador del galpón</label>
+                        <label for="identificacionEditar" class="form-label">Identificador del galpón</label>
                         <input type="select" 
                                class="form-control" 
-                               id="identificacion" 
+                               id="identificacionEditar" 
                                name="identificacion" 
                                placeholder="Identificador"
                                min="1"
@@ -121,10 +119,10 @@ $body = <<<HTML
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="capacidad" class="form-label">Capacidad</label>
+                        <label for="capacidadEditar" class="form-label">Capacidad</label>
                         <input type="number" 
                                class="form-control" 
-                               id="capacidad" 
+                               id="capacidadEditar" 
                                name="capacidad" 
                                placeholder="Capacidad de aves"
                                min="1"
@@ -134,21 +132,21 @@ $body = <<<HTML
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label for="opciones" class="form-label">Tipo de aves</label>
-                        <select id="opcionesEditar" name="opcionesEditar" class="form-control">
+                        <label for="idTipoAveEditar" class="form-label">Tipo de aves</label>
+                        <select id="idTipoAveEditar" name="idTipoAveEditar" class="form-control">
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
                         <div class="invalid-feedback">
-                            La habilitación debe tener al menos 3 caracteres.
+                            Debe seleccionar un tipo de ave.
                         </div>
                     </div>
-                    <input type="hidden" id="idGranja" name="idGranja">
-                    <input type="hidden" id="idGalpon" name="idGalpon">
+                    <input type="hidden" id="idGranjaEditar" name="idGranja">
+                    <input type="hidden" id="idGalponEditar" name="idGalpon">
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" name="btGalpon" value="editarGalpon" form="editarGalponForm">Finalizar</button>
+                <button type="submit" class="btn btn-primary" id="btnEditarGalpon">Finalizar</button>
             </div>
         </div>
     </div>
@@ -156,20 +154,20 @@ $body = <<<HTML
 
 <script>
 <!------------------------------------------------->
-<!--- Sección JavaScript de Galpones -->
+<!--------- Sección JavaScript de Galpones -------->
 <!-------------------------------------------------> 
 <!------- RELLENAR TABLA DE GRANJAS - AJAX -------->
 <!-------------------------------------------------> 
-function cargarTablaGranjas() {
+function cargarTablaGalpones() {
     //Vaciar la tabla
-    if ($.fn.DataTable.isDataTable('#tablaGranjas')) {
-        $('#tablaGranjas').DataTable().destroy();
+    if ($.fn.DataTable.isDataTable('#tablaGalpones')) {
+        $('#tablaGalpones').DataTable().destroy();
     }
-    var tablaGranjasTbody = document.getElementById("granjas");
-    tablaGranjasTbody.innerHTML = '';
+    var tablaGalponesTbody = document.getElementById("galpones");
+    tablaGalponesTbody.innerHTML = '';
 
     // Realizar la solicitud AJAX
-    fetch('index.php?opt=granjas&ajax=getGranjas')
+    fetch('index.php?opt=galpones&ajax=getGalponesGranja&idGranja=' + document.getElementById('selectGranja').value)
     .then(response => {
         if (!response.ok) {
             throw new Error('Error en la solicitud: ' + response.statusText);
@@ -178,211 +176,288 @@ function cargarTablaGranjas() {
     })
     .then(data => {
         // Recorrer los datos y crear las filas de la tabla
-        data.forEach(granja => {
+        data.forEach(galpon => {
             var row = document.createElement("tr");
             row.className = "table-light";
             row.innerHTML = 
-                '<td>' + granja.idGranja + '</td>' +
-                '<td>' + granja.nombre + '</td>' +
-                '<td>' + granja.habilitacionSenasa + '</td>' +
-                '<td>' + granja.metrosCuadrados + '</td>' +
-                '<td>' + granja.ubicacion + '</td>' +
-                '<td>' +
-                    '<button type="button" ' +
-                            'class="btn btn-warning btn-sm" ' +
-                            'data-bs-toggle="modal" ' +
-                            'data-bs-target="#editarGranja" ' +
-                            'data-id="' + granja.idGranja + '" ' +
-                            'data-nombre="' + granja.nombre + '" ' +
-                            'data-habilitacion="' + granja.habilitacionSenasa + '" ' +
-                            'data-metros="' + granja.metrosCuadrados + '" ' +
-                            'data-ubicacion="' + granja.ubicacion + '">' +
-                        'Editar' +
-                    '</button>' +
-                '</td>' +
-                '<td>' +
-                    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarGranja(' + granja.idGranja + ')">Borrar</button>' +
-                '</td>' +
-                '<td>' +
-                    '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
-                       'class="btn btn-warning btn-sm">' +
-                        'Galpones' +
-                    '</a>' +
-                '</td>';
-            tablaGranjasTbody.appendChild(row);
+            '<td>' + galpon.idGalpon + '</td>' +
+            '<td>' + galpon.identificacion + '</td>' +
+            '<td>' + galpon.nombre + '</td>' +
+            '<td>' + galpon.capacidad + '</td>' +
+            '<td>' +
+                '<button type="button" ' +
+                    'class="btn btn-warning btn-sm" ' +
+                    'data-bs-toggle="modal" ' +
+                    'data-bs-target="#editarGalpon" ' +
+                    'data-id="' + galpon.idGalpon + '" ' +
+                    'data-identificacion="' + galpon.identificacion + '" ' +
+                    'data-idTipoAve="' + galpon.idTipoAve + '" ' +
+                    'data-capacidad="' + galpon.capacidad + '" ' +
+                    'data-idGranja="' + galpon.idGranja + '">' +
+                    'Editar' +
+                '</button>' +
+            '</td>' +
+            '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarGalpon(' + galpon.idGalpon + ')">Borrar</button>' +
+            '</td>';
+            tablaGalponesTbody.appendChild(row);
         })
-        $('#tablaGranjas').DataTable();
+        $('#tablaGalpones').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar galpones:', error);
+        $('#tablaGalpones').DataTable();
+    });
+}
+<!-----------------------------------------------------> 
+<!----------- GALPONES - FORMULARIO AGREGAR ----------->  
+<!-----------------------------------------------------> 
+<!--- Pasar al formulario el ID Granja seleccionado --->  
+<!------- y presentar error si no hay seleccion ------->  
+document.getElementById("agregarGalpon").addEventListener("show.bs.modal", function (event) {
+    // Get the currently selected granja ID
+    const selectedGranjaId = document.getElementById('selectGranja').value;
+    if (!selectedGranjaId) {
+        event.preventDefault();
+        showToastError('Debe seleccionar una granja primero');
+        return;
+    }
+    // Set the hidden input value
+    document.querySelector("#agregarGalponForm #idGranja").value = selectedGranjaId;
+    document.querySelector("#editarGalponForm #idGranja").value = selectedGranjaId;
+});
+<!---- Cambiar la acción del botón enviar y enter ---->  
+document.getElementById('btnAgregarGalpon').addEventListener('click', function() {
+    agregarGalpon();
+});
+document.getElementById('agregarGalponForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarGalpon();
+});
+<!-----------------------------------------------------> 
+<!--------- GALPONES - FORMULARIO DE EDICIÓN ---------->  
+<!-----------------------------------------------------> 
+document.getElementById('btnEditarGalpon').addEventListener('click', function() {
+   editarGalpon();
+});
+document.getElementById('editarGalponForm').addEventListener('submit', function(event) {
+   event.preventDefault(); // Prevent the default form submission
+   editarGalpon();
+});
+<!-----------------------------------------------> 
+<!------------- GALPONES - ELIMINAR ------------->  
+<!-----------------------------------------------> 
+function eliminarGalpon(idGalpon) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=galpones&ajax=delGalpon&idGalpon=' + idGalpon, {
+        method: 'GET'
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla y los select
+                cargarTablaGalpones();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
+    });
+}
+<!-----------------------------------------------> 
+<!---------- GALPONES - AGREGAR NUEVO ----------->  
+<!-----------------------------------------------> 
+function agregarGalpon() {
+    const identificacion = document.getElementById('identificacion').value;
+    const capacidad = document.getElementById('capacidad').value;
+    const idGranja = document.getElementById('idGranja').value;
+    const idTipoAve = document.getElementById('idTipoAve').value;
+
+    fetch('index.php?opt=galpones&ajax=addGalpon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'identificacion=' + encodeURIComponent(identificacion) +
+              '&capacidad=' + encodeURIComponent(capacidad) +
+              '&idGranja=' + encodeURIComponent(idGranja) +
+              '&idTipoAve=' + encodeURIComponent(idTipoAve)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaGalpones();
+                $('#agregarGalpon').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+<!-------------------------------------------------> 
+<!-------------- GALPONES - EDITAR ---------------->
+<!-------------------------------------------------> 
+function editarGalpon() {
+    const identificacion = document.getElementById('identificacionEditar').value;
+    const capacidad = document.getElementById('capacidadEditar').value;
+    const idGranja = document.getElementById('idGranjaEditar').value;
+    const idTipoAve = document.getElementById('idTipoAveEditar').value;
+    const idGalpon = document.getElementById('idGalponEditar').value;
+
+    fetch('index.php?opt=galpones&ajax=editGalpon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'identificacion=' + encodeURIComponent(identificacion) +
+              '&capacidad=' + encodeURIComponent(capacidad) +
+              '&idGranja=' + encodeURIComponent(idGranja) +
+              '&idTipoAve=' + encodeURIComponent(idTipoAve)+
+              '&idGalpon=' + encodeURIComponent(idGalpon)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaGalpones();
+                $('#editarGalpon').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+<!-------------------------------------------------> 
+<!------- GRANJAS - CARGAR LISTADO SELECT   ------->
+<!-------------------------------------------------> 
+function cargarSelectGranja() {
+    //Iniciar tabla, cargar opción por default.
+    const selectFiltrarGranja = document.getElementById('selectGranja');
+    selectFiltrarGranja.innerHTML = '';
+    const defaultOption = document.createElement('option');
+        defaultOption.text = 'Seleccione una granja';
+        defaultOption.value = '';
+        selectFiltrarGranja.appendChild(defaultOption);
+
+    // Realizar la solicitud AJAX para obtener las granjas
+    fetch('index.php?opt=granjas&ajax=getGranjas')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(granjas => {
+        // Agregar las granjas desde la API
+        granjas.forEach(granja => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = granja.idGranja;
+            optionAgregar.text = granja.nombre;
+            selectFiltrarGranja.appendChild(optionAgregar);
+        });
+
+        // Si hay un valor previamente seleccionado, restaurarlo y cargar los galpones
+        const previouslySelected = selectFiltrarGranja.getAttribute('data-selected');
+        if (previouslySelected) {
+            selectFiltrarGranja.value = previouslySelected;
+            cargarTablaGalpones();
+        }
     })
     .catch(error => {
         console.error('Error al cargar granjas:', error);
-        $('#tablaGranjas').DataTable();
+        showToastError('Error al cargar las granjas');
     });
 }
-
-<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
-function cargarSelectGranja() {
-// Recupero desde PHP la granja seleccionada en caso de existir
-var selectedGranja = $selectedGranja;
-var granjasSelect = $granjasFiltradas;
-const selectFiltrarGranja = document.getElementById('selectGranja');
-selectFiltrarGranja.innerHTML = '';
-const defaultOption = document.createElement('option');
-defaultOption.text = 'Seleccione una granja';
-defaultOption.value = '';
-selectFiltrarGranja.appendChild(defaultOption);
-granjasSelect.forEach(function (item) {
-    const optionAgregar = document.createElement('option');
-    optionAgregar.value = item.idGranja;
-    optionAgregar.text = item.nombre;
-    // Marcar como seleccionada si coincide con el valor recuperado
-    if (item.idGranja == selectedGranja) {
-        optionAgregar.selected = true;
-    }
-    selectFiltrarGranja.appendChild(optionAgregar);
-    });
-}
-
-var galpon = $resultado;
-var idGranjaJava = $idGranjaFiltro;
-// Procesar los datos y crear filas en la tabla
-var galponTbody = document.getElementById("galpon");
-
-galpon.forEach(function(galpon) {
-    var row = document.createElement("tr");
-    row.className = "table-light";
-    row.innerHTML = 
-        '<td>' + galpon.idGalpon + '</td>' +
-        '<td>' + galpon.identificacion + '</td>' +
-        '<td>' + galpon.nombre + '</td>' +
-        '<td>' + galpon.capacidad + '</td>' +
-        '<td>' +
-            '<button type="button" ' +
-                'class="btn btn-warning btn-sm" ' +
-                'data-bs-toggle="modal" ' +
-                'data-bs-target="#editarGalpon" ' +
-                'data-id="' + galpon.idGalpon + '" ' +
-                'data-identificacion="' + galpon.identificacion + '" ' +
-                'data-idTipoAve="' + galpon.idTipoAve + '" ' +
-                'data-capacidad="' + galpon.capacidad + '" ' +
-                'data-idGranja="' + galpon.idGranja + '">' +
-                'Editar' +
-            '</button>' +
-        '</td>' +
-        '<td>' +
-            '<a href="index.php?opt=galpones&delete=true&idGalpon=' + galpon.idGalpon + ' + &idGranja=' + galpon.idGranja + '" ' +
-                'class="btn btn-danger btn-sm">' +
-                'Borrar' +
-            '</a>' +
-        '</td>';
-    
-    galponTbody.appendChild(row);
-});
-
-// Inicializar DataTable
-$(document).ready(function() {
-    $("#myTable").DataTable();
-});
-
-function cargarOpciones() {
-    document.getElementById('idGranja').value = idGranjaJava;
-    var tiposAves = $tiposAves;
-    // Obtener los dos selects: uno para agregar y otro para editar
-    const selectAgregar = document.getElementById('opciones');
-    const selectEditar = document.getElementById('opcionesEditar');
-
-    // Limpiar las opciones actuales
-    selectAgregar.innerHTML = '';
-    selectEditar.innerHTML = '';
-
-    // Agregar la opción por defecto
-    const defaultOption = document.createElement('option');
-    defaultOption.text = 'Selecciona una opción';
-    defaultOption.value = '';
-    selectAgregar.appendChild(defaultOption);
-    selectEditar.appendChild(defaultOption.cloneNode(true));
-
-    // Agregar las opciones desde el array de tipos de aves (tiposAves)
-    tiposAves.forEach(function (item) {
-        const optionAgregar = document.createElement('option');
-        const optionEditar = document.createElement('option');
-
-        optionAgregar.value = item.idTipoAve;
-        optionAgregar.text = item.nombre;
-
-        optionEditar.value = item.idTipoAve;
-        optionEditar.text = item.nombre;
-
-        selectAgregar.appendChild(optionAgregar);
-        selectEditar.appendChild(optionEditar);
-    });
-}
-
-// Reemplaza las líneas window.onload individuales por:
-    window.addEventListener('load', function() {
-        cargarSelectGranja();
-        cargarOpciones();
-    });
-
-// Lógica para rellenar el modal de edición
-document.addEventListener('click', function (event) {
-    if (event.target && event.target.matches('.btn-warning')) {
-        const button = event.target;
-
-        // Extrae los datos del botón
-        const idGalpon = button.getAttribute('data-id');
-        const identificacion = button.getAttribute('data-identificacion');
-        const idTipoAve = button.getAttribute('data-idTipoAve');
-        const capacidad = button.getAttribute('data-capacidad');
-        const idGranja = button.getAttribute('data-idGranja');
-
-        // Rellena los campos del formulario en el modal
-        document.querySelector('#editarGalponForm #identificacion').value = identificacion;
-        document.querySelector('#editarGalponForm #capacidad').value = capacidad;
-
-        // Selecciona la opción correcta en el select
-        const opcionesEditar = document.querySelector('#editarGalponForm #opcionesEditar');
-        opcionesEditar.value = idTipoAve; // Selecciona el valor correcto
-        if (opcionesEditar.value !== idTipoAve) {
-            // Si el valor no está presente, agrega la opción faltante
-            const nuevaOpcion = document.createElement('option');
-            nuevaOpcion.value = idTipoAve;
-            nuevaOpcion.text = 'Opción desconocida';
-            opcionesEditar.appendChild(nuevaOpcion);
-            opcionesEditar.value = idTipoAve;
+<!-- Listado GRANJAS - Filtrar al presionar opción del select -->
+document.getElementById('selectGranja').addEventListener('change', function(e) {
+    this.setAttribute('data-selected', e.target.value);
+    if (e.target.value) {
+        cargarTablaGalpones();
+    } else {
+        // Limpiar la tabla si no hay granja seleccionada
+        if ($.fn.DataTable.isDataTable('#tablaGalpones')) {
+            $('#tablaGalpones').DataTable().clear().draw();
         }
-
-        // Asigna el ID de la granja (oculto)
-        document.querySelector('#editarGalponForm #idGranja').value = idGranja;
-        document.querySelector('#editarGalponForm #idGalpon').value = idGalpon;
     }
 });
+<!-------------------------------------------------> 
+<!--------- TIPOS DE AVES - CARGAR SELECT --------->
+<!-------------------------------------------------> 
+function cargarSelectTipoAves(select) {
+    //Iniciar tabla, cargar opción por default.
+    const selectTipoAves = document.getElementById(select);
+    selectTipoAves.innerHTML = '';
+    const defaultOption = document.createElement('option');
+        defaultOption.text = 'Seleccione el tipo de ave';
+        defaultOption.value = '';
+        selectTipoAves.appendChild(defaultOption);
 
+    fetch('index.php?opt=galpones&ajax=getTipoAves')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(tipoAves => {
+        tipoAves.forEach(tipoAve => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = tipoAve.idTipoAve;
+            optionAgregar.text = tipoAve.nombre;
+            selectTipoAves.appendChild(optionAgregar);
+        });
+    })
+    .catch(error => {
+        console.error('Error al cargar tipos de aves:', error);
+        showToastError('Error al cargar tipos de aves');
+    });
+}
+<!-------------------------------------------------> 
+<!------- RELLENAR FORMULARIO DE EDICION   -------->
+<!-------------------------------------------------> 
 document.getElementById("editarGalpon").addEventListener("show.bs.modal", function (event) {
     // Botón que activó el modal
     const button = event.relatedTarget;
-
     // Extraer datos del atributo data-* del botón que abrió el modal
     const idGalpon = button.getAttribute("data-id");
     const identificacion = button.getAttribute("data-identificacion");
     const idTipoAve = button.getAttribute("data-idTipoAve");
     const capacidad = button.getAttribute("data-capacidad");
     const idGranja = button.getAttribute("data-idGranja");  // Asegúrate de tener este atributo en el botón
-
     // Asignar los valores a los campos del formulario
-    document.querySelector("#editarGalponForm #identificacion").value = identificacion;
-    document.querySelector("#editarGalponForm #capacidad").value = capacidad;
-    document.querySelector("#editarGalponForm #idTipoAve").value = idTipoAve;
-    document.querySelector("#editarGalponForm #idGalpon").value = idGalpon;
-
+    document.querySelector("#editarGalponForm #identificacionEditar").value = identificacion;
+    document.querySelector("#editarGalponForm #capacidadEditar").value = capacidad;
+    document.querySelector("#editarGalponForm #idTipoAveEditar").value = idTipoAve;
+    document.querySelector("#editarGalponForm #idGalponEditar").value = idGalpon;
     // Asignar el valor del campo hidden idGranja
-    document.querySelector("#editarGalponForm #idGranja").value = idGranja;
-
-    // Actualizar la acción del formulario si es necesario
-    // Aquí te aseguras de que la acción esté correctamente configurada
-    const form = document.getElementById("editarGalponForm");
-    form.action = `index.php?opt=galpon&edit=true&idGalpon=${idGalpon}`;
+    document.querySelector("#editarGalponForm #idGranjaEditar").value = idGranja;
+});
+<!-------------------------------> 
+<!------- CARGAR EL VIEW -------->
+<!-------------------------------> 
+window.addEventListener('load', function() {
+    cargarSelectGranja();
+    cargarTablaGalpones();
+    cargarSelectTipoAves('idTipoAve');
+    cargarSelectTipoAves('idTipoAveEditar');
 });
 
+<!-----------------------------------------> 
+<!------------ VALIDACIONES   ------------->
+<!-----------------------------------------> 
 // Activar validaciones al enviar el formulario
 document.querySelectorAll('.needs-validation').forEach(function (form) {
     form.addEventListener('submit', function (event) {
@@ -410,4 +485,8 @@ document.querySelectorAll('input, select, textarea').forEach(function (input) {
 
 HTML;
 
+// Agregar las funciones y el contenedor de los toast
+// Para mostrar notificaciones
+include 'view/toast.php';
+$body .= $toast;
 ?>
