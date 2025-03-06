@@ -1,7 +1,5 @@
 <?php
 include 'view/toast.php';
-$error = $error ?? ''; // Definir $error como cadena vacía si no está definido
-$idGranja = $idGranja ?? ''; // Definir $idGranja como cadena vacía si no está definido
 
 $body = <<<HTML
 <div class="container">
@@ -16,14 +14,14 @@ $body = <<<HTML
     <table id="tablaGranjas" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
-                <th class="text-primary">ID Granja</th>
+                <th class="text-primary">ID</th>
                 <th class="text-primary">Nombre</th>
                 <th class="text-primary">SENASA Nº</th>
                 <th class="text-primary">m²</th>
                 <th class="text-primary">Ubicación</th> 
-                <th class="text-primary"></th> 
-                <th class="text-primary"></th> 
-                <th class="text-primary"></th> 
+                <th class="text-primary">Editar</th> 
+                <th class="text-primary">Borrar</th> 
+                <th class="text-primary">Galpones</th> 
             </tr>
         </thead>
         <tbody id="granjas">
@@ -183,6 +181,13 @@ $body = <<<HTML
 <!------- RELLENAR TABLA DE GRANJAS - AJAX -------->
 <!-------------------------------------------------> 
 function cargarTablaGranjas() {
+    //Vaciar la tabla
+    if ($.fn.DataTable.isDataTable('#tablaGranjas')) {
+        $('#tablaGranjas').DataTable().destroy();
+    }
+    var tablaGranjasTbody = document.getElementById("granjas");
+    tablaGranjasTbody.innerHTML = '';
+
     // Realizar la solicitud AJAX
     fetch('index.php?opt=granjas&ajax=getGranjas')
     .then(response => {
@@ -192,11 +197,6 @@ function cargarTablaGranjas() {
         return response.json();
     })
     .then(data => {
-        if ($.fn.DataTable.isDataTable('#tablaGranjas')) {
-            $('#tablaGranjas').DataTable().destroy();
-        }
-        var tablaGranjasTbody = document.getElementById("granjas");
-        tablaGranjasTbody.innerHTML = '';
         // Recorrer los datos y crear las filas de la tabla
         data.forEach(granja => {
             var row = document.createElement("tr");
@@ -234,7 +234,7 @@ function cargarTablaGranjas() {
         $('#tablaGranjas').DataTable();
     })
     .catch(error => {
-        console.error('Error al cargar los tipos de mantenimiento:', error);
+        console.error('Error al cargar granjas:', error);
         $('#tablaGranjas').DataTable();
     });
 }
@@ -252,11 +252,32 @@ document.getElementById('agregarGranjaForm').addEventListener('submit', function
 <!-- GRANJAS - CAPTAR EL FORMULARIO DE EDICIÓN -->  
 <!-----------------------------------------------> 
 document.getElementById('btnEditarGranja').addEventListener('click', function() {
-    editarGranja();
+   editarGranja();
 });
 document.getElementById('editarGranjaForm').addEventListener('submit', function(event) {
    event.preventDefault(); // Prevent the default form submission
    editarGranja();
+});
+<!-------------------------------------------------> 
+<!------- RELLENAR FORMULARIO DE EDICION   -------->
+<!-------------------------------------------------> 
+document.getElementById("editarGranja").addEventListener("show.bs.modal", function (event) {
+    // Botón que activó el modal
+    const button = event.relatedTarget;
+
+    // Extraer datos del atributo data-*
+    const idGranja = button.getAttribute("data-id");
+    const nombre = button.getAttribute("data-nombre");
+    const habilitacion = button.getAttribute("data-habilitacion");
+    const metros = button.getAttribute("data-metros");
+    const ubicacion = button.getAttribute("data-ubicacion");
+
+    // Asignar los valores a los campos del formulario
+    document.querySelector("#editarGranjaForm #editarNombre").value = nombre;
+    document.querySelector("#editarGranjaForm #editarHabilitacion").value = habilitacion;
+    document.querySelector("#editarGranjaForm #editarMetros").value = metros;
+    document.querySelector("#editarGranjaForm #editarUbicacion").value = ubicacion;
+    document.querySelector("#editarGranjaForm #editarIdGranja").value = idGranja;
 });
 <!-----------------------------------------------> 
 <!---------- GRANJAS - ELIMINAR ---------->  
@@ -317,29 +338,9 @@ function agregarGranja() {
         showToastError('Error en la solicitud AJAX: ' + error.message);
     });
 }
-
 <!-------------------------------------------------> 
-<!------- RELLENAR FORMULARIO DE EDICION   -------->
+<!------------ GRANJAS - EDITAR   ------------->
 <!-------------------------------------------------> 
-document.getElementById("editarGranja").addEventListener("show.bs.modal", function (event) {
-    // Botón que activó el modal
-    const button = event.relatedTarget;
-
-    // Extraer datos del atributo data-*
-    const idGranja = button.getAttribute("data-id");
-    const nombre = button.getAttribute("data-nombre");
-    const habilitacion = button.getAttribute("data-habilitacion");
-    const metros = button.getAttribute("data-metros");
-    const ubicacion = button.getAttribute("data-ubicacion");
-
-    // Asignar los valores a los campos del formulario
-    document.querySelector("#editarGranjaForm #editarNombre").value = nombre;
-    document.querySelector("#editarGranjaForm #editarHabilitacion").value = habilitacion;
-    document.querySelector("#editarGranjaForm #editarMetros").value = metros;
-    document.querySelector("#editarGranjaForm #editarUbicacion").value = ubicacion;
-    document.querySelector("#editarGranjaForm #editarIdGranja").value = idGranja;
-});
-
 function editarGranja() {
     const idGranja = document.getElementById('editarIdGranja').value;
     const nombre = document.getElementById('editarNombre').value;
@@ -374,40 +375,45 @@ function editarGranja() {
         showToastError('Error en la solicitud AJAX: ' + error.message);
     });
 }
+<!-------------------------------------------------> 
+<!------------ VALIDACIONES   ------------->
+<!-------------------------------------------------> 
+// Activar validaciones al enviar el formulario
+document.querySelectorAll('.needs-validation').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+});
 
-    // Activar validaciones al enviar el formulario
-    document.querySelectorAll('.needs-validation').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    });
-
-    // Validar campos en tiempo real
-    document.querySelectorAll('input, select, textarea').forEach(function (input) {
-        input.addEventListener('input', function () {
-            if (input.checkValidity()) {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-            }
-        });
-    });
-    
-    document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
-        const input = e.target;
-        if (input.value < 1) {
-            input.setCustomValidity("El valor debe ser un número positivo.");
+// Validar campos en tiempo real
+document.querySelectorAll('input, select, textarea').forEach(function (input) {
+    input.addEventListener('input', function () {
+        if (input.checkValidity()) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
         } else {
-            input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
         }
     });
+});
+    
+document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
+    const input = e.target;
+    if (input.value < 1) {
+        input.setCustomValidity("El valor debe ser un número positivo.");
+    } else {
+        input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
+    }
+});
 
+<!-------------------------------------------------> 
+<!---  FUNCIONES A EJECUTAR AL CARGAR LA PÁGINA --->
+<!-------------------------------------------------> 
 window.addEventListener('load', function() {
         cargarTablaGranjas()
 });

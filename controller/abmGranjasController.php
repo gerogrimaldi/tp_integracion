@@ -17,11 +17,12 @@ if (isset($_GET['ajax']))
                     http_response_code(200);
                     echo json_encode($granjas);
                 }else{
+                    http_response_code(200);
                     echo '[]';
                 }
             } catch (RuntimeException $e) {
                     http_response_code(400);
-                    echo json_encode(['error' => $e->getMessage()]);
+                    echo json_encode(['msg' => $e->getMessage()]);
             }
             exit();
 

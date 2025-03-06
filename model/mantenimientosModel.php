@@ -13,6 +13,13 @@ class tipoMantenimiento{
         }
     }
 
+    public function __destruct()
+    {
+        if ($this->mysqli !== null) {
+            $this->mysqli->close();
+        }
+    }
+
     public function setMaxIDTipoMant()
     {
         $sql = "SELECT MAX(idTipoMantenimiento) AS maxID FROM TipoMantenimiento";

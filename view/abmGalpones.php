@@ -24,32 +24,6 @@ $body = <<<HTML
         </div>
     </form>
 
-<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
-    <script>
-        function cargarSelectGranja() {
-        // Recupero desde PHP la granja seleccionada en caso de existir
-        var selectedGranja = $selectedGranja;
-        var granjasSelect = $granjasFiltradas;
-        const selectFiltrarGranja = document.getElementById('selectGranja');
-        selectFiltrarGranja.innerHTML = '';
-        const defaultOption = document.createElement('option');
-        defaultOption.text = 'Seleccione una granja';
-        defaultOption.value = '';
-        selectFiltrarGranja.appendChild(defaultOption);
-        granjasSelect.forEach(function (item) {
-            const optionAgregar = document.createElement('option');
-            optionAgregar.value = item.idGranja;
-            optionAgregar.text = item.nombre;
-            // Marcar como seleccionada si coincide con el valor recuperado
-            if (item.idGranja == selectedGranja) {
-                optionAgregar.selected = true;
-            }
-            selectFiltrarGranja.appendChild(optionAgregar);
-            });
-        }
-
-    </script>
-
     <table id="myTable" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
@@ -66,49 +40,6 @@ $body = <<<HTML
         </tbody>
     </table>
 </div>
-
-<script>
-    var galpon = $resultado;
-    var idGranjaJava = $idGranjaFiltro;
-    // Procesar los datos y crear filas en la tabla
-    var galponTbody = document.getElementById("galpon");
-    
-    galpon.forEach(function(galpon) {
-        var row = document.createElement("tr");
-        row.className = "table-light";
-        row.innerHTML = 
-            '<td>' + galpon.idGalpon + '</td>' +
-            '<td>' + galpon.identificacion + '</td>' +
-            '<td>' + galpon.nombre + '</td>' +
-            '<td>' + galpon.capacidad + '</td>' +
-            '<td>' +
-                '<button type="button" ' +
-                    'class="btn btn-warning btn-sm" ' +
-                    'data-bs-toggle="modal" ' +
-                    'data-bs-target="#editarGalpon" ' +
-                    'data-id="' + galpon.idGalpon + '" ' +
-                    'data-identificacion="' + galpon.identificacion + '" ' +
-                    'data-idTipoAve="' + galpon.idTipoAve + '" ' +
-                    'data-capacidad="' + galpon.capacidad + '" ' +
-                    'data-idGranja="' + galpon.idGranja + '">' +
-                    'Editar' +
-                '</button>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=galpones&delete=true&idGalpon=' + galpon.idGalpon + ' + &idGranja=' + galpon.idGranja + '" ' +
-                   'class="btn btn-danger btn-sm">' +
-                    'Borrar' +
-                '</a>' +
-            '</td>';
-        
-        galponTbody.appendChild(row);
-    });
-
-    // Inicializar DataTable
-    $(document).ready(function() {
-        $("#myTable").DataTable();
-    });
-</script>
 
 <!-- Modal popUp Agregar Galpon -->
 <div class="modal fade" id="agregarGalpon" tabindex="-1" aria-labelledby="agregarGalponModal" aria-hidden="true">
@@ -224,6 +155,134 @@ $body = <<<HTML
 </div>
 
 <script>
+<!------------------------------------------------->
+<!--- Sección JavaScript de Galpones -->
+<!-------------------------------------------------> 
+<!------- RELLENAR TABLA DE GRANJAS - AJAX -------->
+<!-------------------------------------------------> 
+function cargarTablaGranjas() {
+    //Vaciar la tabla
+    if ($.fn.DataTable.isDataTable('#tablaGranjas')) {
+        $('#tablaGranjas').DataTable().destroy();
+    }
+    var tablaGranjasTbody = document.getElementById("granjas");
+    tablaGranjasTbody.innerHTML = '';
+
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=granjas&ajax=getGranjas')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Recorrer los datos y crear las filas de la tabla
+        data.forEach(granja => {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+                '<td>' + granja.idGranja + '</td>' +
+                '<td>' + granja.nombre + '</td>' +
+                '<td>' + granja.habilitacionSenasa + '</td>' +
+                '<td>' + granja.metrosCuadrados + '</td>' +
+                '<td>' + granja.ubicacion + '</td>' +
+                '<td>' +
+                    '<button type="button" ' +
+                            'class="btn btn-warning btn-sm" ' +
+                            'data-bs-toggle="modal" ' +
+                            'data-bs-target="#editarGranja" ' +
+                            'data-id="' + granja.idGranja + '" ' +
+                            'data-nombre="' + granja.nombre + '" ' +
+                            'data-habilitacion="' + granja.habilitacionSenasa + '" ' +
+                            'data-metros="' + granja.metrosCuadrados + '" ' +
+                            'data-ubicacion="' + granja.ubicacion + '">' +
+                        'Editar' +
+                    '</button>' +
+                '</td>' +
+                '<td>' +
+                    '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarGranja(' + granja.idGranja + ')">Borrar</button>' +
+                '</td>' +
+                '<td>' +
+                    '<a href="index.php?opt=galpones&idGranja=' + granja.idGranja + '" ' +
+                       'class="btn btn-warning btn-sm">' +
+                        'Galpones' +
+                    '</a>' +
+                '</td>';
+            tablaGranjasTbody.appendChild(row);
+        })
+        $('#tablaGranjas').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar granjas:', error);
+        $('#tablaGranjas').DataTable();
+    });
+}
+
+<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
+function cargarSelectGranja() {
+// Recupero desde PHP la granja seleccionada en caso de existir
+var selectedGranja = $selectedGranja;
+var granjasSelect = $granjasFiltradas;
+const selectFiltrarGranja = document.getElementById('selectGranja');
+selectFiltrarGranja.innerHTML = '';
+const defaultOption = document.createElement('option');
+defaultOption.text = 'Seleccione una granja';
+defaultOption.value = '';
+selectFiltrarGranja.appendChild(defaultOption);
+granjasSelect.forEach(function (item) {
+    const optionAgregar = document.createElement('option');
+    optionAgregar.value = item.idGranja;
+    optionAgregar.text = item.nombre;
+    // Marcar como seleccionada si coincide con el valor recuperado
+    if (item.idGranja == selectedGranja) {
+        optionAgregar.selected = true;
+    }
+    selectFiltrarGranja.appendChild(optionAgregar);
+    });
+}
+
+var galpon = $resultado;
+var idGranjaJava = $idGranjaFiltro;
+// Procesar los datos y crear filas en la tabla
+var galponTbody = document.getElementById("galpon");
+
+galpon.forEach(function(galpon) {
+    var row = document.createElement("tr");
+    row.className = "table-light";
+    row.innerHTML = 
+        '<td>' + galpon.idGalpon + '</td>' +
+        '<td>' + galpon.identificacion + '</td>' +
+        '<td>' + galpon.nombre + '</td>' +
+        '<td>' + galpon.capacidad + '</td>' +
+        '<td>' +
+            '<button type="button" ' +
+                'class="btn btn-warning btn-sm" ' +
+                'data-bs-toggle="modal" ' +
+                'data-bs-target="#editarGalpon" ' +
+                'data-id="' + galpon.idGalpon + '" ' +
+                'data-identificacion="' + galpon.identificacion + '" ' +
+                'data-idTipoAve="' + galpon.idTipoAve + '" ' +
+                'data-capacidad="' + galpon.capacidad + '" ' +
+                'data-idGranja="' + galpon.idGranja + '">' +
+                'Editar' +
+            '</button>' +
+        '</td>' +
+        '<td>' +
+            '<a href="index.php?opt=galpones&delete=true&idGalpon=' + galpon.idGalpon + ' + &idGranja=' + galpon.idGranja + '" ' +
+                'class="btn btn-danger btn-sm">' +
+                'Borrar' +
+            '</a>' +
+        '</td>';
+    
+    galponTbody.appendChild(row);
+});
+
+// Inicializar DataTable
+$(document).ready(function() {
+    $("#myTable").DataTable();
+});
+
 function cargarOpciones() {
     document.getElementById('idGranja').value = idGranjaJava;
     var tiposAves = $tiposAves;
@@ -298,16 +357,6 @@ document.addEventListener('click', function (event) {
     }
 });
 
-
-document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
-    const input = e.target;
-    if (input.value < 1) {
-        input.setCustomValidity("El valor debe ser un número positivo.");
-    } else {
-        input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
-    }
-});
-
 document.getElementById("editarGalpon").addEventListener("show.bs.modal", function (event) {
     // Botón que activó el modal
     const button = event.relatedTarget;
@@ -334,32 +383,31 @@ document.getElementById("editarGalpon").addEventListener("show.bs.modal", functi
     form.action = `index.php?opt=galpon&edit=true&idGalpon=${idGalpon}`;
 });
 
-    // Activar validaciones al enviar el formulario
-    document.querySelectorAll('.needs-validation').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            if (!form.checkValidity()) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            form.classList.add('was-validated');
-        }, false);
-    });
+// Activar validaciones al enviar el formulario
+document.querySelectorAll('.needs-validation').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    }, false);
+});
 
-    // Validar campos en tiempo real
-    document.querySelectorAll('input, select, textarea').forEach(function (input) {
-        input.addEventListener('input', function () {
-            if (input.checkValidity()) {
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-            } else {
-                input.classList.remove('is-valid');
-                input.classList.add('is-invalid');
-            }
-        });
+// Validar campos en tiempo real
+document.querySelectorAll('input, select, textarea').forEach(function (input) {
+    input.addEventListener('input', function () {
+        if (input.checkValidity()) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        } else {
+            input.classList.remove('is-valid');
+            input.classList.add('is-invalid');
+        }
     });
+});
 </script>
 
-<script src="js/validar_abmGalpones.js"></script>
 HTML;
 
 ?>
