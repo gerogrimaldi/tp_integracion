@@ -10,6 +10,12 @@ if (isset($_GET['ajax']))
         case 'getGalponesGranja':
             header('Content-Type: application/json');
             try {
+                if( empty($_GET['idGranja']) )
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado una granja.']);
+                    exit();
+                }
                 $oGalpon = new Galpon();
                 $idGranja = (int)$_GET['idGranja'];
                 if ($galpones = $oGalpon->getall($idGranja)) {
@@ -49,6 +55,12 @@ if (isset($_GET['ajax']))
         case 'delGalpon': 
             header('Content-Type: application/json');
             try {
+                if( empty($_GET['idGalpon']) )
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado un galpón.']);
+                    exit();
+                }
                 $oGalpon = new Galpon();
                 $idGalpon = (int)$_GET['idGalpon'];
 
@@ -67,6 +79,13 @@ if (isset($_GET['ajax']))
         case 'addGalpon':
             header('Content-Type: application/json');
             try {
+                if( empty($_POST['identificacion']) || empty($_POST['idTipoAve']) || 
+                    empty($_POST['capacidad']) || empty($_POST['idGranja']))
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
                 $oGalpon = new Galpon();
                 $oGalpon->setMaxID();
                 $oGalpon->setIdentificacion($_POST['identificacion']);
@@ -90,6 +109,13 @@ if (isset($_GET['ajax']))
         case 'editGalpon':
             header('Content-Type: application/json');
             try {
+                if( empty($_POST['identificacion']) || empty($_POST['idTipoAve']) || 
+                empty($_POST['capacidad']) || empty($_POST['idGalpon']) || empty($_POST['idGranja']))
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
                 $oGalpon = new Galpon();
                 $oGalpon->setIdGalpon ($_POST['idGalpon']);
                 $oGalpon->setIdentificacion($_POST['identificacion']);

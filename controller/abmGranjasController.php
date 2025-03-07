@@ -29,6 +29,12 @@ if (isset($_GET['ajax']))
         case 'delGranja': 
             header('Content-Type: application/json');
             try {
+                if( empty($_GET['idGranja']))
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: granja no seleccionada.']);
+                    exit();
+                }
                 $oGranja = new Granja();
                 $idGranja = (int)$_GET['idGranja'];
 
@@ -48,6 +54,13 @@ if (isset($_GET['ajax']))
         case 'addGranja':
             header('Content-Type: application/json');
             try {
+                if( empty($_POST['nombre']) || empty($_POST['habilitacion']) || 
+                    empty($_POST['metrosCuadrados']) || empty($_POST['ubicacion']))
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
                 $oGranja = new Granja();
                 $oGranja->setMaxID();
                 $oGranja->setNombre($_POST['nombre']);
@@ -62,7 +75,7 @@ if (isset($_GET['ajax']))
             } catch (RuntimeException $e) {
                     http_response_code(400);
                     // echo json_encode(['error' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al a�adir.']);
+                    echo json_encode(['msg' => 'Error al a�adir.']);
             }
             exit();
         break;
@@ -70,6 +83,13 @@ if (isset($_GET['ajax']))
         case 'editGranja':
             header('Content-Type: application/json');
             try {
+                if( empty($_POST['nombre']) || empty($_POST['idGranja']) || empty($_POST['habilitacion']) || 
+                empty($_POST['metrosCuadrados']) || empty($_POST['ubicacion']))
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
                 $oGranja = new Granja();
                 $oGranja->setIdGranja ($_POST['idGranja']);
                 $oGranja->setNombre($_POST['nombre']);

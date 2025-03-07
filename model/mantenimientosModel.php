@@ -20,17 +20,29 @@ class tipoMantenimiento{
         }
     }
 
-    public function setMaxIDTipoMant()
+    public function setMaxID()
     {
-        $sql = "SELECT MAX(idTipoMantenimiento) AS maxID FROM TipoMantenimiento";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
-            $this->idTipoMantenimiento = $maxID + 1; // Incrementa el ID máximo en 1
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Leer datos de la tabla 'granjas',
+            $sql = "SELECT MAX(idTipoMantenimiento) AS maxID FROM TipoMantenimiento";
+            $result = $this->mysqli->query($sql);
+            if(!$result){
+                throw new RuntimeException('Error al consultar el máximo idGranja: ' . $this->mysqli->error);
+            }
+            $data = []; // Array para almacenar los datos
+            //La consulta devuelve un solo resultado.
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
+                $this->idTipoMantenimiento = $maxID + 1; // Incrementa el ID máximo en 1
+            }else {
+                throw new RuntimeException("Error al obtener el máximo idGranja: " . $this->mysqli->error);
+            }
             return true;
-        }else {
-            return false;
+        }catch(RuntimeException $e) {
+            throw $e;
         }
     }
 
@@ -44,12 +56,16 @@ class tipoMantenimiento{
 
     public function setNombreMantenimiento($nombreMantenimiento)
     {
-        $this->nombreMantenimiento = trim(strip_tags($nombreMantenimiento));
+        $this->nombreMantenimiento = htmlspecialchars(strip_tags(trim($nombreMantenimiento)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function getTipoMantenimientos()
     {
         try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            //Consulta sin preparación ya que no trae datos externos
             $sql = "SELECT idTipoMantenimiento, nombre FROM tipoMantenimiento";
             $result = $this->mysqli->query($sql);
             if (!$result) {
@@ -82,9 +98,8 @@ class tipoMantenimiento{
             $stmtCheck->execute();
             $stmtCheck->store_result();
             if ($stmtCheck->num_rows > 0) {
-                throw new RuntimeException('Error, ya existe: ' . $this->mysqli->error);
                 $stmtCheck->close();
-                return false;
+                throw new RuntimeException('Error, ya existe: ' . $this->mysqli->error);
             }
             $stmtCheck->close();
         // Insertar
@@ -96,7 +111,8 @@ class tipoMantenimiento{
         // Enlaza los parámetros y ejecuta la consulta
             $stmt->bind_param("is", $this->idTipoMantenimiento, $this->nombreMantenimiento);
             if (!$stmt->execute()){
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
             $stmt->close();
             return true;
 
@@ -111,7 +127,6 @@ class tipoMantenimiento{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-
             $sql = "UPDATE tipoMantenimiento SET nombre = ? WHERE idTipoMantenimiento = ?";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
@@ -125,7 +140,6 @@ class tipoMantenimiento{
             return true;
         }catch (RuntimeException $e) {
             throw $e;
-            return false;
         }
         
     }
@@ -154,7 +168,6 @@ class tipoMantenimiento{
             return true;
         }catch (RuntimeException $e){
             throw $e;
-            return false;
         }
     }
 }
@@ -163,6 +176,7 @@ class mantenimientoGranja{
     private $idMantenimientoGranja;
     private $fecha;
 	private $idGranja;
+    private $idTipoMantenimiento;
     private $mysqli;
     
     public function __construct()
@@ -170,6 +184,13 @@ class mantenimientoGranja{
         require_once 'model/conexion.php';  
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
         if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
+    }
+
+    public function __destruct()
+    {
+        if ($this->mysqli !== null) {
+            $this->mysqli->close();
+        }
     }
     
     public function setIdMantGranja($idMantenimiento)
@@ -190,8 +211,20 @@ class mantenimientoGranja{
 
     public function setFecha($fecha)
     {
-        $this->fecha =  $fecha;
+        $this->fecha = htmlspecialchars(strip_tags(trim($fecha)), ENT_QUOTES, 'UTF-8'); 
     }
+
+    /* -------- PROBAR -------------
+    ------- Fecha sanitizada -------
+    public function setFecha($fecha)
+    {
+        // Validate date format
+        if (DateTime::createFromFormat('Y-m-d', $fecha) !== false) {
+            $this->fecha = $fecha;
+        } else {
+            throw new RuntimeException('Formato de fecha inválido. Use YYYY-MM-DD');
+        }
+    }*/
 
     public function setIdTipoMantenimiento($idTipoMantenimiento)
     {
@@ -202,95 +235,119 @@ class mantenimientoGranja{
 
     public function setMaxIDMantGranja()
     {
-        $sql = "SELECT MAX(idMantenimientoGranja) AS maxID FROM mantenimientoGranja  ";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0;
-            $this->idMantenimientoGranja = $maxID + 1;
-            return true;
-        }else {
-            //echo "Error al obtener el máximo idMantenimiento: " . $this->mysqli->error;
-            return false;
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT MAX(idMantenimientoGranja) AS maxID FROM mantenimientoGranja  ";
+            $result = $this->mysqli->query($sql);
+            if(!$result){
+                throw new RuntimeException('Error al consultar el máximo:' . $this->mysqli->error);
+            }
+            $data = [];
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0;
+                $this->idMantenimientoGranja = $maxID + 1;
+                return true;
+            }else {
+                throw new RuntimeException('Error al obtener el máximo: ' . $this->mysqli->error);
+            }
+        }catch(RuntimeException $e) {
+            throw $e;
         }
     }
 
-    public function getMantGranjas($idGranjaFiltro)
+    public function getMantGranjas($idGranja)
     {
         try {
-            if (empty($idGranjaFiltro) || !ctype_digit($idGranjaFiltro)) {
-                throw new RuntimeException('El ID de la granja es inválido.');
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
+            if (!is_numeric($idGranja)) {
+                throw new RuntimeException('El ID de la granja debe ser un número.');
+            }
+            // Preparar la consulta
             $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
                 mantenimientoGranja.idTipoMantenimiento, tipoMantenimiento.nombre 
                 FROM mantenimientoGranja 
                 INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGranja.idTipoMantenimiento)
                 WHERE mantenimientoGranja.idGranja = ?";
-
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
-                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+                throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
             }
-            $stmt->bind_param('i', $idGranjaFiltro);
-            $stmt->execute();
+            // Enlazar el parámetro y ejecutar la consulta
+            $stmt->bind_param('i', $idGranja);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Obtener el resultado de la consulta
             $result = $stmt->get_result();
-            $data = []; // Array para almacenar los resultados
+            if ($result === false) {
+                //Se activa con error, del SQL. Si 0 columnas, sigue sin error.
+                throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);
+            }
+            $data = []; // Array para almacenar los datos
             if ($result->num_rows > 0) {
-                while($row = $result->fetch_assoc()) {
+                while ($row = $result->fetch_assoc()) {
                     $data[] = $row;
                 }
             }
             $stmt->close();
             return $data;
-            //$json_data = json_encode($data);
-        }  catch (RuntimeException $e) {
+        } catch (RuntimeException $e) {
             throw $e;
         }
     }
 
     public function save()
     {
-        $sql = "INSERT INTO mantenimientoGranja (idMantenimientoGranja, fecha, idGranja, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);}
-        $stmt->bind_param("isii", $this->idMantenimientoGranja, $this->fecha, $this->idGranja, $this->idTipoMantenimiento);
-        if (!$stmt->execute()) {throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
-        $stmt->close();
-        return true;
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Inserción de mantenimiento, no es necesario chequear existencia
+            $sql = "INSERT INTO mantenimientoGranja (idMantenimientoGranja, fecha, idGranja, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+            }
+            // Enlaza los parámetros y ejecuta la consulta
+            $stmt->bind_param("isii", $this->idMantenimientoGranja, $this->fecha, $this->idGranja, $this->idTipoMantenimiento);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        }catch(RuntimeException $e) {
+            throw $e;
+        }
     }
-
-    /* No se usará de momento, se desactivaron los botones editar.
-    public function updateMantenimientoGalpon()
-    {
-        $sql = "UPDATE mantenimientoGalpon SET fecha = ?, idGalpon = ?, idTipoMantenimiento = ? WHERE idMantenimientoGalpon = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) { die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);}
-        $stmt->bind_param("siiii", $this->fecha, $this->idGalpon, $this->idTipoMantenimiento, $this->idMantenimiento);
-        if (!$stmt->execute()) {  throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
-        $stmt->close();
-        $this->mysqli->close();
-    }
-
-    public function updateMantenimientoGranja()
-    {
-        $sql = "UPDATE galpon SET identificacion = ?, idTipoAve = ?, capacidad = ?, idGranja = ? WHERE idGalpon = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);}
-        $stmt->bind_param("siiii", $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja, $this->idGalpon);
-        if (!$stmt->execute()) {throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
-        $stmt->close();
-        $this->mysqli->close();
-    } */
 
     public function deleteMantenimientoGranjaId($idMantenimientoGranja)
     {
-        if ($this->mysqli === null) { throw new RuntimeException('La conexión a la base de datos no está inicializada.');}
-        $sql = "DELETE FROM mantenimientoGranja WHERE idMantenimientoGranja = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) {throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);}
-        $stmt->bind_param('i', $idMantenimientoGranja);
-        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
-        $stmt->close();
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idMantenimientoGranja)) {
+                throw new RuntimeException('El ID del galpón debe ser un número.');
+            }
+            $sql = "DELETE FROM mantenimientoGranja WHERE idMantenimientoGranja = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idMantenimientoGranja);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+            }
+            $stmt->close();
+            return true;
+        } catch (runtimeException $e) {
+            throw $e;
+        }
     }
 }
 
@@ -298,6 +355,7 @@ class mantenimientoGalpon{
     private $idMantenimientoGalpon;
     private $fecha;
     private $idGalpon;
+    private $idTipoMantenimiento;
     private $mysqli;
 
     public function __construct()
@@ -305,6 +363,13 @@ class mantenimientoGalpon{
         require_once 'model/conexion.php';  
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
         if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
+    }
+
+    public function __destruct()
+    {
+        if ($this->mysqli !== null) {
+            $this->mysqli->close();
+        }
     }
 
     public function setIdMantGalpon($idMantenimiento)
@@ -337,50 +402,103 @@ class mantenimientoGalpon{
 
     public function setMaxIDMantGalpon()
     {
-        $sql = "SELECT MAX(idMantenimientoGalpon) AS maxID FROM mantenimientoGalpon  ";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0;
-            $this->idMantenimientoGalpon = $maxID + 1; 
-        }else {
-            echo "Error al obtener el máximo idMantenimiento: " . $this->mysqli->error;
-        }
-    }
-
-    public function getMantGalpon($idGalponFiltro)
-    {
-        $sql = "SELECT mantenimientoGalpon.idMantenimientoGalpon, mantenimientoGalpon.fecha, mantenimientoGalpon.idGalpon,
-        mantenimientoGalpon.idTipoMantenimiento, tipoMantenimiento.nombre FROM mantenimientoGalpon 
-        INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGalpon.idTipoMantenimiento)
-        WHERE mantenimientoGalpon.idGalpon=".$idGalponFiltro;
-        $result = $this->mysqli->query($sql);
-        $data = []; // Array para almacenar los resultados
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
+            $sql = "SELECT MAX(idMantenimientoGalpon) AS maxID FROM mantenimientoGalpon  ";
+            $result = $this->mysqli->query($sql);
+            if(!$result){
+                throw new RuntimeException('Error al consultar el máximo:' . $this->mysqli->error);
+            }
+            $data = [];
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0;
+                $this->idMantenimientoGalpon = $maxID + 1;
+                return true;
+            }else {
+                throw new RuntimeException('Error al obtener el máximo: ' . $this->mysqli->error);
+            }
+        }catch(RuntimeException $e) {
+            throw $e;
         }
-        $json_data = json_encode($data);
-        return $json_data;
     }
 
-    public function save()
-    {
-        $sql = "INSERT INTO mantenimientoGalpon (idMantenimientoGalpon, fecha, idGalpon, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);}
-        $stmt->bind_param("isii", $this->idMantenimientoGalpon, $this->fecha, $this->idGalpon, $this->idTipoMantenimiento);
-        if (!$stmt->execute()) {throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);}
-        $stmt->close();
-        return true;
-    }
-
-    public function deleteMantenimientoGalponId($idMantenimientoGalpon)
+    public function getMantGalpon($idGalpon)
     {
         try {
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idGalpon)) {
+                throw new RuntimeException('El ID del galpón debe ser un número.');
+            }
+            // Preparar la consulta
+            $sql = "SELECT mantenimientoGalpon.idMantenimientoGalpon, mantenimientoGalpon.fecha, mantenimientoGalpon.idGalpon,
+                    mantenimientoGalpon.idTipoMantenimiento, tipoMantenimiento.nombre FROM mantenimientoGalpon 
+                    INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGalpon.idTipoMantenimiento)
+                    WHERE mantenimientoGalpon.idGalpon= ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
+            }
+            // Enlazar el parámetro y ejecutar la consulta
+            $stmt->bind_param('i', $idGalpon);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Obtener el resultado de la consulta
+            $result = $stmt->get_result();
+            if ($result === false) {
+                //Se activa con error, del SQL. Si 0 columnas, sigue sin error.
+                throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);
+            }
+            $data = []; // Array para almacenar los datos
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function save()
+    {
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Inserción de mantenimiento, no es necesario chequear existencia
+            $sql = "INSERT INTO mantenimientoGalpon (idMantenimientoGalpon, fecha, idGalpon, idTipoMantenimiento) VALUES (?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+            }
+            // Enlaza los parámetros y ejecuta la consulta
+            $stmt->bind_param("isii", $this->idMantenimientoGalpon, $this->fecha, $this->idGalpon, $this->idTipoMantenimiento);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        }catch(RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function deleteMantenimientoGalponId($idMantenimientoGalpon)
+    {
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idMantenimientoGalpon)) {
+                throw new RuntimeException('El ID del galpón debe ser un número.');
             }
             $sql = "DELETE FROM mantenimientoGalpon WHERE idMantenimientoGalpon = ?";
             $stmt = $this->mysqli->prepare($sql);
@@ -389,18 +507,12 @@ class mantenimientoGalpon{
             }
             $stmt->bind_param('i', $idMantenimientoGalpon);
             if (!$stmt->execute()) {
-                // Verificar si es un error de clave foránea
-                if ($this->mysqli->errno == 1451) {
-                    throw new RuntimeException('No se puede eliminar el mantenimiento porque está siendo utilizado en otros registros.');
-                }
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
             }
             $stmt->close();
             return true;
         } catch (RuntimeException $e) {
-            // Propagar el error para manejarlo en el controlador
             throw $e;
         }
     }
-
 }

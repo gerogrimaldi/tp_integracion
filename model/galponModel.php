@@ -86,7 +86,6 @@ class galpon{
             }
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -127,7 +126,6 @@ class galpon{
             return $data;
         } catch (RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -137,7 +135,6 @@ class galpon{
             if ($this->mysqli === null) { 
                     throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            // Leer datos de la tabla 'granjas',
             $sql = "SELECT galpon.idGalpon, galpon.identificacion, galpon.idTipoAve, 
                     galpon.capacidad, galpon.idGranja, granja.nombre FROM galpon
                     INNER JOIN granja ON (galpon.idGranja = granja.idGranja)";
@@ -155,7 +152,6 @@ class galpon{
             return $data;
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -181,25 +177,8 @@ class galpon{
             return $data;
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
-
-    /* public function getGalponPorId($idGalpon)
-    {
-        $sql = "SELECT idGalpon, identificacion, idTipoAve, capacidad, idGranja FROM galpon WHERE idGalpon=".$idGalpon;
-        if ( $resultado = $this->mysqli->query($sql) )
-		{
-			if ( $resultado->num_rows > 0 )
- 			{
-                 return $resultado;
-			}else{
-                return false;
-            }
-        }
-        unset($resultado);
-        $this->mysqli->close();
-    } */
 
     public function save()
     {
@@ -220,7 +199,6 @@ class galpon{
             if ($stmtCheck->num_rows > 0) {
                 $stmtCheck->close();
                 throw new RuntimeException("Error, ya existe: " . $this->mysqli->error);
-                return false; 
             }
             $stmtCheck->close();
             // Inserción de Granja
@@ -240,7 +218,6 @@ class galpon{
             return true;
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -266,7 +243,6 @@ class galpon{
             return true;
         } catch (RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -298,7 +274,6 @@ class galpon{
             return true;
         } catch (runtimeException $e) {
             throw $e;
-            return false;
         }
     }
 }

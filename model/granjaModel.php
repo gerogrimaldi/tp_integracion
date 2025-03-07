@@ -87,7 +87,6 @@ class granja{
             }
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -113,7 +112,6 @@ class granja{
             return $data;
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -137,7 +135,6 @@ class granja{
             if ($stmtCheck->num_rows > 0) {
                 $stmtCheck->close();
                 throw new RuntimeException("Error, ya existe: " . $this->mysqli->error);
-                return false; 
             }
             $stmtCheck->close();
             // Inserción de Granja
@@ -157,7 +154,6 @@ class granja{
             return true;
         }catch(RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -183,7 +179,6 @@ class granja{
             return true;
         } catch (RuntimeException $e) {
             throw $e;
-            return false;
         }
     }
 
@@ -217,7 +212,6 @@ class granja{
             return true;
         } catch (runtimeException $e) {
             throw $e;
-            return false;
         }
     }
 }
