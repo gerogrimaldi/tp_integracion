@@ -341,7 +341,7 @@ function editarGalpon() {
     });
 }
 <!-------------------------------------------------> 
-<!------- GRANJAS - CARGAR LISTADO SELECT   ------->
+<!-------- GRANJAS - CARGAR LISTADO SELECT -------->
 <!-------------------------------------------------> 
 function cargarSelectGranja() {
     //Iniciar tabla, cargar opción por default.

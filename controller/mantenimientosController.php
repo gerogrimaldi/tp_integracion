@@ -10,7 +10,7 @@ if (isset($_GET['ajax']))
         case 'addTipoMant':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['nombreMant']))
+                if( empty($_POST['nombreMant']) )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: el campo está vacío.']);
@@ -35,7 +35,7 @@ if (isset($_GET['ajax']))
         case 'delTipoMant': 
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idTipoMant']))
+                if( (!isset($_GET['idTipoMant']) || $_GET['idTipoMant'] === '') )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: no se seleccionó tipo de mantenimiento.']);
@@ -59,7 +59,9 @@ if (isset($_GET['ajax']))
         case 'editTipoMant':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['idTipoMant']) || empty($_POST['nombreMantEdit']))
+                
+                if( (!isset($_POST['idTipoMant']) || $_POST['idTipoMant'] === '') 
+                || empty($_POST['nombreMantEdit']))
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -106,8 +108,8 @@ if (isset($_GET['ajax']))
         case 'newMantGranja':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['fechaMantenimiento']) || empty($_POST['idGranja']) || 
-                empty($_POST['tipoMantenimiento']))
+                if( empty($_POST['fechaMant']) || (!isset($_POST['idGranja']) || $_POST['idGranja'] === '') || 
+                (!isset($_POST['tipoMantenimiento']) || $_POST['tipoMantenimiento'] === ''))
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -115,7 +117,7 @@ if (isset($_GET['ajax']))
                 }
                 $oMantenimientoGranja = new mantenimientoGranja();
                 $oMantenimientoGranja->setMaxIDMantGranja();
-                $oMantenimientoGranja->setFecha( $_POST['fechaMantenimiento']);
+                $oMantenimientoGranja->setFecha( $_POST['fechaMant']);
                 $oMantenimientoGranja->setIdGranja( $_POST['idGranja'] );
                 $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
                 if ($oMantenimientoGranja->save()) {
@@ -132,7 +134,7 @@ if (isset($_GET['ajax']))
         case 'getMantGranja':
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idGranja']) )
+                if( !isset($_GET['idGranja']) || $_GET['idGranja'] === '' )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: no se ha seleccionado una granja.']);
@@ -156,8 +158,7 @@ if (isset($_GET['ajax']))
         case 'delMantGranja': 
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idMantenimientoGranja']) )
-                {
+                if( !isset($_GET['idMantenimientoGranja']) || $_GET['idMantenimientoGranja'] === '' ){
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: mantenimiento no seleccionado.']);
                     exit();
@@ -182,7 +183,7 @@ if (isset($_GET['ajax']))
         case 'newMantGalpon':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['fechaMantenimiento']) || empty($_POST['idGalpon']) || 
+                if( empty($_POST['fechaMantenimiento']) || ( !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ) || 
                 empty($_POST['tipoMantenimiento']))
                 {
                     http_response_code(400);
@@ -208,7 +209,7 @@ if (isset($_GET['ajax']))
         case 'getMantGalpon':
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idGalpon']) )
+                if( !isset($_GET['idGalpon']) || $_GET['idGalpon'] === '' )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: no se ha seleccionado un galpón.']);
@@ -232,7 +233,7 @@ if (isset($_GET['ajax']))
         case 'delMantGalpon': 
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idMantenimientoGalpon']) )
+                if( !isset($_GET['idMantenimientoGalpon']) || $_GET['idMantenimientoGalpon'] === '' )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: mantenimiento no seleccionado.']);

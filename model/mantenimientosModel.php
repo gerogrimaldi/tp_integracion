@@ -20,7 +20,7 @@ class tipoMantenimiento{
         }
     }
 
-    public function setMaxID()
+    public function setMaxIDTipoMant()
     {
         try{
             if ($this->mysqli === null) { 

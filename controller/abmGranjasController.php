@@ -29,7 +29,7 @@ if (isset($_GET['ajax']))
         case 'delGranja': 
             header('Content-Type: application/json');
             try {
-                if( empty($_GET['idGranja']))
+                if( (!isset($_GET['idGranja']) || $_GET['idGranja'] === '') )
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: granja no seleccionada.']);
@@ -54,6 +54,7 @@ if (isset($_GET['ajax']))
         case 'addGranja':
             header('Content-Type: application/json');
             try {
+
                 if( empty($_POST['nombre']) || empty($_POST['habilitacion']) || 
                     empty($_POST['metrosCuadrados']) || empty($_POST['ubicacion']))
                 {
@@ -83,8 +84,8 @@ if (isset($_GET['ajax']))
         case 'editGranja':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['nombre']) || empty($_POST['idGranja']) || empty($_POST['habilitacion']) || 
-                empty($_POST['metrosCuadrados']) || empty($_POST['ubicacion']))
+                if( empty($_POST['nombre']) || (!isset($_POST['idGranja']) || $_POST['idGranja'] === '') 
+                || empty($_POST['habilitacion']) ||  empty($_POST['metrosCuadrados']) || empty($_POST['ubicacion']))
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);

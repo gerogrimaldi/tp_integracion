@@ -1,65 +1,61 @@
 <?php
-
-include 'view/toast.php';
-
-// Si no hay granja seleccionada, se carga un array vacío para que la tabla no de error.
-$resultado = $resultado ?? []; 
-$resultadoGalp = $resultadoGalp ?? []; 
-
 $body = <<<HTML
 <div class="container">
     <h1>Mantenimientos</h1>
-<!------------------------------------------------------------------> 
-<!-- TIPO MANTENIMIENTOS - AGREGAR/VER MANTENIMIENTOS -->
-<!------------------------------------------------------------------>  
-<p class="d-inline-flex gap-1">
-  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#verMant" aria-expanded="false" aria-controls="collapseExample">
-    Ver tipos de mantenimientos
-  </button>
-</p>
-<div class="collapse mb-4" id="verMant">
-<p class="d-inline-flex gap-1">
-    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#agregarMant" aria-expanded="false" aria-controls="collapseExample">
-        Agregar tipos de Mantenimientos
-    </button>
+    
     <p class="d-inline-flex gap-1">
-    <div class="collapse mb-4" id="agregarMant">
-        <div class="card card-body text-dark">
-            <form id="agregarTipoMantForm" class="needs-validation" novalidate>
-                <div class="mb-4">
-                    <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
-                    <input type="text" class="form-control" 
-                        id="nombreMant" name="nombreMant"
-                        placeholder="Ejemplo: Corte de césped"
-                        min="1" required>
-                    <div class="invalid-feedback">
-                        Debe contar con al menos 3 letras.
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#verMant" aria-expanded="false" aria-controls="collapseExample">
+            Ver tipos de mantenimientos
+        </button>
+    </p>
+
+    <div class="collapse mb-4" id="verMant">
+        <!-- Removed d-inline-flex from this div -->
+        <div class="mb-3">
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#agregarMant" aria-expanded="false" aria-controls="collapseExample">
+                Agregar tipos de Mantenimientos
+            </button>
+        </div>
+        
+        <div class="collapse mb-4" id="agregarMant">
+            <div class="card card-body text-dark">
+                <form id="agregarTipoMantForm" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="nombreMant" class="form-label">Tipo de mantenimiento</label>
+                        <input type="text" class="form-control" 
+                            id="nombreMant" name="nombreMant"
+                            placeholder="Ejemplo: Corte de césped"
+                            min="1" required>
+                        <div class="invalid-feedback">
+                            Debe contar con al menos 3 letras.
+                        </div>
                     </div>
-                </div>
-                <button type="button" class="btn btn-primary" id="btnAgregarTipoMant">Agregar</button>
-            </form>
+                    <button type="button" class="btn btn-primary" id="btnAgregarTipoMant">Agregar</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card card-body text-dark">
+            <table id="tablaTiposMant" class="table table-bordered bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Descripción</th>
+                        <th class="text-primary"></th>
+                        <th class="text-primary"></th>
+                    </tr>
+                </thead>
+                <tbody id="tipoMant">
+                    <!-- Los datos se insertarán aquí -->
+                </tbody>
+            </table>
         </div>
     </div>
-  <div class="card card-body text-dark">
-    <table id="tablaTiposMant" class="table table-bordered bg-white">
-            <thead class="table-light">
-                <tr>
-                    <th class="text-primary">ID</th>
-                    <th class="text-primary">Descripción</th>
-                    <th class="text-primary"></th>
-                    <th class="text-primary"></th>
-                </tr>
-            </thead>
-            <tbody id="tipoMant">
-                <!-- Los datos se insertarán aquí -->
-            </tbody>
-    </table>
-  </div>
 </div>
 
-<!------------------------------------------------------------------> 
-<!-- MODAL: EDICIÓN DE UN TIPO DE MANTENIMIENTO -->
-<!------------------------------------------------------------------> 
+<!------------------------------------------------> 
+<!-- MODAL: EDITAR TIPO DE MANTENIMIENTO -->
+<!------------------------------------------------> 
 <div class="modal fade" id="editarTipoMant" tabindex="-1" aria-labelledby="editarTipoMantModal" aria-hidden="true">
     <div class="modal-dialog">
        <div class="modal-content bg-dark text-white">
@@ -91,11 +87,11 @@ $body = <<<HTML
 </div>
 
 <script>
-<!------------------------------------------------------------------->
-<!--- Sección JavaScript de Tipos de Mantenimiento -->
-<!-------------------------------------------------------------------> 
-<!-- TIPOS DE MANTENIMIENTO - RELLENAR FORMULARIO DE EDICIÓN --> 
-<!-------------------------------------------------------------------> 
+<!-------------------------------------------------->
+<!-- Sección JavaScript de Tipos de Mantenimiento -->
+<!--------------------------------------------------> 
+<!--- TIPO MANTENIMIENTO - RELLENAR FORM EDICIÓN ---> 
+<!--------------------------------------------------> 
 document.addEventListener('click', function (event) {
     if (event.target && event.target.matches('.btn-warning')) {
         const button = event.target;
@@ -105,9 +101,9 @@ document.addEventListener('click', function (event) {
         document.querySelector('#editarTipoMantForm #idTipoMant').value = idTipoMant;
     }
 });
-<!-------------------------------------------------------------------> 
+<!--------------------------------------------------------> 
 <!-- TIPO MANTENIMIENTOS - CAPTAR EL FORMULARIO AGREGAR -->  
-<!-------------------------------------------------------------------> 
+<!--------------------------------------------------------> 
 document.getElementById('btnAgregarTipoMant').addEventListener('click', function() {
     agregarTipoMant();
 });
@@ -115,9 +111,9 @@ document.getElementById('agregarTipoMantForm').addEventListener('submit', functi
     event.preventDefault(); // Prevent the default form submission
     agregarTipoMant();
 });
-<!-------------------------------------------------------------------> 
-<!-- TIPO MANTENIMIENTOS - CAPTAR EL FORMULARIO DE EDICIÓN -->  
-<!-------------------------------------------------------------------> 
+<!--------------------------------------------------------> 
+<!-- TIPO MANTENIMIENTOS - ACCION FORMULARIO DE EDICIÓN -->  
+<!--------------------------------------------------------> 
 document.getElementById('btnEditarTipoMant').addEventListener('click', function() {
     editarTipoMant();
 });
@@ -125,9 +121,9 @@ document.getElementById('editarTipoMantForm').addEventListener('submit', functio
     event.preventDefault(); // Prevent the default form submission
     editarTipoMant();
 });
-<!-------------------------------------------------------------------> 
-<!-- TIPOS DE MANTENIMIENTOS - FUNCIONES DE RESOLUCIÓN ABM -->  
-<!-------------------------------------------------------------------> 
+<!--------------------------------------------------------> 
+<!------- TIPOS DE MANTENIMIENTOS - RESOLUCIÓN ABM ------->  
+<!--------------------------------------------------------> 
 function agregarTipoMant() {
     const nombreMant = document.getElementById('nombreMant').value;
 
@@ -208,13 +204,55 @@ function eliminarTipoMantenimiento(idTipoMant) {
     });
 }
 
+<!-------------------------------------------------> 
+<!----- TIPO DE MANTENIMIENTO - CARGAR SELECT ----->
+<!-------------------------------------------------> 
+function cargarSelectTipoMant(select) {
+    //Cargar opción por default.
+    const selectTipoMant = document.getElementById(select);
+    selectTipoMant.innerHTML = '';
+    const defaultOption = document.createElement('option');
+        defaultOption.text = 'Seleccione el tipo de mantenimiento';
+        defaultOption.value = '';
+        selectTipoMant.appendChild(defaultOption);
+
+    fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        data.forEach(tipoMant => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = tipoMant.idTipoMantenimiento;
+            optionAgregar.text = tipoMant.nombre;
+            selectTipoMant.appendChild(optionAgregar);
+        });
+    })
+    .catch(error => {
+        console.error('Error al cargar tipos de mantenimiento:', error);
+        showToastError('Error al cargar tipos de mantenimiento');
+    });
+}
+
 function recargarTipoMant() {
+    //Recargar secciones de la página cuando se cambia un tipo mant.
     cargarTablaTipoMant();
-    cargarSelectTipoMant()
+    //cargarTablaMantGalpon();
+    cargarTablaMantGranja()
 }
 
 <!-- JS Para rellenar tabla tipo mantenimientos -->
 function cargarTablaTipoMant() {
+    // Vaciar tabla
+    if ($.fn.DataTable.isDataTable('#tablaTiposMant')) {
+            $('#tablaTiposMant').DataTable().destroy();
+    }
+    var tipoMantTbody = document.getElementById("tipoMant");
+    tipoMantTbody.innerHTML = '';
+
     // Realizar la solicitud AJAX
     fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
     .then(response => {
@@ -224,11 +262,6 @@ function cargarTablaTipoMant() {
         return response.json();
     })
     .then(data => {
-        if ($.fn.DataTable.isDataTable('#tablaTiposMant')) {
-            $('#tablaTiposMant').DataTable().destroy();
-        }
-        var tipoMantTbody = document.getElementById("tipoMant");
-        tipoMantTbody.innerHTML = '';
         // Recorrer los datos y crear las filas de la tabla
         data.forEach(tipoMant => {
             var row = document.createElement("tr");
@@ -264,53 +297,25 @@ function cargarTablaTipoMant() {
 
 
 <div class="container">
-<h2>Granjas</h2>
-
-<form id="selectGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
-    <div class="mb-4">
-        <label for="selectGranja" class="form-label">Seleccione la granja para ver mantenimientos realizados.</label>
-        <div class="input-group">
-            <select id="selectGranja" name="selectGranja" class="form-control" required>
-                <!-- Las opciones se agregan con JavaScript -->
-            </select>
-            <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGranja">Filtrar</button>
-            <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGranja">
-            Agregar mantenimiento
-        </button>
-            <div class="invalid-feedback">
-                Debe elegir una opción.
+    <h2>Granjas</h2>
+    <form id="selectGranjaForm" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="selectGranja" class="form-label">Seleccione la granja para ver mantenimientos realizados.</label>
+            <div class="input-group">
+                <select id="selectGranja" name="selectGranja" class="form-control" required>
+                    <!-- Las opciones se agregan con JavaScript -->
+                </select>
+                <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGranja">
+                    Agregar mantenimiento
+                </button>
+                <div class="invalid-feedback">
+                    Debe elegir una opción.
+                </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 
-<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
-<script>
-    function cargarSelectGranja() {
-       // Recupero desde PHP la granja seleccionada en caso de existir
-       var selectedGranja = $selectedGranja;
-       var granjasSelect = $granjasFiltradas;
-       const selectFiltrarGranja = document.getElementById('selectGranja');
-       selectFiltrarGranja.innerHTML = '';
-       const defaultOption = document.createElement('option');
-       defaultOption.text = 'Seleccione una granja';
-       defaultOption.value = '';
-       selectFiltrarGranja.appendChild(defaultOption);
-       granjasSelect.forEach(function (item) {
-           const optionAgregar = document.createElement('option');
-           optionAgregar.value = item.idGranja;
-           optionAgregar.text = item.nombre;
-           // Marcar como seleccionada si coincide con el valor recuperado
-           if (item.idGranja == selectedGranja) {
-               optionAgregar.selected = true;
-           }
-           selectFiltrarGranja.appendChild(optionAgregar);
-        });
-    }
-</script>
-
-</div>
-    <table id="tablaMantenimientos" class="table table-bordered bg-white">
+    <table id="tablaMantGranja" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
                 <th class="text-primary">ID</th>
@@ -319,48 +324,11 @@ function cargarTablaTipoMant() {
                 <th class="text-primary"></th>
             </tr>
         </thead>
-        <tbody id="mantenimientos">
+        <tbody id="mantGranja">
             <!-- Los datos se insertarán aquí -->
         </tbody>
     </table>
 </div>
-
-<!-- Script JS para rellenar la tabla de mantenimientos de GRANJA -->
-<script>
-    // Comentado para evitar el uso de GPT y empezar a razonar mejor el JS.
-    // Recupera el resultado de PHP en JSON y lo almacena en una variable JS.
-    var mantenimientos = $resultado;
-    // Crea una variable Tbody que es igual elemento con ese ID en el HTML (la tabla en este caso).
-    var mantenimientosTbody = document.getElementById("mantenimientos");
-    // Realiza un recorrido por cada elemento del arreglo, y ejecuta la "function"
-    mantenimientos.forEach(
-        function(mantenimientos) {
-            //Row: Fila. Damos forma a un "<tr>" que es una fila en HTML (table-row)
-        var row = document.createElement("tr");
-        // Asignamos los atributos en HTML del <tr>.
-        row.className = "table-light";
-        // Crea los <td> (columnas). Están completas de los datos de la variable mantenimientos, o botones.
-        row.innerHTML = 
-            '<td>' + mantenimientos.idMantenimientoGranja + '</td>' +
-            '<td>' + mantenimientos.fecha + '</td>' +
-            '<td>' + mantenimientos.nombre + '</td>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=mantenimientos&delete=granja&idMantenimientoGranja=' + mantenimientos.idMantenimientoGranja + '&selectGranja=' + mantenimientos.idGranja + '" ' +
-                   'class="btn btn-danger btn-sm">' +
-                    'Borrar' +
-                '</a>' +
-            '</td>';
-        // Agrega al TBody la línea de HTML completa.
-        mantenimientosTbody.appendChild(row);
-    });
-
-    // Inicializar DataTable - Es un "plugin" que le agrega la busqueda, ordenamiento, etc. a la tabla.
-    // Se le pasa como parámetro la tabla HTML que creamos.
-    $(document).ready(function() {
-        $("#tablaMantenimientos").DataTable();
-    });
-</script>
 
 <!-- Modal agregar Mantenimiento GRANJA -->
 <!-- TO DO: SI NO SE FILTRA UNA GRANJA ANTES, DA ERROR EL SQL -->
@@ -372,10 +340,10 @@ function cargarTablaTipoMant() {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="newMantGranjaForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+                <form id="newMantGranjaForm" class="needs-validation" novalidate>
                     <div class="mb-4">
                         <label for="fechaMant" class="form-label">Fecha y hora de realización</label>
-                       <input type="datetime-local" class="form-control" 
+                        <input type="datetime-local" class="form-control" 
                             id="fechaMant" name="fechaMantenimiento"
                             required>
                         <div class="invalid-feedback">
@@ -396,50 +364,191 @@ function cargarTablaTipoMant() {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" name="btMantenimientos" value="newMantGranja" form="newMantGranjaForm">Finalizar</button>
+                <button type="submit" class="btn btn-primary" id="btnAgregarMantGranja">Finalizar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Script JS para rellenar las opciones de tipos de mantenimiento, en ambos modales -->
 <script>
-function cargarSelectTipoMant() {
-    // Realizar la solicitud AJAX para obtener los tipos de mantenimiento
-    fetch('index.php?opt=mantenimientos&ajax=getTipoMant')
-        .then(response => response.json()) // Convertir la respuesta a JSON
-        .then(data => {
-    // Rellenar el select de tipos de mantenimiento para granjas
-    const selectTipoMantGranja = document.getElementById('selectTipoMantGranja');
-    const selectTipoMantGalpon = document.getElementById('selectTipoMantGalpon');
-    selectTipoMantGranja.innerHTML = '';
-    selectTipoMantGalpon.innerHTML = '';
+<!-------------------------------------------------->
+<!-- Sección JavaScript - Mantenimiento de Granja -->
+<!--------------------------------------------------> 
+<!------ CARGAR GRANJAS DISPONIBLES EN SELECT ------> 
+<!-------------------------------------------------->
+function cargarSelectGranja() {
+    //Iniciar tabla, cargar opción por default.
+    const selectFiltrarGranja = document.getElementById('selectGranja');
+    selectFiltrarGranja.innerHTML = '';
     const defaultOption = document.createElement('option');
-    defaultOption.text = 'Seleccione';
-    defaultOption.value = '';
-    selectTipoMantGranja.appendChild(defaultOption);
-    const defaultOptionClonado = defaultOption.cloneNode(true);
-    selectTipoMantGalpon.appendChild(defaultOptionClonado);
-    
-    tipoMant = data;
-    tipoMant.forEach(function (item) {
-        const optionAgregar = document.createElement('option');
-        optionAgregar.value = item.idTipoMantenimiento;
-        optionAgregar.text = item.nombre;
-        selectTipoMantGranja.appendChild(optionAgregar);
-        // Clonar opción para el segundo modal
-        const optionAgregarClonada = optionAgregar.cloneNode(true);
-        selectTipoMantGalpon.appendChild(optionAgregarClonada);
+        defaultOption.text = 'Seleccione una granja';
+        defaultOption.value = '-1';
+        selectFiltrarGranja.appendChild(defaultOption);
+
+    // Realizar la solicitud AJAX para obtener las granjas
+    fetch('index.php?opt=granjas&ajax=getGranjas')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(granjas => {
+        // Agregar las granjas desde la API
+        granjas.forEach(granja => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = granja.idGranja;
+            optionAgregar.text = granja.nombre;
+            selectFiltrarGranja.appendChild(optionAgregar);
+        });
+
+        // Si hay un valor previamente seleccionado, restaurarlo y cargar los galpones
+        const previouslySelected = selectFiltrarGranja.getAttribute('data-selected');
+        if (previouslySelected) {
+            selectFiltrarGranja.value = previouslySelected;
+            cargarTablaGalpones();
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar granjas:', error);
+        showToastError('Error al cargar las granjas');
     });
-
-    //Reemplazar el valor por el ID de la granja/galpon seleccionado en el formulario
-    var selectedGranja = $selectedGranja;
-    document.querySelector('#newMantGranjaForm #idGranja').value = selectedGranja;
-    var selectedGalpon = $selectedGalpon;
-    document.querySelector('#newMantGalponForm #idGalpon').value = selectedGalpon;
-});
 }
+<!-- Listado GRANJAS - Filtrar al presionar opción del select -->
+document.getElementById('selectGranja').addEventListener('change', function(e) {
+    this.setAttribute('data-selected', e.target.value);
+    if (e.target.value) {
+        cargarTablaMantGranja();
+    } else {
+        // Limpiar la tabla si no hay granja seleccionada
+        if ($.fn.DataTable.isDataTable('#tablaGalpones')) {
+            $('#tablaGalpones').DataTable().clear().draw();
+        }
+    }
+});
+<!-------------------------------------------------> 
+<!------ RELLENAR TABLA MANT GRANJAS - AJAX ------->
+<!-------------------------------------------------> 
+function cargarTablaMantGranja() {
+    //Vaciar la tabla
+    if ($.fn.DataTable.isDataTable('#tablaMantGranja')) {
+        $('#tablaMantGranja').DataTable().destroy();
+    }
+    var tablaMantGranjaTbody = document.getElementById("mantGranja");
+    tablaMantGranjaTbody.innerHTML = '';
 
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=getMantGranja&idGranja=' + document.getElementById('selectGranja').value)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Recorrer los datos y crear las filas de la tabla
+        data.forEach(mantenimientos => {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+            '<td>' + mantenimientos.idMantenimientoGranja + '</td>' +
+            '<td>' + mantenimientos.fecha + '</td>' +
+            '<td>' + mantenimientos.nombre + '</td>' +
+            '</td>' +
+            '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarMantGranja(' + mantenimientos.idMantenimientoGranja + ')">Borrar</button>' +
+            '</td>';
+            tablaMantGranjaTbody.appendChild(row);
+        })
+        $('#tablaMantGranja').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar galpones:', error);
+        $('#tablaMantGranja').DataTable();
+    });
+}
+<!-----------------------------------------------------> 
+<!--------- MANT GRANJAS - FORMULARIO AGREGAR --------->  
+<!-----------------------------------------------------> 
+<!--- Pasar al formulario el ID Granja seleccionado --->  
+<!------- y presentar error si no hay seleccion ------->  
+document.getElementById("newMantGranja").addEventListener("show.bs.modal", function (event) {
+    // Get the currently selected granja ID
+    const selectedGranjaId = document.getElementById('selectGranja').value;
+    if (!selectedGranjaId) {
+        event.preventDefault();
+        showToastError('Debe seleccionar una granja primero');
+        return;
+    }
+    // Set the hidden input value
+    document.querySelector("#newMantGranjaForm #idGranja").value = selectedGranjaId;
+    cargarSelectTipoMant('selectTipoMantGranja');
+});
+<!---- Cambiar la acción del botón enviar y enter ---->  
+document.getElementById('btnAgregarMantGranja').addEventListener('click', function() {
+    agregarMantGranja();
+});
+document.getElementById('newMantGranjaForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarMantGranja();
+});
+<!-----------------------------------------------> 
+<!-------- MANT GRANJAS - AGREGAR NUEVO --------->  
+<!-----------------------------------------------> 
+function agregarMantGranja() {
+    const fechaMant = document.getElementById('fechaMant').value;
+    const tipoMantenimiento = document.getElementById('selectTipoMantGranja').value;
+    const idGranja = document.getElementById('idGranja').value;
+
+    fetch('index.php?opt=mantenimientos&ajax=newMantGranja', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'fechaMant=' + encodeURIComponent(fechaMant) +
+              '&tipoMantenimiento=' + encodeURIComponent(tipoMantenimiento) +
+              '&idGranja=' + encodeURIComponent(idGranja)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaMantGranja();
+                $('#newMantGranja').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+<!-----------------------------------------------> 
+<!----------- MANT GRANJAS - ELIMINAR ----------->  
+<!-----------------------------------------------> 
+function eliminarMantGranja(idMantenimientoGranja) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=delMantGranja&idMantenimientoGranja=' + idMantenimientoGranja, {
+        method: 'GET'
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla y los select
+                cargarTablaMantGranja();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
+    });
+}
 </script>
 
 <div class="container">
@@ -454,8 +563,8 @@ function cargarSelectTipoMant() {
                 </select>
                 <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGalpon">Filtrar</button>
                 <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGalpon">
-                Agregar mantenimiento
-            </button>
+                    Agregar mantenimiento
+                </button>
                 <div class="invalid-feedback">
                     Debe elegir una opción.
                 </div>
@@ -463,21 +572,20 @@ function cargarSelectTipoMant() {
         </div>
     </form>
 
-    </div>
-        <table id="tablaMantenimientosGalp" class="table table-bordered bg-white">
-            <thead class="table-light">
-                <tr>
-                    <th class="text-primary">ID</th>
-                    <th class="text-primary">Fecha</th>
-                    <th class="text-primary">Mantenimiento</th>
-                    <th class="text-primary"></th>
-                </tr>
-            </thead>
-            <tbody id="mantenimientosGalp">
-                <!-- Los datos se insertarán aquí -->
-            </tbody>
-        </table>
-    </div>
+    <table id="tablaMantenimientosGalp" class="table table-bordered bg-white">
+        <thead class="table-light">
+            <tr>
+                <th class="text-primary">ID</th>
+                <th class="text-primary">Fecha</th>
+                <th class="text-primary">Mantenimiento</th>
+                <th class="text-primary"></th>
+            </tr>
+        </thead>
+        <tbody id="mantenimientosGalp">
+            <!-- Los datos se insertarán aquí -->
+        </tbody>
+    </table>
+</div>
 
     <!-- Modal agregar Mantenimiento Galpon -->
     <!-- TO DO: SI NO SE FILTRA UN GALPON ANTES, DA ERROR EL SQL -->
@@ -522,7 +630,8 @@ function cargarSelectTipoMant() {
 
 <!-- Script JS para rellenar la tabla de mantenimientos de GALPON -->
 <script>
-    var mantenimientosGalp = $resultadoGalp;
+    /*
+    var mantenimientosGalp = \$resultadoGalp;
     var mantenimientosGalpTbody = document.getElementById("mantenimientosGalp");
     mantenimientosGalp.forEach(
         function(mantenimientosGalp) {
@@ -547,14 +656,12 @@ function cargarSelectTipoMant() {
     $(document).ready(function() {
         $("#tablaMantenimientosGalp").DataTable();
     });
-</script>
 
 <!-- Script JS para rellenar las opciones con las Granjas disponibles -->
-<script>
     function cargarSelectGalpon() {
        // Recupero desde PHP el galpón seleccionada en caso de existir
-       var selectedGalpon = $selectedGalpon;
-       var galponesSelect = $galponesFiltrados;
+       var selectedGalpon = \$selectedGalpon;
+       var galponesSelect = \$galponesFiltrados;
        const selectFiltrarGalpon = document.getElementById('selectGalpon');
        selectFiltrarGalpon.innerHTML = '';
        const defaultOption = document.createElement('option');
@@ -571,20 +678,22 @@ function cargarSelectTipoMant() {
            }
            selectFiltrarGalpon.appendChild(optionAgregar);
         });
-    }
-
+    }    
+    });*/
+    
     // Reemplaza las líneas window.onload individuales por:
     window.addEventListener('load', function() {
         cargarSelectGranja();
-        cargarSelectTipoMant();
-        cargarSelectGalpon();
-        cargarTablaTipoMant()
+        cargarTablaTipoMant();
+        cargarTablaMantGranja()
     });
+
 </script>
 
 HTML;
 // Agregar las funciones y el contenedor de los toast
 // Para mostrar notificaciones
+include 'view/toast.php';
 $body .= $toast;
 ?>
 
