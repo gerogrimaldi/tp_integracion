@@ -183,8 +183,8 @@ if (isset($_GET['ajax']))
         case 'newMantGalpon':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['fechaMantenimiento']) || ( !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ) || 
-                empty($_POST['tipoMantenimiento']))
+                if( empty($_POST['fechaMant']) || ( !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ) || 
+                (!isset($_POST['tipoMantenimiento']) || $_POST['tipoMantenimiento'] === ''))
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -192,7 +192,7 @@ if (isset($_GET['ajax']))
                 }
                 $oMantenimientoGalpon = new mantenimientoGalpon();
                 $oMantenimientoGalpon->setMaxIDMantGalpon();
-                $oMantenimientoGalpon->setFecha( $_POST['fechaMantenimiento']);
+                $oMantenimientoGalpon->setFecha( $_POST['fechaMant']);
                 $oMantenimientoGalpon->setIdGalpon( $_POST['idGalpon'] );
                 $oMantenimientoGalpon->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] ); 
                 if ($oMantenimientoGalpon->save()) {

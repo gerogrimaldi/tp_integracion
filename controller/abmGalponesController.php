@@ -37,7 +37,7 @@ if (isset($_GET['ajax']))
             header('Content-Type: application/json');
             try {
                 $oGalpon = new Galpon();
-                if ($galponesConGranja = getGalponesMasGranjas()) {
+                if ($galponesConGranja = $oGalpon->getGalponesMasGranjas()) {
                     http_response_code(200);
                     echo json_encode($galponesConGranja);
                 }else{

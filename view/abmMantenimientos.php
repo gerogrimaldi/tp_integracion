@@ -382,7 +382,7 @@ function cargarSelectGranja() {
     selectFiltrarGranja.innerHTML = '';
     const defaultOption = document.createElement('option');
         defaultOption.text = 'Seleccione una granja';
-        defaultOption.value = '-1';
+        defaultOption.value = '';
         selectFiltrarGranja.appendChild(defaultOption);
 
     // Realizar la solicitud AJAX para obtener las granjas
@@ -393,9 +393,9 @@ function cargarSelectGranja() {
         }
         return response.json();
     })
-    .then(granjas => {
+    .then(data => {
         // Agregar las granjas desde la API
-        granjas.forEach(granja => {
+        data.forEach(granja => {
             const optionAgregar = document.createElement('option');
             optionAgregar.value = granja.idGranja;
             optionAgregar.text = granja.nombre;
@@ -554,14 +554,13 @@ function eliminarMantGranja(idMantenimientoGranja) {
 <div class="container">
     <h2> Galpones</h2>
 
-    <form id="selectGalponForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
+    <form id="selectGalponForm" class="needs-validation" novalidate>
         <div class="mb-4">
             <label for="selectGalpon" class="form-label">Seleccione el galpón para ver mantenimientos realizados.</label>
             <div class="input-group">
                 <select id="selectGalpon" name="selectGalpon" class="form-control" required>
                     <!-- Las opciones se agregan con JavaScript -->
                 </select>
-                <button type="submit" class="btn btn-primary rounded-end" name="btMantenimientos" value="selectGalpon">Filtrar</button>
                 <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#newMantGalpon">
                     Agregar mantenimiento
                 </button>
@@ -572,7 +571,7 @@ function eliminarMantGranja(idMantenimientoGranja) {
         </div>
     </form>
 
-    <table id="tablaMantenimientosGalp" class="table table-bordered bg-white">
+    <table id="tablaMantGalpon" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
                 <th class="text-primary">ID</th>
@@ -581,55 +580,233 @@ function eliminarMantGranja(idMantenimientoGranja) {
                 <th class="text-primary"></th>
             </tr>
         </thead>
-        <tbody id="mantenimientosGalp">
+        <tbody id="mantGalpon">
             <!-- Los datos se insertarán aquí -->
         </tbody>
     </table>
 </div>
 
-    <!-- Modal agregar Mantenimiento Galpon -->
-    <!-- TO DO: SI NO SE FILTRA UN GALPON ANTES, DA ERROR EL SQL -->
-    <div class="modal fade" id="newMantGalpon" tabindex="-1" aria-labelledby="newMantGalponModal" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="newMantGalponModal">Agregar mantenimiento realizado</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="newMantGalponForm" action="index.php?opt=mantenimientos" method="POST" class="needs-validation" novalidate>
-                        <div class="mb-4">
-                            <label for="fechaMant" class="form-label">Fecha y hora de realización</label>
-                           <input type="datetime-local" class="form-control" 
-                                id="fechaMant" name="fechaMantenimiento"
-                                required>
-                            <div class="invalid-feedback">
-                                Seleccione una fecha y hora válidos.
-                            </div>
+<!-- Modal agregar Mantenimiento Galpon -->
+<!-- TO DO: SI NO SE FILTRA UN GALPON ANTES, DA ERROR EL SQL -->
+<div class="modal fade" id="newMantGalpon" tabindex="-1" aria-labelledby="newMantGalponModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="newMantGalponModal">Agregar mantenimiento realizado</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newMantGalponForm" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="fechaMantGalpon" class="form-label">Fecha y hora de realización</label>
+                        <input type="datetime-local" class="form-control" 
+                            id="fechaMantGalpon" name="fechaMantenimiento"
+                            required>
+                        <div class="invalid-feedback">
+                            Seleccione una fecha y hora válidos.
                         </div>
-                        <div class="mb-4">
-                            <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
-                            <select id="selectTipoMantGalpon" name="tipoMantenimiento" class="form-control">
-                                <!-- Las opciones se agregarán aquí con JavaScript -->
-                            </select>
-                            <div class="invalid-feedback">
-                                La habilitación debe tener al menos 3 caracteres.
-                            </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
+                        <select id="selectTipoMantGalpon" name="tipoMantenimiento" class="form-control">
+                            <!-- Las opciones se agregarán aquí con JavaScript -->
+                        </select>
+                        <div class="invalid-feedback">
+                            La habilitación debe tener al menos 3 caracteres.
                         </div>
-                        <input type="hidden" id="idGalpon" name="idGalpon">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" name="btMantenimientos" value="newMantGalpon" form="newMantGalponForm">Finalizar</button>
-                </div>
+                    </div>
+                    <input type="hidden" id="idGalpon" name="idGalpon">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btnAgregarMantGalpon" >Finalizar</button>
             </div>
         </div>
     </div>
 </div>
+</div>
 
-<!-- Script JS para rellenar la tabla de mantenimientos de GALPON -->
 <script>
+<!-------------------------------------------------->
+<!-- Sección JavaScript - Mantenimiento de Galpon -->
+<!--------------------------------------------------> 
+<!------ CARGAR GALPONES DISPONIBLES EN SELECT -----> 
+<!-------------------------------------------------->
+function cargarSelectGalpon() {
+    //Iniciar tabla, cargar opción por default.
+    const selectFiltrarGalpon = document.getElementById('selectGalpon');
+    selectFiltrarGalpon.innerHTML = '';
+    const defaultOption = document.createElement('option');
+        defaultOption.text = 'Seleccione un galpón';
+        defaultOption.value = '';
+        selectFiltrarGalpon.appendChild(defaultOption);
+
+    fetch('index.php?opt=galpones&ajax=getAllGalpones')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+
+        data.forEach(galpones => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = galpones.idGalpon;
+            optionAgregar.text = galpones.identificacion + " - " + galpones.nombre;
+            selectFiltrarGalpon.appendChild(optionAgregar);
+        });
+
+        // Si hay un valor previamente seleccionado, restaurarlo y cargar los galpones
+        const previouslySelected = selectFiltrarGalpon.getAttribute('data-selected');
+        if (previouslySelected) {
+            selectFiltrarGalpon.value = previouslySelected;
+            cargarTablaGalpones();
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar galpones:', error);
+        showToastError('Error al cargar galpones');
+    });
+}
+<!-- Listado Galpon - Filtrar al presionar opción del select -->
+document.getElementById('selectGalpon').addEventListener('change', function(e) {
+    this.setAttribute('data-selected', e.target.value);
+    if (e.target.value) {
+        cargarTablaMantGalpon();
+    } else {
+        // Limpiar la tabla si no hay Galpon seleccionado
+        if ($.fn.DataTable.isDataTable('#tablaGalpones')) {
+            $('#tablaGalpones').DataTable().clear().draw();
+        }
+    }
+});
+<!-------------------------------------------------> 
+<!------ RELLENAR TABLA MANT. GALPON - AJAX ------->
+<!-------------------------------------------------> 
+function cargarTablaMantGalpon() {
+    //Vaciar la tabla
+    if ($.fn.DataTable.isDataTable('#tablaMantGalpon')) {
+        $('#tablaMantGalpon').DataTable().destroy();
+    }
+    var tablaMantGalponTbody = document.getElementById("mantGalpon");
+    tablaMantGalponTbody.innerHTML = '';
+
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=getMantGalpon&idGalpon=' + document.getElementById('selectGalpon').value)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Recorrer los datos y crear las filas de la tabla
+        data.forEach(mantenimientos => {
+            var row = document.createElement("tr");
+            row.className = "table-light";
+            row.innerHTML = 
+            '<td>' + mantenimientos.idMantenimientoGalpon + '</td>' +
+            '<td>' + mantenimientos.fecha + '</td>' +
+            '<td>' + mantenimientos.nombre + '</td>' +
+            '</td>' +
+            '<td>' +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarMantGalpon(' + mantenimientos.idMantenimientoGalpon + ')">Borrar</button>' +
+            '</td>';
+            tablaMantGalponTbody.appendChild(row);
+        })
+        $('#tablaMantGalpon').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar galpones:', error);
+        $('#tablaMantGalpon').DataTable();
+    });
+}
+<!----------------------------------------------------->
+<!-----------------------------------------------------> 
+<!--------- MANT. GALPON - FORMULARIO AGREGAR --------->  
+<!-----------------------------------------------------> 
+<!--- Pasar al formulario el ID Galpon seleccionado --->  
+<!------- y presentar error si no hay seleccion ------->  
+document.getElementById("newMantGalpon").addEventListener("show.bs.modal", function (event) {
+    // Get the currently selected Galpon ID
+    const selectedGalponId = document.getElementById('selectGalpon').value;
+    if (!selectedGalponId) {
+        event.preventDefault();
+        showToastError('Debe seleccionar un galpón primero');
+        return;
+    }
+    // Set the hidden input value
+    document.querySelector("#newMantGalponForm #idGalpon").value = selectedGalponId;
+    cargarSelectTipoMant('selectTipoMantGalpon');
+});
+<!---- Cambiar la acción del botón enviar y enter ---->  
+document.getElementById('btnAgregarMantGalpon').addEventListener('click', function() {
+    agregarMantGalpon();
+});
+document.getElementById('newMantGalponForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarMantGalpon();
+});
+<!-----------------------------------------------> 
+<!-------- MANT. Galpon - AGREGAR NUEVO --------->  
+<!-----------------------------------------------> 
+function agregarMantGalpon() {
+    const fechaMant = document.getElementById('fechaMantGalpon').value;
+    const tipoMantenimiento = document.getElementById('selectTipoMantGalpon').value;
+    const idGalpon = document.getElementById('idGalpon').value;
+
+    fetch('index.php?opt=mantenimientos&ajax=newMantGalpon', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'fechaMant=' + encodeURIComponent(fechaMant) +
+              '&tipoMantenimiento=' + encodeURIComponent(tipoMantenimiento) +
+              '&idGalpon=' + encodeURIComponent(idGalpon)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaMantGalpon();
+                $('#newMantGalpon').modal('hide');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+<!-----------------------------------------------> 
+<!----------- MANT. Galpon - ELIMINAR ----------->  
+<!-----------------------------------------------> 
+function eliminarMantGalpon(idMantenimientoGalpon) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=mantenimientos&ajax=delMantGalpon&idMantenimientoGalpon=' + idMantenimientoGalpon, {
+        method: 'GET'
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                // Si la eliminación fue exitosa, recargar la tabla y los select
+                cargarTablaMantGalpon();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
+    });
+}
+
     /*
     var mantenimientosGalp = \$resultadoGalp;
     var mantenimientosGalpTbody = document.getElementById("mantenimientosGalp");
@@ -685,7 +862,9 @@ function eliminarMantGranja(idMantenimientoGranja) {
     window.addEventListener('load', function() {
         cargarSelectGranja();
         cargarTablaTipoMant();
-        cargarTablaMantGranja()
+        cargarTablaMantGranja();
+        cargarSelectGalpon();
+        cargarTablaMantGalpon()
     });
 
 </script>
