@@ -805,67 +805,14 @@ function eliminarMantGalpon(idMantenimientoGalpon) {
         console.error('Error en la solicitud AJAX:', error);
         showToastError('Error desconocido.');
     });
-}
-
-    /*
-    var mantenimientosGalp = \$resultadoGalp;
-    var mantenimientosGalpTbody = document.getElementById("mantenimientosGalp");
-    mantenimientosGalp.forEach(
-        function(mantenimientosGalp) {
-        var row = document.createElement("tr");
-        row.className = "table-light";
-        row.innerHTML = 
-            '<td>' + mantenimientosGalp.idMantenimientoGalpon + '</td>' +
-            '<td>' + mantenimientosGalp.fecha + '</td>' +
-            '<td>' + mantenimientosGalp.nombre + '</td>' +
-            '</td>' +
-            '<td>' +
-                '<a href="index.php?opt=mantenimientos&delete=galpon&idMantenimientoGalpon=' + mantenimientosGalp.idMantenimientoGalpon + '&selectGalpon=' + mantenimientosGalp.idGalpon + '" ' +
-                   'class="btn btn-danger btn-sm">' +
-                    'Borrar' +
-                '</a>' +
-            '</td>';
-        mantenimientosGalpTbody.appendChild(row);
-    });
-
-    // Inicializar DataTable - Es un "plugin" que le agrega la busqueda, ordenamiento, etc. a la tabla.
-    // Se le pasa como parámetro la tabla HTML que creamos.
-    $(document).ready(function() {
-        $("#tablaMantenimientosGalp").DataTable();
-    });
-
-<!-- Script JS para rellenar las opciones con las Granjas disponibles -->
-    function cargarSelectGalpon() {
-       // Recupero desde PHP el galpón seleccionada en caso de existir
-       var selectedGalpon = \$selectedGalpon;
-       var galponesSelect = \$galponesFiltrados;
-       const selectFiltrarGalpon = document.getElementById('selectGalpon');
-       selectFiltrarGalpon.innerHTML = '';
-       const defaultOption = document.createElement('option');
-       defaultOption.text = 'Seleccione un galpón';
-       defaultOption.value = '';
-       selectFiltrarGalpon.appendChild(defaultOption);
-       galponesSelect.forEach(function (item) {
-           const optionAgregar = document.createElement('option');
-           optionAgregar.value = item.idGalpon;
-            optionAgregar.text = item.identificacion + " - " + item.nombre;
-           // Marcar como seleccionada si coincide con el valor recuperado
-           if (item.idGalpon == selectedGalpon) {
-               optionAgregar.selected = true;
-           }
-           selectFiltrarGalpon.appendChild(optionAgregar);
-        });
-    }    
-    });*/
-    
-    // Reemplaza las líneas window.onload individuales por:
-    window.addEventListener('load', function() {
-        cargarSelectGranja();
-        cargarTablaTipoMant();
-        cargarTablaMantGranja();
-        cargarSelectGalpon();
-        cargarTablaMantGalpon()
-    });
+}   
+window.addEventListener('load', function() {
+    cargarSelectGranja();
+    cargarTablaTipoMant();
+    cargarTablaMantGranja();
+    cargarSelectGalpon();
+    cargarTablaMantGalpon()
+});
 
 </script>
 

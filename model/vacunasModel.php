@@ -11,7 +11,6 @@ class vacuna{
     
     public function __construct()
     {
-        // Inicializar conexión a base de datos
         require_once 'model/conexion.php';  
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
         if ($this->mysqli->connect_error) {
@@ -27,7 +26,14 @@ class vacuna{
         }
     }
 
-    public function setIdViaApliacion($idViaAplicacion)
+    public function __destruct()
+    {
+        if ($this->mysqli !== null) {
+            $this->mysqli->close();
+        }
+    }
+
+    public function setIdViaAplicacion($idViaAplicacion) // Corrected method name
     {
         if ( ctype_digit($idViaAplicacion)==true )
         {
@@ -37,141 +43,185 @@ class vacuna{
 
     public function setNombre($nombre)
     {
-        $this->nombre = trim($nombre);
+        $this->nombre = htmlspecialchars(strip_tags(trim($nombre)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function setMarca($marca)
     {
-        $this->marca = trim($marca); 
+        $this->marca = htmlspecialchars(strip_tags(trim($marca)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function setEnfermedad($enfermedad)
     {
-        $this->enfermedad = trim($enfermedad); 
+        $this->enfermedad = htmlspecialchars(strip_tags(trim($enfermedad)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function setMaxIDVacuna()
     {
-        $sql = "SELECT MAX(idVacuna) AS maxID FROM vacuna  ";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0;
-            $this->idVacuna = $maxID + 1; 
-        }else {
-            echo "Error al obtener el máximo idVacuna: " . $this->mysqli->error;
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT MAX(idVacuna) AS maxID FROM vacuna";
+            $result = $this->mysqli->query($sql);
+            if(!$result){
+                throw new RuntimeException('Error al consultar el máximo idVacuna: ' . $this->mysqli->error);
+            }
+            $data = []; 
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0; 
+                $this->idVacuna = $maxID + 1; 
+            }else {
+                throw new RuntimeException("Error al obtener el máximo idVacuna: " . $this->mysqli->error);
+            }
+        }catch(RuntimeException $e) {
+            throw $e;
         }
     }
 
     public function getall()
     {
-        $sql = "SELECT vacuna.idVacuna, vacuna.nombre, vacuna.idViaAplicacion, vacuna.marca, vacuna.enfermedad, viaAplicacion.idViaAplicacion, viaAplicacion.via FROM vacuna 
-                INNER JOIN viaAplicacion ON (vacuna.idViaAplicacion = viaAplicacion.idViaAplicacion)";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
+            $sql = "SELECT vacuna.idVacuna, vacuna.nombre, vacuna.idViaAplicacion, 
+                    vacuna.marca, vacuna.enfermedad, viaAplicacion.idViaAplicacion, viaAplicacion.via 
+                    FROM vacuna 
+                    INNER JOIN viaAplicacion ON (vacuna.idViaAplicacion = viaAplicacion.idViaAplicacion)";
+            $result = $this->mysqli->query($sql);
+            if ($result === false) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
+            }
+            $data = [];
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            return $data;
+        }catch(RuntimeException $e) {
+            throw $e;
         }
-        $json_data = json_encode($data);
-        return $json_data;
     }
 
     public function getAllViaAplicacion()
     {
-        $sql = "SELECT viaAplicacion.idViaAplicacion, viaAplicacion.via FROM viaAplicacion";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-        }
-        $json_data = json_encode($data);
-        return $json_data;
-    }
-
-    public function getVacunaPorId($idVacuna)
-    {
-        $sql = "SELECT vacuna.idVacuna, vacuna.nombre, vacuna.idViaAplicacion, vacuna.marca, vacuna.enfermedad, viaAplicacion.idViaAplicacion, viaAplicacion.nombre FROM vacuna 
-                INNER JOIN viaAplicacion ON (vacuna.idViaAplicacion = viaAplicacion.idViaAplicacion) WHERE idVacuna=".$idVacuna;
-        if ( $resultado = $this->mysqli->query($sql) )
-		{
-			if ( $resultado->num_rows > 0 )
- 			{
-                 return $resultado;
-			}else{
-                return false;
+            $sql = "SELECT viaAplicacion.idViaAplicacion, viaAplicacion.via FROM viaAplicacion";
+            $result = $this->mysqli->query($sql);
+            if ($result === false) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
             }
+            $data = [];
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            return $data;
+        }catch(RuntimeException $e) {
+            throw $e;
         }
-        unset($resultado);
-        $this->mysqli->close();
     }
 
     public function save()
     {
-        $sqlCheck = "SELECT idVacuna FROM vacuna WHERE idVacuna = ?";
-        $stmtCheck = $this->mysqli->prepare($sqlCheck);
-        if (!$stmtCheck) { die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); }
-        $stmtCheck->bind_param("i", $this->idVacuna);
-        $stmtCheck->execute();
-        $stmtCheck->store_result();
-        if ($stmtCheck->num_rows > 0) {
-            echo '<script type="text/javascript">alert("Error: La vacuna ya existe.");</script>';
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sqlCheck = "SELECT idVacuna FROM vacuna WHERE nombre = ? AND marca = ?";
+            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+            if (!$stmtCheck) {
+                throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
+            }
+            // Enlazar parametros
+            $stmtCheck->bind_param("ss", $this->nombre, $this->marca);
+            $stmtCheck->execute();
+            $stmtCheck->store_result();
+            // Verificar
+            if ($stmtCheck->num_rows > 0) {
+                $stmtCheck->close();
+                throw new RuntimeException("Error: La vacuna ya existe.");
+            }
             $stmtCheck->close();
+            // Inserción
+            $sql = "INSERT INTO vacuna (idVacuna, nombre, idViaAplicacion, marca, enfermedad) 
+                    VALUES (?, ?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+            }
+            $stmt->bind_param("isiss", $this->idVacuna, $this->nombre, $this->idViaAplicacion, $this->marca, $this->enfermedad);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $stmt->close();
             $this->mysqli->close();
-            return false; 
+            return true;
+        } catch (RuntimeException $e) {
+            throw $e;
         }
-        $stmtCheck->close();
-        // Inserción
-        $sql = "INSERT INTO vacuna (idVacuna, nombre, idViaAplicacion, marca, enfermedad) 
-                VALUES (?, ?, ?, ?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-        }
-        $stmt->bind_param("isiss", $this->idVacuna, $this->nombre, $this->idViaAplicacion, $this->marca, $this->enfermedad);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
-        $this->mysqli->close();
-        return true;
     }
 
     public function update()
     {
-        $sql = "UPDATE vacuna SET nombre = ?, idViaAplicacion = ?, marca = ?, enfermedad = ? WHERE idVacuna = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "UPDATE vacuna SET nombre = ?, idViaAplicacion = ?, marca = ?, enfermedad = ? WHERE idVacuna = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            // Enlazar parámetros y ejecutar la consulta
+            $stmt->bind_param("sissi", $this->nombre, $this->idViaAplicacion, $this->marca, $this->enfermedad, $this->idVacuna);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        } catch (RuntimeException $e) {
+            throw $e;
         }
-        $stmt->bind_param("sissi", $this->nombre, $this->idViaAplicacion, $this->marca, $this->enfermedad, $this->idVacuna);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
-        $this->mysqli->close();
     }
 
     public function deleteVacunaPorId($idVacuna)
     {
-        if ($this->mysqli === null) {
-            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idVacuna)) {
+                throw new RuntimeException('El ID del galpón debe ser un número.');
+            }
+            $sql = "DELETE FROM vacuna WHERE idVacuna = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idVacuna);
+            if (!$stmt->execute()) {
+                // Verificar si es un error de clave foránea
+                if ($this->mysqli->errno == 1451) {
+                    throw new RuntimeException('La vacuna tiene registros asociados.');
+                }else{
+                    throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+                }
+            }
+            // Cerrar el statement
+            $stmt->close();
+            return true;
+        } catch (runtimeException $e) {
+            throw $e;
         }
-        $sql = "DELETE FROM vacuna WHERE idVacuna = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) {
-            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
-        }
-        $stmt->bind_param('i', $idVacuna);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
     }
-
 }
 
 class loteVacuna{
@@ -194,6 +244,13 @@ class loteVacuna{
         }
     }
 
+    public function __destruct()
+    {
+        if ($this->mysqli !== null) {
+            $this->mysqli->close();
+        }
+    }
+
     public function setIdLoteVacuna($idLoteVacuna)
     {
         if ( ctype_digit($idLoteVacuna)==true )
@@ -212,130 +269,218 @@ class loteVacuna{
 
     public function setNumeroLote($numeroLote)
     {
-            $this->numeroLote = trim($numeroLote);
+        $this->numeroLote = htmlspecialchars(strip_tags(trim($numeroLote)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function setCantidad($cantidad)
     {
-        $this->cantidad = trim($cantidad);
+        $this->cantidad = htmlspecialchars(strip_tags(trim($cantidad)), ENT_QUOTES, 'UTF-8'); 
     }
 
     public function setFechaCompra($fechaCompra)
     {
-        $this->fechaCompra = $fechaCompra;
+        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $fechaCompra);
+        if ($dateTime) {
+            $this->fechaCompra = $dateTime->format('Y-m-d H:i:s');
+        } else {
+            throw new RuntimeException('Formato de fecha de compra inválido.');
+        }
     }
 
     public function setVencimiento($vencimiento)
     {
-        $this->vencimiento = $vencimiento;
+        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $vencimiento);
+        if ($dateTime) {
+            $this->vencimiento = $dateTime->format('Y-m-d H:i:s');
+        } else {
+            throw new RuntimeException('Formato de fecha de vencimiento inválido.');
+        }
+    }
+    
+    public function setMaxIDLoteVacuna()
+    {
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Leer datos de la tabla 'granjas',
+            $sql = "SELECT MAX(idLoteVacuna) AS maxID FROM loteVacuna";
+            $result = $this->mysqli->query($sql);
+            if(!$result){
+                throw new RuntimeException('Error al consultar el máximo idLoteVacuna: ' . $this->mysqli->error);
+            }
+            $data = []; // Array para almacenar los datos
+            //La consulta devuelve un solo resultado.
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
+                $this->idLoteVacuna = $maxID + 1; // Corrected property assignment
+            }else {
+                throw new RuntimeException("Error al obtener el máximo idLoteVacuna: " . $this->mysqli->error);
+            }
+        }catch(RuntimeException $e) {
+            throw $e;
+        }
     }
 
     public function getall()
     {
-        $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
+        try{
+            if ($this->mysqli === null) { 
+                    throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
                 loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre,
                 vacuna.marca FROM loteVacuna INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna)";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+            $result = $this->mysqli->query($sql);
+            if ($result === false) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
             }
+            $data = [];
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            return $data;
+        }catch(RuntimeException $e) {
+            throw $e;
         }
-        $json_data = json_encode($data);
-        return $json_data;
     }
 
     public function getLotes($idVacuna)
     {
-        $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
-                loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre,
-                vacuna.marca FROM loteVacuna INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna) WHERE loteVacuna.idVacuna = ".$idVacuna;
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-        }
-        $json_data = json_encode($data);
-        return $json_data;
-    }
-
-    public function setMaxIDLoteVacuna()
-    {
-        $sql = "SELECT MAX(idLoteVacuna) AS maxID FROM loteVacuna  ";
-        $result = $this->mysqli->query($sql);
-        $data = [];
-        if ($result && $row = $result->fetch_assoc()) {
-            $maxID = $row['maxID'] ?? 0;
-            $this->idLoteVacuna = $maxID + 1; 
-        }else {
-            echo "Error al obtener el máximo idLoteVacuna: " . $this->mysqli->error;
+            // Preparar la consulta
+            $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
+                loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre, vacuna.marca 
+                FROM loteVacuna 
+                INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna) 
+                WHERE loteVacuna.idVacuna = ?";
+        $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
+            }
+            // Enlazar el parámetro y ejecutar la consulta
+            $stmt->bind_param("i", $idVacuna);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Obtener el resultado de la consulta
+            $result = $stmt->get_result();
+            if ($result === false) {
+                //Se activa con error, del SQL. Si 0 columnas, sigue sin error.
+                throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);
+            }
+            $data = []; // Array para almacenar los datos
+            if ($result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
         }
     }
 
     public function save()
     {
-        $sqlCheck = "SELECT idLoteVacuna FROM loteVacuna WHERE idLoteVacuna = ?";
-        $stmtCheck = $this->mysqli->prepare($sqlCheck);
-        if (!$stmtCheck) { die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error); }
-        $stmtCheck->bind_param("i", $this->idLoteVacuna);
-        $stmtCheck->execute();
-        $stmtCheck->store_result();
-        if ($stmtCheck->num_rows > 0) {
-            echo '<script type="text/javascript">alert("Error: el lote ya existe.");</script>';
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            // Verificar si ya existe el número de lote para el mismo idVacuna
+            $sqlCheck = "SELECT idLoteVacuna FROM loteVacuna WHERE numeroLote = ? AND idVacuna = ?";
+            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+            if (!$stmtCheck) {
+                throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
+            }
+            // Enlazar parámetros
+            $stmtCheck->bind_param("si", $this->numeroLote, $this->idVacuna);
+            $stmtCheck->execute();
+            $stmtCheck->store_result();
+            // Verificar
+            if ($stmtCheck->num_rows > 0) {
+                $stmtCheck->close();
+                throw new RuntimeException("Error: El número de lote ya existe para esta vacuna.");
+            }
             $stmtCheck->close();
+            // Inserción
+            $sql = "INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+            }
+            $stmt->bind_param("issisi", $this->idLoteVacuna, $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $stmt->close();
             $this->mysqli->close();
-            return false; 
+            return true;
+        } catch (RuntimeException $e) {
+            throw $e;
         }
-        $stmtCheck->close();
-        // Inserción
-        $sql = "INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimiento, idVacuna) 
-                VALUES (?, ?, ?, ?, ?)";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-        }
-        $stmt->bind_param("issisi", $this->idLoteVacuna, $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
-        $this->mysqli->close();
-        return true;
     }
 
     public function update()
     {
-        $sql = "UPDATE loteVacuna SET  numeroLote = ?, fechaCompra = ?, cantidad = ?, vencimiento = ?, idVacuna = ? WHERE idLoteVacuna = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if (!$stmt) {
-            die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "UPDATE loteVacuna SET  numeroLote = ?, fechaCompra = ?, cantidad = ?, vencimiento = ?, idVacuna = ? WHERE idLoteVacuna = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            // Enlazar parámetros y ejecutar la consulta
+            $stmt->bind_param("ssisii", $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna, $this->idLoteVacuna);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            // Cerrar la consulta
+            $stmt->close();
+            return true;
+        } catch (RuntimeException $e) {
+            throw $e;
         }
-        $stmt->bind_param("ssisii", $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna, $this->idLoteVacuna);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
-        $this->mysqli->close();
     }
 
-    public function deleteLoteVacunaPorId($idLoteVacuna)
+    public function deleteVacunaPorId($idLoteVacuna)
     {
-        if ($this->mysqli === null) {
-            throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+        try{
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idLoteVacuna)) {
+                throw new RuntimeException('El ID del lote de vacuna debe ser un número.'); // Corrected error message
+            }
+            $sql = "DELETE FROM loteVacuna WHERE idLoteVacuna = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idLoteVacuna);
+            if (!$stmt->execute()) {
+                // Verificar si es un error de clave foránea
+                if ($this->mysqli->errno == 1451) {
+                    throw new RuntimeException('El lote de vacuna tiene registros asociados.');
+                }else{
+                    throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
+                }
+            }
+            // Cerrar el statement
+            $stmt->close();
+            return true;
+        } catch (runtimeException $e) {
+            throw $e;
         }
-        $sql = "DELETE FROM loteVacuna WHERE idLoteVacuna = ?";
-        $stmt = $this->mysqli->prepare($sql);
-        if ($stmt === false) {
-            throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
-        }
-        $stmt->bind_param('i', $idLoteVacuna);
-        if (!$stmt->execute()) {
-            throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-        }
-        $stmt->close();
     }
 
 }

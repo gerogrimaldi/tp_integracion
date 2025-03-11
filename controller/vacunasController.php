@@ -1,88 +1,235 @@
 <?php
 require_once 'model/vacunasModel.php';
 
-if ( !empty($_POST) ) 
+if (isset($_GET['ajax']))
 {
-    if ( $_POST['btVacunas'] == 'newVacuna')
-    {   
-        $oVacuna = new vacuna();
-        $oVacuna->setMaxIDVacuna();
-        $oVacuna->setIdViaApliacion( $_POST['viaAplicacion'] );
-        $oVacuna->setNombre( $_POST['nombre'] );
-        $oVacuna->setMarca( $_POST['marca'] );
-        $oVacuna->setEnfermedad( $_POST['enfermedad'] );
-        $oVacuna->save();
-    }
+    switch ($_GET['ajax']) {
+    // ------------------------------------
+    // SOLICITUDES AJAX - VACUNAS
+    // ------------------------------------
+        case 'getVacunas':
+            header('Content-Type: application/json');
+            try {
+                $oVacuna = new vacuna();
+                if ($vacunas = $oVacuna->getall()) {
+                    http_response_code(200);
+                    echo json_encode($vacunas);
+                } else {
+                    // Si no hay registros
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                // echo json_encode(['msg' => $e->getMessage()]);
+                echo json_encode(['msg' => 'Error al obtener los galpones y sus granjas.']);
+            }
+            exit();
 
-    if ( $_POST['btVacunas'] == 'editVacuna')
-    {   
-        $oVacuna = new vacuna();
-        $oVacuna->setIdVacuna($_POST['idVacuna']);
-        $oVacuna->setIdViaApliacion( $_POST['viaAplicacion'] );
-        $oVacuna->setNombre( $_POST['nombre'] );
-        $oVacuna->setMarca( $_POST['marca'] );
-        $oVacuna->setEnfermedad( $_POST['enfermedad'] );
-        $oVacuna->update();
-    }
+        case 'getViasAplicacion':
+            header('Content-Type: application/json');
+            try {
+                $oVacuna = new vacuna();
+                if ($viaAplicacion = $oVacuna->getAllViaAplicacion()) {
+                    http_response_code(200);
+                    echo json_encode($viaAplicacion);
+                } else {
+                    // Si no hay registros
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al obtener vías de aplicación.']);
+            }
+            exit();
+            
+        case 'delVacuna': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idVacuna']) || $_GET['idVacuna'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado una vacuna.']);
+                    exit();
+                }
+                $oVacuna = new vacuna();
+                if ($oVacuna->deleteVacunaPorId($_GET['idVacuna'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Eliminado correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
+            }
+            exit();
+        break;
 
-    if ( $_POST['btVacunas'] == 'editLoteVacuna')
-    {   
-        $oLoteVacuna = new loteVacuna();
-        $oLoteVacuna->setIdLoteVacuna($_POST['idLoteVacuna']);
-        $oLoteVacuna->numeroLote( $_POST['numeroLote'] );
-        $oLoteVacuna->fechaCompra( $_POST['fechaCompra'] );
-        $oLoteVacuna->cantidad( $_POST['cantidad'] );
-        $oLoteVacuna->vencimiento( $_POST['vencimiento'] );
-        $oLoteVacuna->idVacuna( $_POST['idVacuna'] );
-        $oLoteVacuna->update();
-    }
+        case 'addVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['nombre']) || (!isset($_POST['viaAplicacion']) || $_POST['viaAplicacion'] === '') || 
+                    empty($_POST['marca']) || empty($_POST['enfermedad'])) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oVacuna = new vacuna();
+                $oVacuna->setMaxIDVacuna();
+                $oVacuna->setIdViaApliacion($_POST['viaAplicacion']);
+                $oVacuna->setNombre($_POST['nombre']);
+                $oVacuna->setMarca($_POST['marca']);
+                $oVacuna->setEnfermedad($_POST['enfermedad']);
 
-    if ( $_POST['btVacunas'] == 'newLoteVacuna')
-    {   
-        echo var_dump($_POST);
-        $oLoteVacuna = new loteVacuna();
-        $oLoteVacuna->setMaxIDLoteVacuna();
-        $oLoteVacuna->setNumeroLote( $_POST['numeroLote'] );
-        $oLoteVacuna->setFechaCompra( $_POST['fechaCompra'] );
-        $oLoteVacuna->setCantidad( $_POST['cantidad'] );
-        $oLoteVacuna->setVencimiento( $_POST['fechaVencimiento'] );
-        $oLoteVacuna->setIdVacuna( $_POST['idVacuna'] );
-        $oLoteVacuna->save();
-    }
-}
+                // Respuesta al frontend
+                if ($oVacuna->save()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Vacuna agregada correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al añadir.']);
+            }
+            exit();
+        break;
 
-if ( !empty($_GET) ) 
-{
-    if (isset($_GET['delete']) && $_GET['delete'] == 'true')
-    {
-        $oVacuna = new vacuna();
-        $idVacuna = (int)$_GET['idVacuna'];
-        $oVacuna->deleteVacunaPorId($idVacuna);
+        case 'editVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['nombre']) || (!isset($_POST['idVacuna']) || $_POST['idVacuna'] === '') || 
+                    empty($_POST['marca']) || (!isset($_POST['viaAplicacion']) || $_POST['viaAplicacion'] === '') || 
+                    empty($_POST['enfermedad'])) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oVacuna = new vacuna();
+                $oVacuna->setIdVacuna($_POST['idVacuna']);
+                $oVacuna->setIdViaApliacion($_POST['viaAplicacion']);
+                $oVacuna->setNombre($_POST['nombre']);
+                $oVacuna->setMarca($_POST['marca']);
+                $oVacuna->setEnfermedad($_POST['enfermedad']);
+                // Respuesta al frontend
+                if ($oVacuna->update()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                    // echo json_encode(['msg' => $e->getMessage()]);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                // echo json_encode(['msg' => $e->getMessage()]);
+                echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
 
-        // Recargar pagina para mostrar resultados
-        header("Location: index.php?opt=vacunas");
-        exit();
-    }
+    // ------------------------------------
+    // SOLICITUDES AJAX - LOTE DE VACUNAS
+    // ------------------------------------
+        case 'getLoteVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idVacuna']) || $_GET['idVacuna'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado una vacuna.']);
+                    exit();
+                }
+                $oLoteVacuna = new loteVacuna();
+                if ($lote = $oLoteVacuna->getLotes($_GET['idVacuna'])) {
+                    http_response_code(200);
+                    echo json_encode($lote);
+                } else {
+                    // Si no hay registros
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                // echo json_encode(['msg' => $e->getMessage()]);
+                echo json_encode(['msg' => 'Error al obtener los lotes.']);
+            }
+            exit();
 
-    if (isset($_GET['delete']) && $_GET['delete'] == 'lote')
-    {
-        $oLoteVacuna = new loteVacuna();
-        $idLoteVacuna = (int)$_GET['idLoteVacuna'];
-        $oLoteVacuna->deleteLoteVacunaPorId($idLoteVacuna);
+        case 'delLoteVacuna': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteVacuna']) || $_GET['idLoteVacuna'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado un lote de vacunas.']);
+                    exit();
+                }
+                $oLoteVacuna = new loteVacuna();
+                if ($oLoteVacuna->deleteLoteVacunaPorId($_GET['idLoteVacuna'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Eliminado correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
+            }
+            exit();
+        break;
 
-        // Recargar pagina para mostrar resultados
-        header("Location: index.php?opt=vacunas");
-        exit();
-    }
+        case 'addLoteVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['numeroLote']) || (!isset($_POST['idVacuna']) || $_POST['idVacuna'] === '') || 
+                    empty($_POST['fechaCompra']) || empty($_POST['cantidad']) || empty($_POST['fechaVencimiento'])) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLoteVacuna = new loteVacuna();
+                $oLoteVacuna->setMaxIDLoteVacuna();
+                $oLoteVacuna->setNumeroLote($_POST['numeroLote']);
+                $oLoteVacuna->setFechaCompra($_POST['fechaCompra']);
+                $oLoteVacuna->setCantidad($_POST['cantidad']);
+                $oLoteVacuna->setVencimiento($_POST['fechaVencimiento']);
+                $oLoteVacuna->setIdVacuna($_POST['idVacuna']);
+                // Respuesta al frontend
+                if ($oLoteVacuna->save()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Lote de vacunas agregada correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al añadir.']);
+            }
+            exit();
+        break;
 
-    if ($_GET['opt']=='vacunas')
-    {
-        $oVacuna = new vacuna();
-        $vacunasJSON = $oVacuna->getall();
-        $viaAplicacionJSON = $oVacuna->getAllViaAplicacion();
+        case 'editLoteVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['numeroLote']) || (!isset($_POST['idLoteVacuna']) || $_POST['idLoteVacuna'] === '') || 
+                    empty($_POST['fechaCompra']) || (!isset($_POST['idVacuna']) || $_POST['idVacuna'] === '') || 
+                    empty($_POST['cantidad']) || empty($_POST['vencimiento'])) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLoteVacuna = new loteVacuna();
+                $oLoteVacuna->setIdLoteVacuna($_POST['idLoteVacuna']);
+                $oLoteVacuna->setNumeroLote($_POST['numeroLote']);
+                $oLoteVacuna->setFechaCompra($_POST['fechaCompra']);
+                $oLoteVacuna->setCantidad($_POST['cantidad']);
+                $oLoteVacuna->setVencimiento($_POST['vencimiento']);
+                $oLoteVacuna->setIdVacuna($_POST['idVacuna']);
+                // Respuesta al frontend
+                if ($oLoteVacuna->update()) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                    // echo json_encode(['msg' => $e->getMessage()]);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                // echo json_encode(['msg' => $e->getMessage()]);
+                echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
 
-        $oLoteVacuna = new loteVacuna();
-        $loteJSON = $oLoteVacuna->getLotes('1');
-
+        default:
+            exit();
+        break;
     }
 }

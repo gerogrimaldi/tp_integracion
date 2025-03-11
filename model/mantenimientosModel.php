@@ -211,20 +211,13 @@ class mantenimientoGranja{
 
     public function setFecha($fecha)
     {
-        $this->fecha = htmlspecialchars(strip_tags(trim($fecha)), ENT_QUOTES, 'UTF-8'); 
-    }
-
-    /* -------- PROBAR -------------
-    ------- Fecha sanitizada -------
-    public function setFecha($fecha)
-    {
-        // Validate date format
-        if (DateTime::createFromFormat('Y-m-d', $fecha) !== false) {
-            $this->fecha = $fecha;
+        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $fecha);
+        if ($dateTime) {
+            $this->fecha = $dateTime->format('Y-m-d H:i:s');
         } else {
-            throw new RuntimeException('Formato de fecha inválido. Use YYYY-MM-DD');
+            throw new RuntimeException('Formato de fecha inválido.');
         }
-    }*/
+    }
 
     public function setIdTipoMantenimiento($idTipoMantenimiento)
     {
@@ -390,7 +383,13 @@ class mantenimientoGalpon{
 
     public function setFecha($fecha)
     {
-        $this->fecha = $fecha;
+        //Convierte la fecha desde el frontend a un formato válido para MySQL
+        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $fecha);
+        if ($dateTime) {
+            $this->fecha = $dateTime->format('Y-m-d H:i:s');
+        } else {
+            throw new RuntimeException('Formato de fecha inválido.');
+        }
     }
 
     public function setIdTipoMantenimiento($idTipoMantenimiento)

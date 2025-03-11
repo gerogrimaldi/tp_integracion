@@ -70,17 +70,15 @@ class galpon{
             if ($this->mysqli === null) { 
                     throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            // Leer datos de la tabla 'granjas',
             $sql = "SELECT MAX(idGalpon) AS maxID FROM galpon";;
             $result = $this->mysqli->query($sql);
             if(!$result){
                 throw new RuntimeException('Error al consultar el máximo idGranja: ' . $this->mysqli->error);
             }
-            $data = []; // Array para almacenar los datos
-            //La consulta devuelve un solo resultado.
+            $data = [];
             if ($result && $row = $result->fetch_assoc()) {
-                $maxID = $row['maxID'] ?? 0; // Si no hay registros, maxID será 0
-                $this->idGalpon = $maxID + 1; // Incrementa el ID máximo en 1
+                $maxID = $row['maxID'] ?? 0;
+                $this->idGalpon = $maxID + 1; 
             }else {
                 throw new RuntimeException("Error al obtener el máximo idGranja: " . $this->mysqli->error);
             }
@@ -143,7 +141,7 @@ class galpon{
                 //Este error se da si falla el SQL. Si devuelve 0 columnas, no se activa.
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
             }
-            $data = []; // Array para almacenar los datos
+            $data = [];
             if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
                     $data[] = $row;
@@ -161,14 +159,13 @@ class galpon{
             if ($this->mysqli === null) { 
                     throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            // Leer datos de la tabla 'granjas',
             $sql = "SELECT idTipoAve, nombre FROM tipoAve";
             $result = $this->mysqli->query($sql);
             if ($result === false) {
                 //Este error se da si falla el SQL. Si devuelve 0 columnas, no se activa.
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
             }
-            $data = []; // Array para almacenar los datos
+            $data = [];
             if ($result->num_rows > 0) {
                 while($row = $result->fetch_assoc()) {
                     $data[] = $row;
@@ -191,29 +188,24 @@ class galpon{
             if (!$stmtCheck) {
                 throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
             }
-            // Enlazar parametro
             $stmtCheck->bind_param("i", $this->idGalpon);
             $stmtCheck->execute();
             $stmtCheck->store_result();
-            // Verificar
             if ($stmtCheck->num_rows > 0) {
                 $stmtCheck->close();
                 throw new RuntimeException("Error, ya existe: " . $this->mysqli->error);
             }
             $stmtCheck->close();
-            // Inserción de Granja
             $sql = "INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) 
                     VALUES (?, ?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
             }
-            // Enlaza los parámetros y ejecuta la consulta
             $stmt->bind_param("isiii", $this->idGalpon, $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja);
             if (!$stmt->execute()) {
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
-            // Cerrar la consulta
             $stmt->close();
             return true;
         }catch(RuntimeException $e) {
@@ -227,18 +219,15 @@ class galpon{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            // Preparar la consulta para actualizar los datos del Granja
             $sql = "UPDATE galpon SET identificacion = ?, idTipoAve = ?, capacidad = ?, idGranja = ? WHERE idGalpon = ?";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
             }
-            // Enlazar parámetros y ejecutar la consulta
             $stmt->bind_param("siiii", $this->identificacion, $this->idTipoAve, $this->capacidad, $this->idGranja, $this->idGalpon);
             if (!$stmt->execute()) {
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
-            // Cerrar la consulta
             $stmt->close();
             return true;
         } catch (RuntimeException $e) {

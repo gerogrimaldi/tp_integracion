@@ -126,7 +126,8 @@ if (isset($_GET['ajax']))
                 }
             }catch (RuntimeException $e) {
                     http_response_code(400);
-                    echo json_encode(['error' => 'Error al ingresar mantenimiento']);
+                    //echo json_encode(['msg' => $e->getMessage()]);
+                    echo json_encode(['msg' => 'Error al ingresar mantenimiento']);
             }
             exit();
         break;
