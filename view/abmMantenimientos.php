@@ -41,8 +41,8 @@ $body = <<<HTML
                     <tr>
                         <th class="text-primary">ID</th>
                         <th class="text-primary">Descripción</th>
-                        <th class="text-primary"></th>
-                        <th class="text-primary"></th>
+                        <th class="text-primary">✏</th>
+                        <th class="text-primary">❌</th>
                     </tr>
                 </thead>
                 <tbody id="tipoMant">
@@ -321,7 +321,7 @@ function cargarTablaTipoMant() {
                 <th class="text-primary">ID</th>
                 <th class="text-primary">Fecha</th>
                 <th class="text-primary">Mantenimiento</th>
-                <th class="text-primary"></th>
+                <th class="text-primary">❌</th>
             </tr>
         </thead>
         <tbody id="mantGranja">
@@ -577,7 +577,7 @@ function eliminarMantGranja(idMantenimientoGranja) {
                 <th class="text-primary">ID</th>
                 <th class="text-primary">Fecha</th>
                 <th class="text-primary">Mantenimiento</th>
-                <th class="text-primary"></th>
+                <th class="text-primary">❌</th>
             </tr>
         </thead>
         <tbody id="mantGalpon">

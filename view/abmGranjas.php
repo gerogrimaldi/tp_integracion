@@ -17,8 +17,8 @@ $body = <<<HTML
                 <th class="text-primary">SENASA Nº</th>
                 <th class="text-primary">m²</th>
                 <th class="text-primary">Ubicación</th> 
-                <th class="text-primary">Editar</th> 
-                <th class="text-primary">Borrar</th> 
+                <th class="text-primary">✏</th>
+                <th class="text-primary">❌</th>
             </tr>
         </thead>
         <tbody id="granjas">

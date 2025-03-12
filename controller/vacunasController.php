@@ -125,7 +125,7 @@ if (isset($_GET['ajax']))
     // ------------------------------------
     // SOLICITUDES AJAX - LOTE DE VACUNAS
     // ------------------------------------
-        case 'getLoteVacuna':
+        case 'getLotesVacuna':
             header('Content-Type: application/json');
             try {
                 if (!isset($_GET['idVacuna']) || $_GET['idVacuna'] === '') {

@@ -29,8 +29,8 @@ $body = <<<HTML
                 <th class="text-primary">Identificación</th>
                 <th class="text-primary">Tipo de Aves</th>
                 <th class="text-primary">Capacidad</th>
-                <th class="text-primary">Editar</th>
-                <th class="text-primary">Borrar</th>
+                <th class="text-primary">✏</th>
+                <th class="text-primary">❌</th>
             </tr>
         </thead>
         <tbody id="galpones">

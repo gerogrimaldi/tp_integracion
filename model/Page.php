@@ -103,7 +103,7 @@ class Page
                 $(document).ready(function() {
                     $.extend(true, $.fn.dataTable.defaults, {
                         language: {
-                           url: "lib/DataTables/Spanish.json"
+                           url: "js/DataTables/Spanish.json"
                         }
                     });
                 });
