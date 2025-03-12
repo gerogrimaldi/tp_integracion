@@ -75,7 +75,7 @@ if (isset($_GET['ajax']))
                 }
                 $oVacuna = new vacuna();
                 $oVacuna->setMaxIDVacuna();
-                $oVacuna->setIdViaApliacion($_POST['viaAplicacion']);
+                $oVacuna->setIdViaAplicacion($_POST['viaAplicacion']);
                 $oVacuna->setNombre($_POST['nombre']);
                 $oVacuna->setMarca($_POST['marca']);
                 $oVacuna->setEnfermedad($_POST['enfermedad']);
@@ -104,7 +104,7 @@ if (isset($_GET['ajax']))
                 }
                 $oVacuna = new vacuna();
                 $oVacuna->setIdVacuna($_POST['idVacuna']);
-                $oVacuna->setIdViaApliacion($_POST['viaAplicacion']);
+                $oVacuna->setIdViaAplicacion($_POST['viaAplicacion']);
                 $oVacuna->setNombre($_POST['nombre']);
                 $oVacuna->setMarca($_POST['marca']);
                 $oVacuna->setEnfermedad($_POST['enfermedad']);
@@ -116,7 +116,7 @@ if (isset($_GET['ajax']))
                 } 
             } catch (RuntimeException $e) {
                 http_response_code(400);
-                // echo json_encode(['msg' => $e->getMessage()]);
+                //echo json_encode(['msg' => $e->getMessage()]);
                 echo json_encode(['msg' => 'Error al editar.']);
             }
             exit();

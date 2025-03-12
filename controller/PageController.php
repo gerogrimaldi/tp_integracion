@@ -1,12 +1,10 @@
 <?php
-include ('./includes/key.php');
 $_GET['opt'] = $_GET['opt'] ?? '';
 
 switch ($_GET['opt']) {
 	case '':
 	case 'login': // Caso adicional para manejar 'login'
 		$valueBt = 'login';
-		require_once 'includes/key.php';
 		require_once 'view/login.php';
 		break;
 

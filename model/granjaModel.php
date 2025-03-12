@@ -11,7 +11,7 @@ class granja{
     
     public function __construct()
     {
-        require_once 'model/conexion.php';  
+        require_once 'includes/config.php';  
         // Inicializar la conexión
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
         if ($this->mysqli->connect_error) {

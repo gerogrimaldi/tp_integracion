@@ -14,9 +14,14 @@ class Page
         $this->setFooter();
     }
 
-    
+    function getBusinessName(){
+        include ('./includes/config.php');
+        return $business['name'];
+    }
+
     private function setHeader($_header = "")
     {
+        $nombreEmpresa = $this->getBusinessName();
         // HEAD
         if ($_header!=""){
             $this->header = $_header;
@@ -28,7 +33,7 @@ class Page
             <head>
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title>Pollos hnos</title>
+            <title>' . $nombreEmpresa . '</title>
             <meta name="description" content="">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             
@@ -92,8 +97,8 @@ class Page
             </footer>
             </div>
                 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-                <link href="lib/DataTables/datatables.min.css" rel="stylesheet">
-                <script src="lib/DataTables/datatables.min.js"></script>
+                <link href="js/DataTables/datatables.min.css" rel="stylesheet">
+                <script src="js/DataTables/datatables.min.js"></script>
                 <script>
                 $(document).ready(function() {
                     $.extend(true, $.fn.dataTable.defaults, {

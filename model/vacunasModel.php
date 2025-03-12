@@ -11,7 +11,7 @@ class vacuna{
     
     public function __construct()
     {
-        require_once 'model/conexion.php';  
+        require_once 'includes/config.php';
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
         if ($this->mysqli->connect_error) {
             die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
@@ -33,7 +33,7 @@ class vacuna{
         }
     }
 
-    public function setIdViaAplicacion($idViaAplicacion) // Corrected method name
+    public function setIdViaAplicacion($idViaAplicacion)
     {
         if ( ctype_digit($idViaAplicacion)==true )
         {
@@ -161,7 +161,6 @@ class vacuna{
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
             $stmt->close();
-            $this->mysqli->close();
             return true;
         } catch (RuntimeException $e) {
             throw $e;
