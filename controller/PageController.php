@@ -37,6 +37,10 @@ switch ($_GET['opt']) {
 		require_once 'view/abmVacunas.php';
 		break;
 
+	case 'home':
+		require_once 'controller/homeController.php';
+		break;
+
 	default:
 		require_once 'view/error_404.php';
 		break;

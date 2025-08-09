@@ -23,10 +23,11 @@ if ( !empty($_POST) && isset($_POST['btLogin']) ) {
             unset($_POST['email']);
             if ($oUsuario->validar())
             {
-                require_once 'controller/PageController.php';
+                //Si es correcto, envio a la pantalla de home
+                header('Location: index.php?opt=home'); exit;
             }else{
-                //$_SESSION['login_error'] = "Invalid email or password. Please try again.";
-                //require_once 'controller/PageController.php';
+                //Si falla en el inicio de sesión, redirige al login
+                require_once 'controller/PageController.php';
             }
             break;
 

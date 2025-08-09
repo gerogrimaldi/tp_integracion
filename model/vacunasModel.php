@@ -450,7 +450,7 @@ class loteVacuna{
         }
     }
 
-    public function deleteVacunaPorId($idLoteVacuna)
+    public function deleteLoteVacunaPorId($idLoteVacuna)
     {
         try{
             if ($this->mysqli === null) { 

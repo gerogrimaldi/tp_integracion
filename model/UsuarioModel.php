@@ -33,7 +33,7 @@ class Usuario{
 
     public function setidUsuario($idUsuario)
     {
-        if ( ctype_digit($idUsuario)==true )
+        if (ctype_digit($idUsuario)==true )
         {
             $this->idUsuario = $idUsuario;
         }
@@ -41,7 +41,6 @@ class Usuario{
 
     public function setPassword($password)
     { 
-        // $this->password = password_hash($password, PASSWORD_DEFAULT);
         $this->password = $password;
     }
 
@@ -57,7 +56,7 @@ class Usuario{
 
     public function setNombre($nombre)
     {
-        $nombre = trim($nombre); // Eliminar espacios en blanco al inicio y al final
+        $nombre = trim($nombre);
         // Verifica si el nombre no está vacío
         if (!empty($nombre)) {
             $this->nombre = $nombre;
@@ -70,7 +69,7 @@ class Usuario{
         $this->fechaNac = $this->fechaNac->format('Y-m-d H:i:s');
     }
 
-        public function setTelefono($telefono)
+    public function setTelefono($telefono)
     {
         if ( ctype_alnum($telefono)==true )
         {
