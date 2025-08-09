@@ -1,10 +1,10 @@
 <?php
+//Si no tiene nada, le asigna un valor por defecto
 $_GET['opt'] = $_GET['opt'] ?? '';
 
 switch ($_GET['opt']) {
 	case '':
 	case 'login': // Caso adicional para manejar 'login'
-		$valueBt = 'login';
 		require_once 'view/login.php';
 		break;
 
@@ -43,30 +43,11 @@ switch ($_GET['opt']) {
 }
 
 
-if ( !empty($_POST['btFormulario']))
+if ( !empty($_POST['btLogin']))
 {
-	echo "<h1 class='bg-black'>EJECUTO VALIDACION<h1>";
-	echo("<h2><script>console.log(".$_POST['btFormulario'].")</script></h2>"); 
-
+	//Cargo el controlador de usuario
+	//Internamente, cada controlador sabe como manejar los POST y los GET que le corresponden.
     require_once 'controller/userController.php';
-	if ($validacion)
-	{
-		//si no marque el permanecer conectado, quito la validacion
-		// if (!isset($_POST['connected'])){
-		// 	$validacion = false;
-		// }
-		echo("<h2><script>console.log('Ingreso Home')</script></h2>"); 
-
-		require_once('view/home.php');		
-	}else{
-		echo("<h2><script>console.log('validacion falsa')</script></h2>"); 
-
-		$valueBt="login";
-        require_once('view/login.php');
-	}
 }
 
-if ( !empty($_POST['btEvento']) )
-{
-	require_once 'controller/eventController.php';
-}
+var_dump($_SESSION);

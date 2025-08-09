@@ -7,5 +7,3 @@ require_once __DIR__.'/controller/PageController.php';
     $oPage=new Page();
     $oPage->setBody($body);
     echo $oPage->getHtml();
-
-

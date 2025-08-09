@@ -1,13 +1,4 @@
 <?php
-// ####################DEBUg##################
-// echo "<script>console.log('RECAPTCHA_KEY: " . RECAPTCHA_KEY . "');</script>";
-// echo("<h2><script>console.log('key is set : ".RECAPTCHA_KEY."')</script></h2>"); 
-echo '<script>console.log("'.$valueBt.'"); </script>'; 
-// ############################################endregion
-
-
-$token = rand(5, 1500);
-$_SESSION['token'] = $token;
 $recaptcha_key = RECAPTCHA_KEY;
 
 if (empty($idUsuario)) {
@@ -88,24 +79,18 @@ HTML;
 $body.= <<<HTML
             <!-- Submit Button -->
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary btn-lg fw-bold" name="btFormulario" value="{$valueBt}">
+                <button type="submit" class="btn btn-primary btn-lg fw-bold" name="btLogin" value="login">
                     Iniciar Sesión
                 </button>
             </div>
 
             <!-- Password Recovery Link -->
             <div class="text-center mt-4">
-                <a href="#" class="forgot-password">¿Olvidó su contraseña?</a>
+                <a href="#" class="forgot-password">¿Olvidó su contraseña?</a> 
             </div>
         </form>
-    </div>
-    
-    <!-- Footer -->
-    <div class="mt-4 text-center">
-        <small class="text-muted">&copy; 2025 Su Empresa. Todos los derechos reservados.</small>
     </div>
 </div>
 
 <script src="js/clientValidation.js"></script>
 HTML;
-

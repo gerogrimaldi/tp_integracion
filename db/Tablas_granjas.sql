@@ -5,7 +5,9 @@ CREATE TABLE usuarios (
   direccion VARCHAR(500) NOT NULL,
   telefono VARCHAR(20) NOT NULL,
   password VARCHAR(100) NOT NULL,
-  fechaNac DATE NOT NULL
+  fechaNac DATE NOT NULL,
+  user_token VARCHAR(64),
+  user_token_expir DATETIME
 );
 
 CREATE TABLE granja (
