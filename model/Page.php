@@ -14,14 +14,8 @@ class Page
         $this->setFooter();
     }
 
-    function getBusinessName(){
-        include ('./includes/config.php');
-        return $business['name'];
-    }
-
     private function setHeader($_header = "")
     {
-        $nombreEmpresa = $this->getBusinessName();
         // HEAD
         if ($_header!=""){
             $this->header = $_header;
@@ -33,7 +27,7 @@ class Page
             <head>
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title>' . $nombreEmpresa . '</title>
+            <title>' . EMPRESA_NOMBRE . '</title>
             <meta name="description" content="">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             

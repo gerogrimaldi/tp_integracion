@@ -6,12 +6,8 @@ echo '<script>console.log("'.$valueBt.'"); </script>';
 // ############################################endregion
 
 
-// At the beginning of your file, handle session messages
-
-// Rest of your variables setup...
 $token = rand(5, 1500);
 $_SESSION['token'] = $token;
-include ('./includes/config.php');
 $recaptcha_key = RECAPTCHA_KEY;
 
 if (empty($idUsuario)) {

@@ -12,14 +12,9 @@ class Usuario{
     private $fechaNac;
 
     private $mysqli;
-
-
 	
     public function __construct()
     {
-        require_once 'model/conexion.php';  
-        
-        // Inicializar la conexión
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
     
         // Verificar si la conexión fue exitosa

@@ -90,10 +90,5 @@
                 Iniciando sesión...
             `;
 
-            // You can remove this setTimeout and form.submit() in production
-            // This is just to simulate an API call
-            setTimeout(() => {
-                form.submit();
-            }, 1000);
         });
     });

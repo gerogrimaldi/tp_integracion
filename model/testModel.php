@@ -7,7 +7,7 @@ class Test{
 
     public function __construct()
     {
-        //require_once 'model/conexion.php';  
+
     }
 
     public function testConnect()
