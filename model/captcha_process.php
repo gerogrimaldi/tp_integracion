@@ -2,8 +2,6 @@
     $error = '';
     $errMsg = '';
     $_SESSION ['captcha'] = false;
-
-    //valido captcha
     if (isset($_POST['btLogin'])) {
         if (isset($_POST['g-recaptcha-response']) && !empty($_POST['g-recaptcha-response'])) {
             // Verificar el CAPTCHA

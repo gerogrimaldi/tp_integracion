@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__.'/includes/config.php';
 session_start();
+require_once __DIR__.'/includes/config.php';
 require_once __DIR__.'/model/Page.php';
 require_once __DIR__.'/controller/PageController.php';
 

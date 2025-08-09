@@ -33,9 +33,9 @@ class Usuario{
 
     public function setidUsuario($idUsuario)
     {
-        if (ctype_digit($idUsuario)==true )
-        {
-            $this->idUsuario = $idUsuario;
+        $idUsuario = trim($idUsuario);
+        if (is_numeric($idUsuario)) {
+            $this->idUsuario = (int)$idUsuario;
         }
     }
 
@@ -173,6 +173,33 @@ class Usuario{
                 $stmt->close();
             }
         }
+    }
+
+    // Valida el token de sesión y su expiración
+    public function validarToken($token)
+    {
+        //Falta agregar a este IF la validacion de que ID Usuario esté seteado
+        //Algo asi, pero empty no sirve ya que el ID puede ser 0
+        //($this->idUsuario >= 0) ||
+        if ( empty($token)) {
+            return false;
+        }
+        $sql = "SELECT user_token, user_token_expir FROM usuarios WHERE idUsuario = ? LIMIT 1";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param("i", $this->idUsuario);
+        $stmt->execute();
+        $stmt->bind_result($db_token, $db_token_expir);
+        if ($stmt->fetch()) {
+            $stmt->close();
+            if ($db_token === $token && strtotime($db_token_expir) > time()) {
+                return true;
+            }
+        }
+        $stmt->close();
+        return false;
     }
 
 // CARGA; UPDATE, DELTE

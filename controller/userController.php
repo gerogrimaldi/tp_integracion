@@ -49,7 +49,6 @@ if ( !empty($_POST) && isset($_POST['btLogin']) ) {
     }
 }
 
-
 if ( !empty($_GET) ) 
 {
 
