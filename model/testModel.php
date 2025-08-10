@@ -87,4 +87,33 @@ class Test{
             exit; 
         }
     }
+
+    public function backupDB()
+    {
+    /*Para agregar mysqldump al PATH en Windows:
+    1-Copia la ruta donde está mysqldump.exe (por ejemplo, C:\xampp\mysql\bin).
+    2-Ve a Panel de control → Sistema → Configuración avanzada del sistema → Variables de entorno.
+    3-En “Variables del sistema”, busca y selecciona la variable Path, haz clic en Editar.
+    4-Agrega una nueva entrada con la ruta copiada.
+    5-Hacer lo mismo en variables de entorno de usuario para evitar rproblemas
+    5-Aceptar y reiniciar la PC.*/
+        $backupFile = __DIR__ . '/../db/backup_granjas_' . date('Ymd_His') . '.sql';
+        $command = sprintf(
+            'mysqldump --user=%s --password=%s --host=%s %s > %s 2>&1',
+            escapeshellarg(DB_USER),
+            escapeshellarg(DB_PASS),
+            escapeshellarg(DB_HOST),
+            escapeshellarg(DB_NAME),
+            escapeshellarg($backupFile)
+        );
+
+        ob_start();
+        system($command, $result);
+        $output = ob_get_clean();
+        if ($result === 0 && file_exists($backupFile) && filesize($backupFile) > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

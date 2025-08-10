@@ -20,6 +20,9 @@
                 <button type="submit" name="btTest" value="borrarDB" class="btn btn-success">
                     Borrar Base de Datos
                 </button>
+                <button type="submit" name="btTest" value="backupDB" class="btn btn-success">
+                    Backup BD
+                </button>
             </form>
         </div>
 </div>';
