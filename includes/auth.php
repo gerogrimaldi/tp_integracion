@@ -1,5 +1,6 @@
 <?php
-// Función para validar sesión y expiración de token usando el modelo Usuario
+// Esta función valida:
+// Si el usuario está logueado correctamente y verifica su token
 
 function checkAuth() {
     try {

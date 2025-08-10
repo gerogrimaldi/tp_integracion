@@ -6,6 +6,7 @@ CREATE TABLE usuarios (
   telefono VARCHAR(20) NOT NULL,
   password VARCHAR(100) NOT NULL,
   fechaNac DATE NOT NULL,
+  tipoUsuario ENUM('dueno', 'encargado') NOT NULL DEFAULT 'dueno',
   user_token VARCHAR(64),
   user_token_expir DATETIME
 );

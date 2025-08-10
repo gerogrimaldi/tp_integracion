@@ -133,7 +133,7 @@ class Usuario{
     
         try {
             // Prepare the statement to prevent SQL injection
-            $sql = "SELECT idUsuario, email, password FROM usuarios WHERE email = ? LIMIT 1";
+            $sql = "SELECT idUsuario, email, password, tipoUsuario FROM usuarios WHERE email = ? LIMIT 1";
             $stmt = $this->mysqli->prepare($sql);
 
             if (!$stmt) {
@@ -157,7 +157,7 @@ class Usuario{
                 $usuario = $result->fetch_assoc();
                 if ($this->password === $usuario['password'])
                 {
-                    $this->iniciarSesion($usuario['idUsuario']);
+                    $this->iniciarSesion($usuario['idUsuario'], $usuario['tipoUsuario']);
                     return true;
                 }
             }
@@ -259,11 +259,11 @@ class Usuario{
         $this->mysqli->query($sql);
     } 
 
-    private Function iniciarSesion($idUsuario)
+    private Function iniciarSesion($idUsuario, $permisos)
     {
         $_SESSION['user_id'] = $idUsuario;
         $_SESSION['token'] = bin2hex(random_bytes(32)); // Genera un token de sesión seguro
-
+        $_SESSION['tipoUsuario'] = $permisos;
         // Inserción del token en el usuario, para validaciones
         $sql = "UPDATE usuarios SET user_token = ?, user_token_expir = DATE_ADD(NOW(), INTERVAL 12 HOUR) WHERE idUsuario = ?"; 
         $stmt = $this->mysqli->prepare($sql);

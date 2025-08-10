@@ -11,7 +11,8 @@ switch ($_GET['opt']) {
 	case 'login':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
-			require_once 'view/error_db.php';
+			$error = 'db';
+			require_once 'view/error.php';
 			break;
 		} elseif ($auth === true) {
 			header('Location: index.php?opt=home');
@@ -22,7 +23,8 @@ switch ($_GET['opt']) {
 		}
 
 	case 'error_db':
-		require_once 'view/error_db.php';
+		$error = 'db';
+		require_once 'view/error.php';
 		break;
 
 	case 'test':
@@ -37,7 +39,8 @@ switch ($_GET['opt']) {
 	case 'home':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
-			require_once 'view/error_db.php';
+			$error = 'db';
+			require_once 'view/error.php';
 			break;
 		} elseif ($auth === false) {
 			header('Location: index.php?opt=login');
@@ -46,11 +49,23 @@ switch ($_GET['opt']) {
 		switch ($_GET['opt']) {
 			case 'granjas':
 				require_once 'controller/abmGranjasController.php';
-				require_once 'view/abmGranjas.php';
+				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				{
+					require_once 'view/abmGranjas.php';
+				}else{
+					$error = '403';
+					require_once 'view/error.php';
+				}
 				break;
 			case 'galpones':
 				require_once 'controller/abmGalponesController.php';
-				require_once 'view/abmGalpones.php';
+				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				{
+					require_once 'view/abmGalpones.php';
+				}else{
+					$error = '403';
+					require_once 'view/error.php';
+				}
 				break;
 			case 'mantenimientos':
 				require_once 'controller/mantenimientosController.php';
@@ -67,7 +82,8 @@ switch ($_GET['opt']) {
 		break;
 
 	default:
-		require_once 'view/error_404.php';
+		$error = '404';
+		require_once 'view/error.php';
 		break;
 }
 

@@ -1,7 +1,7 @@
 
-INSERT INTO usuarios (idUsuario, nombre, email, direccion, telefono, password, fechaNac) VALUES
-(0, 'Brian', 'bngbrian@gmail.com', 'Los Talas 180', '+54934345555', '123456', '2000-03-01'),
-(1, 'Nahuel', 'nahuel@gmail.com', 'Los Colibries 1130', '+54933345555', '123456', '1998-03-01');
+INSERT INTO usuarios (idUsuario, nombre, email, direccion, telefono, password, fechaNac, tipoUsuario) VALUES
+(0, 'Brian', 'bngbrian@gmail.com', 'Los Talas 180', '+54934345555', '123456', '2000-03-01', 'encargado'),
+(1, 'Nahuel', 'nahuel@gmail.com', 'Los Colibries 1130', '+54933345555', '123456', '1998-03-01', 'dueno');
 
 
 INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) VALUES
