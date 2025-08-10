@@ -57,6 +57,7 @@ class Page
             require_once __DIR__ . '/../includes/auth.php';
             $isLogged = checkAuth();
             $navItems = '';
+            $userDropdown = '';
             if ($isLogged) {
                 $navItems = '
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=home">Inicio</a></li>
@@ -66,6 +67,44 @@ class Page
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=vacunas">Vacunas</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=test">Test</a></li>
                 ';
+                $userName = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Usuario';
+                $userDropdown = '
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-circle me-1"></i> ' . $userName . '
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><span class="dropdown-item-text fw-bold"><i class="bi bi-person me-1"></i>Ha iniciado sesión como ' . $userName . '</span></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" id="logoutBtn"><i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        var logoutBtn = document.getElementById("logoutBtn");
+                        if (logoutBtn) {
+                            logoutBtn.addEventListener("click", function(e) {
+                                e.preventDefault();
+                                fetch("index.php?opt=config&ajax=logout", {
+                                    method: "GET"
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        window.location.href = "index.php?opt=login";
+                                    } else {
+                                        showToastError("Error al cerrar sesión");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error en la solicitud AJAX:", error);
+                                    showToastError("Error desconocido.");
+                                });
+                            });
+                        }
+                    });
+                    </script>';
             } else {
                 $navItems = '
                     <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>
@@ -78,7 +117,7 @@ class Page
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">' . $navItems . '</ul>
+                        <ul class="navbar-nav">' . $navItems . '</ul>' . $userDropdown . '
                     </div>
                 </nav>
                 <br />';

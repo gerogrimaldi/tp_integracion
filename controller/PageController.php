@@ -37,6 +37,7 @@ switch ($_GET['opt']) {
 	case 'mantenimientos':
 	case 'vacunas':
 	case 'home':
+	case 'config':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
 			$error = 'db';
@@ -62,6 +63,16 @@ switch ($_GET['opt']) {
 				if ( $_SESSION['tipoUsuario'] === 'dueno' )
 				{
 					require_once 'view/abmGalpones.php';
+				}else{
+					$error = '403';
+					require_once 'view/error.php';
+				}
+				break;
+			case 'config':
+				require_once 'controller/userController.php';
+				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				{
+					require_once 'view/config.php';
 				}else{
 					$error = '403';
 					require_once 'view/error.php';

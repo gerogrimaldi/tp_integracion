@@ -76,7 +76,7 @@ if (isset($_GET['ajax']))
             } catch (RuntimeException $e) {
                     http_response_code(400);
                     // echo json_encode(['error' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al a�adir.']);
+                    echo json_encode(['msg' => 'Error al añadir.']);
             }
             exit();
         break;

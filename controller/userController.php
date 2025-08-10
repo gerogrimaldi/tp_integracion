@@ -1,20 +1,9 @@
 <?php
 require_once 'model/UsuarioModel.php';
+
+//Manejo del login, se utiliza el formulario tal cual sin JavaScript.
 if ( !empty($_POST) && isset($_POST['btLogin']) ) {
-
     switch ($_POST['btLogin']) {
-        case '':
-        case 'registrar': 
-            $oUsuario = new Usuario();
-            $oUsuario->setPassword($_POST['password']);
-            $oUsuario->setNombre($_POST['nombre']);
-            $oUsuario->setDireccion($_POST['direccion']);
-            $oUsuario->setTelefono($_POST['telefono']);
-            $oUsuario->setEmail($_POST['email']);
-            $oUsuario->setDate($_POST['date']);
-            $todo_ok = $oUsuario->save();
-            break;
-
         case 'login':
             $oUsuario = new Usuario();
             $oUsuario->setPassword($_POST['password']);
@@ -30,6 +19,41 @@ if ( !empty($_POST) && isset($_POST['btLogin']) ) {
                 require_once 'controller/PageController.php';
             }
             break;
+    }
+}
+
+//Para todo lo demás, se utiliza AJAX
+if (isset($_GET['ajax']))
+{
+    switch ($_GET['ajax']) {
+    // SOLICITUDES AJAX DE USUARIOS
+        case 'logout':
+            header('Content-Type: application/json');
+            try {
+                $oUser = new Usuario();
+                $oUser->setidUsuario($_SESSION['user_id']);
+                $oUser->cerrarSesion();
+                http_response_code(200);
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+    }
+}
+
+/*
+CASOS QUE PUEDEN SERVIR LUEGO PARA HACER EL AJAX
+        case 'registrar': 
+            $oUsuario = new Usuario();
+            $oUsuario->setPassword($_POST['password']);
+            $oUsuario->setNombre($_POST['nombre']);
+            $oUsuario->setDireccion($_POST['direccion']);
+            $oUsuario->setTelefono($_POST['telefono']);
+            $oUsuario->setEmail($_POST['email']);
+            $oUsuario->setDate($_POST['date']);
+            $todo_ok = $oUsuario->save();
+            break;
 
         case 'editarUsuario':
             require_once 'model/UsuarioModel.php';
@@ -42,40 +66,4 @@ if ( !empty($_POST) && isset($_POST['btLogin']) ) {
             $oUsuario->setEmail($_POST['email']);
             $oUsuario->update();
             break;
-
-        default:
-            require_once 'view/error_404.php';
-            break;
-    }
-}
-
-if ( !empty($_GET) ) 
-{
-
-    if ($_GET['opt']=='list')
-    {
-        $oUsuario = new Usuario();
-        $resultado = $oUsuario->getall();		
-    }
-
-    if ($_GET['opt']=='edit')
-    {
-        $oUsuario = new Usuario();
-            $resultado = $oUsuario->getUsuarioPorId($idUsuario);
-            if ( $resultado!=false )
-            {
-                $unaUsuario = $resultado->fetch_array();
-                $idUsuario  = $unaUsuario['idUsuario'];
-                $password  = $unaUsuario['password'];
-                $apellido   = $unaUsuario['apellido'];
-                $nombres    = $unaUsuario['nombres'];
-                $telefono   = $unaUsuario['telefono'];
-            }
-    }
-
-    if ($_GET['opt']=='delete')
-    {
-        $oUsuario = new Usuario();
-        $resultado = $oUsuario->deleteUsuarioPorId($idUsuario);
-    }
-}
+*/

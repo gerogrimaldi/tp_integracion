@@ -6,6 +6,8 @@ Se debe mantener EXCLUSIVA para Login, datos de usuario y errores de login.
 USUARIO
 - user_id: ID del usuario autenticado
 - user_email: Email del usuario autenticado
+- tipoUsuario: Tipo de usuario (dueno, encargado)
+- user_name: Nombre del usuario autenticado
 
 LOGIN PROCESS
 - captcha_error: Mensaje de error del captcha si no se completa correctamente
@@ -21,6 +23,7 @@ class Usuario{
     private $telefono;
     private $direccion;
     private $fechaNac;
+    private $tipoUsuario; // dueno, encargado
     private $mysqli;
 	
     public function __construct()
@@ -77,6 +80,13 @@ class Usuario{
         }
     }
 
+    public function setTipoUsuario($tipoUsuario)
+    {
+        if (ctype_alnum($tipoUsuario)==true ){
+            $this->tipoUsuario = $tipoUsuario;
+        }
+    }
+
     public function toArray()
     {
         $vUsuario=array(
@@ -95,8 +105,7 @@ class Usuario{
         $sql = "SELECT * FROM Usuarios";
         if ( $resultado = $this->mysqli->query($sql) )
 		{
-			if ( $resultado->num_rows > 0 )
- 			{
+			if ( $resultado->num_rows > 0 ){
                  return $resultado;
 			}else{
                 return false;
@@ -106,14 +115,11 @@ class Usuario{
         $this->mysqli->close();
     }
 
-
     public function getUsuarioPorId($idUsuario)
     {
         $sql = "SELECT * FROM usuarios WHERE idUsuario=".$idUsuario;
-        if ( $resultado = $this->mysqli->query($sql) )
-		{
-			if ( $resultado->num_rows > 0 )
- 			{
+        if ( $resultado = $this->mysqli->query($sql) ){
+			if ( $resultado->num_rows > 0 ){
                  return $resultado;
 			}else{
                 return false;
@@ -133,7 +139,7 @@ class Usuario{
     
         try {
             // Prepare the statement to prevent SQL injection
-            $sql = "SELECT idUsuario, email, password, tipoUsuario FROM usuarios WHERE email = ? LIMIT 1";
+            $sql = "SELECT idUsuario, email, password, tipoUsuario, nombre FROM usuarios WHERE email = ? LIMIT 1";
             $stmt = $this->mysqli->prepare($sql);
 
             if (!$stmt) {
@@ -157,7 +163,10 @@ class Usuario{
                 $usuario = $result->fetch_assoc();
                 if ($this->password === $usuario['password'])
                 {
-                    $this->iniciarSesion($usuario['idUsuario'], $usuario['tipoUsuario']);
+                    $this->setidUsuario($usuario['idUsuario']);
+                    $this->setTipoUsuario($usuario['tipoUsuario']);
+                    $this->setNombre($usuario['nombre']);
+                    $this->iniciarSesion();
                     return true;
                 }
             }
@@ -205,46 +214,46 @@ class Usuario{
 // CARGA; UPDATE, DELTE
     public function save()
     {
-            // Consulta para verificar si el usuario ya existe
-            $sqlCheck = "SELECT email FROM usuarios WHERE email = ?";
-            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+        // Consulta para verificar si el usuario ya existe
+        $sqlCheck = "SELECT email FROM usuarios WHERE email = ?";
+        $stmtCheck = $this->mysqli->prepare($sqlCheck);
 
-            if (!$stmtCheck) {
-                die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
-            }
+        if (!$stmtCheck) {
+            die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
+        }
 
-            // Enlazar parametro
-            $stmtCheck->bind_param("s", $this->email);
-            $stmtCheck->execute();
-            $stmtCheck->store_result();
+        // Enlazar parametro
+        $stmtCheck->bind_param("s", $this->email);
+        $stmtCheck->execute();
+        $stmtCheck->store_result();
 
-            // Verificar
-            if ($stmtCheck->num_rows > 0) {
-                echo '<script type="text/javascript">alert("Error: El usuario con este correo electrónico ya está registrado.");</script>';
-                $stmtCheck->close();
-                $this->mysqli->close();
-                return false; 
-            }
-
+        // Verificar
+        if ($stmtCheck->num_rows > 0) {
+            echo '<script type="text/javascript">alert("Error: El usuario con este correo electrónico ya está registrado.");</script>';
             $stmtCheck->close();
-
-            // Inserción del nuevo usuario
-            $sql = "INSERT INTO usuarios (nombre, email, direccion, telefono, password, fechaNac) 
-                    VALUES (?, ?, ?, ?, ?, ?)";
-            $stmt = $this->mysqli->prepare($sql);
-
-            if (!$stmt) {
-                die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-            }
-
-            // Enlaza los parámetros y ejecuta la consulta
-            $stmt->bind_param("ssssss", $this->nombre, $this->email, $this->direccion, $this->telefono, $this->password, $this->fechaNac);
-            $stmt->execute();
-
-            // Cerrar la consulta y la conexión
-            $stmt->close();
             $this->mysqli->close();
-            return true;
+            return false; 
+        }
+
+        $stmtCheck->close();
+
+        // Inserción del nuevo usuario
+        $sql = "INSERT INTO usuarios (nombre, email, direccion, telefono, password, fechaNac) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $this->mysqli->prepare($sql);
+
+        if (!$stmt) {
+            die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
+        }
+
+        // Enlaza los parámetros y ejecuta la consulta
+        $stmt->bind_param("ssssss", $this->nombre, $this->email, $this->direccion, $this->telefono, $this->password, $this->fechaNac);
+        $stmt->execute();
+
+        // Cerrar la consulta y la conexión
+        $stmt->close();
+        $this->mysqli->close();
+        return true;
     }
 
     public function update()
@@ -259,11 +268,12 @@ class Usuario{
         $this->mysqli->query($sql);
     } 
 
-    private Function iniciarSesion($idUsuario, $permisos)
+    private Function iniciarSesion()
     {
-        $_SESSION['user_id'] = $idUsuario;
+        $_SESSION['user_id'] = $this->idUsuario;
         $_SESSION['token'] = bin2hex(random_bytes(32)); // Genera un token de sesión seguro
-        $_SESSION['tipoUsuario'] = $permisos;
+        $_SESSION['tipoUsuario'] = $this->tipoUsuario;
+        $_SESSION['user_name'] = $this->nombre;
         // Inserción del token en el usuario, para validaciones
         $sql = "UPDATE usuarios SET user_token = ?, user_token_expir = DATE_ADD(NOW(), INTERVAL 12 HOUR) WHERE idUsuario = ?"; 
         $stmt = $this->mysqli->prepare($sql);
@@ -273,6 +283,23 @@ class Usuario{
         // Enlaza los parámetros y ejecuta la consulta
         $stmt->bind_param("si", $_SESSION['token'], $_SESSION['user_id']);
         $stmt->execute();
+    }
+
+    public function cerrarSesion()
+    {
+        // Elimina el token de sesión del usuario
+        $sql = "UPDATE usuarios SET user_token = NULL, user_token_expir = NULL WHERE idUsuario = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { 
+            throw new RuntimeException("Error en la preparación de la consulta de cierre de sesión: " . $this->mysqli->error); 
+        }
+        $stmt->bind_param("i", $_SESSION['user_id']);
+        $stmt->execute();
+        //Elimina la sesión
+        session_unset(); // Elimina todas las variables de sesión
+        session_destroy(); // Destruye la sesión
+        // No hacer header ni exit aquí, dejar que el controlador maneje la respuesta
+        return true;
     }
 
 }
