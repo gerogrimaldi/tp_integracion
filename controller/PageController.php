@@ -6,10 +6,20 @@ $_GET['opt'] = $_GET['opt'] ?? '';
 
 
 switch ($_GET['opt']) {
+
 	case '':
 	case 'login':
-		require_once 'view/login.php';
-		break;
+		$auth = checkAuth();
+		if ($auth === 'error_db') {
+			require_once 'view/error_db.php';
+			break;
+		} elseif ($auth === true) {
+			header('Location: index.php?opt=home');
+			break;
+		} else {
+			require_once 'view/login.php';
+			break;
+		}
 
 	case 'error_db':
 		require_once 'view/error_db.php';
@@ -21,32 +31,39 @@ switch ($_GET['opt']) {
 		break;
 
 	case 'granjas':
-		checkAuth();
-		require_once 'controller/abmGranjasController.php';
-		require_once 'view/abmGranjas.php';
-		break;
-
 	case 'galpones':
-		checkAuth();
-		require_once 'controller/abmGalponesController.php';
-		require_once 'view/abmGalpones.php';
-		break;
-
 	case 'mantenimientos':
-		checkAuth();
-		require_once 'controller/mantenimientosController.php';
-		require_once 'view/abmMantenimientos.php';
-		break;
-
 	case 'vacunas':
-		checkAuth();
-		require_once 'controller/vacunasController.php';
-		require_once 'view/abmVacunas.php';
-		break;
-
 	case 'home':
-		checkAuth();
-		require_once 'controller/homeController.php';
+		$auth = checkAuth();
+		if ($auth === 'error_db') {
+			require_once 'view/error_db.php';
+			break;
+		} elseif ($auth === false) {
+			header('Location: index.php?opt=login');
+			break;
+		}
+		switch ($_GET['opt']) {
+			case 'granjas':
+				require_once 'controller/abmGranjasController.php';
+				require_once 'view/abmGranjas.php';
+				break;
+			case 'galpones':
+				require_once 'controller/abmGalponesController.php';
+				require_once 'view/abmGalpones.php';
+				break;
+			case 'mantenimientos':
+				require_once 'controller/mantenimientosController.php';
+				require_once 'view/abmMantenimientos.php';
+				break;
+			case 'vacunas':
+				require_once 'controller/vacunasController.php';
+				require_once 'view/abmVacunas.php';
+				break;
+			case 'home':
+				require_once 'controller/homeController.php';
+				break;
+		}
 		break;
 
 	default:
@@ -59,5 +76,3 @@ if (!empty($_POST['btLogin'])) {
 	//Internamente, cada controlador sabe como manejar los POST y los GET que le corresponden.
 	require_once 'controller/userController.php';
 }
-
-//var_dump($_SESSION);

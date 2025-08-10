@@ -53,20 +53,32 @@ class Page
         if($_menu != ""){
             $this->menu = $_menu;
         } else{
-            $this->menu = 
+            // Determinar si el usuario está autenticado
+            require_once __DIR__ . '/../includes/auth.php';
+            $isLogged = checkAuth();
+            $navItems = '';
+            if ($isLogged) {
+                $navItems = '
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=home">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=granjas">Granjas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=galpones">Galpones</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=mantenimientos">Mantenimientos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=vacunas">Vacunas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=test">Test</a></li>
+                ';
+            } else {
+                $navItems = '
+                    <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=login">Ingresar</a></li>
+                ';
+            }
+            $this->menu =
                 '<nav class="navbar navbar-expand-lg navbar-light bg-light">
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
                     <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php">Inicio</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="index.php?opt=login">Ingresar</a>
-                            </li>
-                        </ul>
+                        <ul class="navbar-nav">' . $navItems . '</ul>
                     </div>
                 </nav>
                 <br />';
