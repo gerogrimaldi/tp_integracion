@@ -32,12 +32,18 @@ switch ($_GET['opt']) {
 		require_once 'view/test.php';
 		break;
 
+	case 'compuestos':
+		require_once 'controller/compuestosController.php';
+		require_once 'view/abmCompuestos.php';
+		break;
+
 	case 'granjas':
 	case 'galpones':
 	case 'mantenimientos':
 	case 'vacunas':
 	case 'home':
-	case 'config':
+	case 'database':
+	case 'usuarios':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
 			$error = 'db';
@@ -68,15 +74,8 @@ switch ($_GET['opt']) {
 					require_once 'view/error.php';
 				}
 				break;
-			case 'config':
-				require_once 'controller/userController.php';
-				if ( $_SESSION['tipoUsuario'] === 'dueno' )
-				{
-					require_once 'view/config.php';
-				}else{
-					$error = '403';
-					require_once 'view/error.php';
-				}
+			case 'database':
+				require_once 'view/database.php';
 				break;
 			case 'mantenimientos':
 				require_once 'controller/mantenimientosController.php';
@@ -88,6 +87,16 @@ switch ($_GET['opt']) {
 				break;
 			case 'home':
 				require_once 'controller/homeController.php';
+				break;
+			case 'usuarios':
+				require_once 'controller/userController.php';
+				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				{
+					require_once 'view/abmUsuarios.php';
+				}else{
+					$error = '403';
+					require_once 'view/error.php';
+				}
 				break;
 		}
 		break;

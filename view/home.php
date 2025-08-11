@@ -48,23 +48,45 @@ $body = <<<HTML
             </a>
         </div>
         <div class="col">
+            <a href="index.php?opt=database" class="text-decoration-none">
+                <div class="card h-100 text-center bg-secondary text-white shadow">
+                    <div class="card-body">
+                        <i class="bi bi-gear display-1"></i>
+                        <h5 class="card-title mt-3">Configuración</h5>
+                        <p class="card-text">Copias de seguridad y restauración.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="index.php?opt=compuestos" class="text-decoration-none">
+                <div class="card h-100 text-center bg-primary text-white shadow">
+                    <div class="card-body">
+                        <i class="bi bi-leaf display-1"></i>
+                        <h5 class="card-title mt-3">Compuestos</h5>
+                        <p class="card-text">Administrar compuestos y compras.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
+            <a href="index.php?opt=usuarios" class="text-decoration-none">
+                <div class="card h-100 text-center bg-success text-white shadow">
+                    <div class="card-body">
+                        <i class="bi bi-people display-1"></i>
+                        <h5 class="card-title mt-3">Usuarios</h5>
+                        <p class="card-text">Gestionar usuarios del sistema.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col">
             <a href="index.php?opt=test" class="text-decoration-none">
                 <div class="card h-100 text-center bg-secondary text-white shadow">
                     <div class="card-body">
                         <i class="bi bi-clipboard-check display-1"></i>
                         <h5 class="card-title mt-3">Test</h5>
                         <p class="card-text">Acceso a pruebas del sistema.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="index.php?opt=config" class="text-decoration-none">
-                <div class="card h-100 text-center bg-secondary text-white shadow">
-                    <div class="card-body">
-                        <i class="bi bi-gear display-1"></i>
-                        <h5 class="card-title mt-3">Configuración</h5>
-                        <p class="card-text">Administración de usuarios y backups.</p>
                     </div>
                 </div>
             </a>

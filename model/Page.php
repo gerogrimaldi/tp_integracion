@@ -30,25 +30,19 @@ class Page
             <title>' . EMPRESA_NOMBRE . '</title>
             <meta name="description" content="">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            
             <script src="https://www.google.com/recaptcha/api.js" async defer></script>
             <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico" />
-            
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
-
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
             </head>
-            
             <body class="bg-dark text-white">
             <div class="container">';
                 
         }
     }
 
-    private function setMenu($_menu = "")
-    {
+private function setMenu($_menu = ""){
         // NAVBAR
         if($_menu != ""){
             $this->menu = $_menu;
@@ -65,6 +59,9 @@ class Page
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=galpones">Galpones</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=mantenimientos">Mantenimientos</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=vacunas">Vacunas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=compuestos">Compuestos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=usuarios">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php?opt=database">Configuración</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=test">Test</a></li>
                 ';
                 $userName = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Usuario';
@@ -87,7 +84,7 @@ class Page
                         if (logoutBtn) {
                             logoutBtn.addEventListener("click", function(e) {
                                 e.preventDefault();
-                                fetch("index.php?opt=config&ajax=logout", {
+                                fetch("index.php?opt=usuarios&ajax=logout", {
                                     method: "GET"
                                 })
                                 .then(response => {
@@ -113,11 +110,14 @@ class Page
             }
             $this->menu =
                 '<nav class="navbar navbar-expand-lg navbar-light bg-light">
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">' . $navItems . '</ul>' . $userDropdown . '
+                    <div class="container-fluid">
+                        <a class="navbar-brand" href="index.php">' . EMPRESA_NOMBRE . '</a>
+                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbarNav">
+                            <ul class="navbar-nav">' . $navItems . '</ul>' . $userDropdown . '
+                        </div>
                     </div>
                 </nav>
                 <br />';
