@@ -5,6 +5,10 @@ RewriteEngine On
 RewriteCond %{REQUEST_URI} ^/$ [OR]
 RewriteCond %{REQUEST_URI} ^/index\.php$ [OR]
 
+# Permitir acceso a cualquier archivo dentro de /css/ o /js/
+RewriteCond %{REQUEST_URI} ^/css/ [OR]
+RewriteCond %{REQUEST_URI} ^/js/ [OR]
+
 # Permitir acceso a la página de error para evitar bucle
 RewriteCond %{REQUEST_URI} ^/view/error\.php$
 

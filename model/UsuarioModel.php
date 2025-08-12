@@ -187,13 +187,19 @@ class Usuario{
     // Valida el token de sesión y su expiración
     public function validarToken($token)
     {
-        //Falta agregar a este IF la validacion de que ID Usuario esté seteado
-        //Algo asi, pero empty no sirve ya que el ID puede ser 0
-        //($this->idUsuario >= 0) ||
-        if ( empty($token)) {
+        // Verificar que idUsuario sea un número válido (incluido 0)
+        if (!is_int($this->idUsuario) || $this->idUsuario < 0) {
             return false;
         }
-        $sql = "SELECT user_token, user_token_expir FROM usuarios WHERE idUsuario = ? LIMIT 1";
+        // Verificar que el token no esté vacío
+        if (!is_string($token) || $token === '') {
+            return false;
+        }
+        $sql = "SELECT user_token, user_token_expir 
+                FROM usuarios 
+                WHERE idUsuario = ? 
+                LIMIT 1";
+
         $stmt = $this->mysqli->prepare($sql);
         if (!$stmt) {
             return false;
@@ -201,14 +207,14 @@ class Usuario{
         $stmt->bind_param("i", $this->idUsuario);
         $stmt->execute();
         $stmt->bind_result($db_token, $db_token_expir);
+        $valido = false;
         if ($stmt->fetch()) {
-            $stmt->close();
             if ($db_token === $token && strtotime($db_token_expir) > time()) {
-                return true;
+                $valido = true;
             }
         }
         $stmt->close();
-        return false;
+        return $valido;
     }
 
 // CARGA; UPDATE, DELTE

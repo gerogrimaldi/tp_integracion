@@ -1,4 +1,13 @@
 <?php
+require_once __DIR__.'/../model/testModel.php';
+$ultimoBackup = Test::obtenerUltimaFechaBackup(); // Devuelve string con fecha o NULL
+$diasSinBackup = null;
+if ($ultimoBackup) {
+    $fechaBackup = new DateTime($ultimoBackup);
+    $hoy = new DateTime();
+    $diasSinBackup = $hoy->diff($fechaBackup)->days;
+}
+
 $body = <<<HTML
 <div class="container py-5">
     <h1 class="text-center mb-5">Panel Principal</h1>
@@ -94,4 +103,13 @@ $body = <<<HTML
     </div>
 </div>
 HTML;
+
+include 'view/toast.php';
+$body .= $toast;
+
+// Si el backup tiene más de 15 días, generar script JS para mostrar toast
+if ($diasSinBackup !== null && $diasSinBackup > 15) {
+    $body .= "<script>showToastError('No se realiza una copia de seguridad hace más de 15 días (último backup: hace {$diasSinBackup} días). Procure realizarla lo antes posible.');</script>";
+}
+
 ?>
