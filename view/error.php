@@ -1,7 +1,7 @@
 <?php
 // view/error.php
 // Vista centralizada para mostrar errores personalizados
-
+$error = $error ?? '';
 switch ($error) 
 {
     case 'db':
@@ -20,8 +20,21 @@ switch ($error)
         break;
     
     default:
-        $error_title = $error_title ?? '¡Ups! Ha ocurrido un error';
-        $error_message = $error_message ?? 'Ha ocurrido un error inesperado.';
+        echo '<!DOCTYPE html>
+        <html lang="es">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>ERROR</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        </head>
+        <p>Ha ocurrido un error. La URL no es correcta o no tiene permisos para acceder.</p>
+        </footer>
+        </div>
+        </body>
+        </html>';
+        exit;
         break;
 }
 

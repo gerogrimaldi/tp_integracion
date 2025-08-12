@@ -41,9 +41,11 @@ if ( !empty($_POST) )
 
     if ( $_POST['btTest'] == 'backupDB' )
     {
-        echo "<h1 class='bg-white'>Realizando backup...</h1>";
+        //echo "<h1 class='bg-white'>Realizando backup...</h1>";
         $oTest = new Test();
         $oTest->backupDB();
+        $oTest->descargarBackupBD();
+
     }
 
 }

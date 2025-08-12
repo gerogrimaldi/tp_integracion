@@ -4,6 +4,7 @@ $mensaje = '';
 
 class Test{
     private $mysqli;
+    private $backupFile;
 
     public function __construct()
     {
@@ -97,23 +98,47 @@ class Test{
     4-Agrega una nueva entrada con la ruta copiada.
     5-Hacer lo mismo en variables de entorno de usuario para evitar rproblemas
     5-Aceptar y reiniciar la PC.*/
-        $backupFile = __DIR__ . '/../db/backup_granjas_' . date('Ymd_His') . '.sql';
+        $this->backupFile = __DIR__ . '/../db/backup_granjas_' . date('Ymd_His') . '.sql';
         $command = sprintf(
             'mysqldump --user=%s --password=%s --host=%s %s > %s 2>&1',
             escapeshellarg(DB_USER),
             escapeshellarg(DB_PASS),
             escapeshellarg(DB_HOST),
             escapeshellarg(DB_NAME),
-            escapeshellarg($backupFile)
+            escapeshellarg($this->backupFile)
         );
 
         ob_start();
         system($command, $result);
         $output = ob_get_clean();
-        if ($result === 0 && file_exists($backupFile) && filesize($backupFile) > 0) {
+        if ($result === 0 && file_exists($this->backupFile) && filesize($this->backupFile) > 0) {
             return true;
         } else {
             return false;
+        }
+    }
+
+    public function descargarBackupBD()
+    {
+        if (file_exists($this->backupFile)) {
+            // Limpio buffers previos
+            ob_clean();
+            flush();
+
+            // Encabezados para descarga
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/octet-stream');
+            header('Content-Disposition: attachment; filename="' . basename($this->backupFile) . '"');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($this->backupFile));
+
+            // Envía el archivo
+            readfile($this->backupFile);
+            exit;
+        } else {
+            echo "El archivo de backup no existe.";
         }
     }
 }

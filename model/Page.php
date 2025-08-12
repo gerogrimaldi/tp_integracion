@@ -54,7 +54,6 @@ private function setMenu($_menu = ""){
             $userDropdown = '';
             if ($isLogged) {
                 $navItems = '
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=home">Inicio</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=granjas">Granjas</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=galpones">Galpones</a></li>
                     <li class="nav-item"><a class="nav-link" href="index.php?opt=mantenimientos">Mantenimientos</a></li>
