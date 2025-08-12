@@ -1,21 +1,15 @@
 <?php
-$mensaje = '';
-
-
-class Test{
+class test{
     private $mysqli;
     private $backupFile;
 
     public function __construct()
     {
-
     }
 
     public function testConnect()
     {
         $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-    
-        // Verificar si la conexión fue exitosa
         if ($this->mysqli->connect_error) {
             die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
         }else{
@@ -91,7 +85,7 @@ class Test{
 
     public function backupDB()
     {
-    /*Para agregar mysqldump al PATH en Windows:
+        /*Para agregar mysqldump al PATH en Windows:
     1-Copia la ruta donde está mysqldump.exe (por ejemplo, C:\xampp\mysql\bin).
     2-Ve a Panel de control → Sistema → Configuración avanzada del sistema → Variables de entorno.
     3-En “Variables del sistema”, busca y selecciona la variable Path, haz clic en Editar.
@@ -107,25 +101,21 @@ class Test{
             escapeshellarg(DB_NAME),
             escapeshellarg($this->backupFile)
         );
-
         ob_start();
         system($command, $result);
-        $output = ob_get_clean();
-        if ($result === 0 && file_exists($this->backupFile) && filesize($this->backupFile) > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        ob_end_clean(); // Clean the buffer
+        return ($result === 0 && file_exists($this->backupFile) && filesize($this->backupFile) > 0);
     }
 
     public function descargarBackupBD()
     {
         if (file_exists($this->backupFile)) {
-            // Limpio buffers previos
-            ob_clean();
-            flush();
+            // Clear any previous output
+            if (ob_get_level()) {
+                ob_end_clean();
+            }
 
-            // Encabezados para descarga
+            // Set headers
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
             header('Content-Disposition: attachment; filename="' . basename($this->backupFile) . '"');
@@ -133,12 +123,34 @@ class Test{
             header('Cache-Control: must-revalidate');
             header('Pragma: public');
             header('Content-Length: ' . filesize($this->backupFile));
-
-            // Envía el archivo
+            // Send the file
             readfile($this->backupFile);
-            exit;
         } else {
-            echo "El archivo de backup no existe.";
+            // This shouldn't be reached if backupDB() returned true
+            die("El archivo de backup no existe.");
+        }
+    }
+
+    public function guardarFechaBackup()
+    {
+        $fechaFile = __DIR__ . '/../db/ultimo_backup.txt';
+        $fechaActual = date('Y-m-d H:i:s');
+        file_put_contents($fechaFile, $fechaActual);
+    }
+
+    public static function obtenerUltimaFechaBackup()
+    {
+        $fechaFile = __DIR__ . '/../db/ultimo_backup.txt';
+        if (file_exists($fechaFile)) {
+            return file_get_contents($fechaFile);
+        }
+        return 'Nunca';
+    }
+
+    public function destruirBackup()
+    {
+        if (file_exists($this->backupFile)) {
+            unlink($this->backupFile);
         }
     }
 }
