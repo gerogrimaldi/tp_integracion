@@ -11,16 +11,6 @@ CREATE TABLE usuarios (
   user_token_expir DATETIME
 );
 
-CREATE TABLE notificacion (
-    idNotificacion INT NOT NULL,
-    mensaje VARCHAR(500) NOT NULL,
-    fecha DATETIME NOT NULL,
-    leido BOOLEAN DEFAULT FALSE,
-    idUsuario INT NOT NULL,
-    FOREIGN KEY (idUsuario) REFERENCES usuarios(idUsuario),
-    PRIMARY KEY (idNotificacion)
-);
-
 CREATE TABLE granja (
     idGranja INT NOT NULL,
     nombre VARCHAR(80) NOT NULL,

@@ -3,7 +3,6 @@ INSERT INTO usuarios (idUsuario, nombre, email, direccion, telefono, password, f
 (0, 'Brian', 'bngbrian@gmail.com', 'Los Talas 180', '+54934345555', '123456', '2000-03-01', 'encargado'),
 (1, 'Nahuel', 'nahuel@gmail.com', 'Los Colibries 1130', '+54933345555', '123456', '1998-03-01', 'dueno');
 
-
 INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) VALUES
 (0, 'Granja la chorlita', '07-892-0467', '80', 'Aldea San Rafael'),
 (1, 'Granja el nieto', '10-015-8905', '120', 'Aldea San Juan'),

@@ -1,0 +1,328 @@
+<?php
+$body = <<<HTML
+<div class="container">
+    <h1>Usuarios</h1>
+    <form id="selectUsuarioForm" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="selectUsuario" class="form-label">Seleccione un usuario para ver o modificar sus datos.</label>
+            <div class="input-group">
+                <select id="selectUsuario" name="selectUsuario" class="form-control" required>
+                    <!-- Las opciones se agregan con JavaScript -->
+                </select>
+                <button type="button" class="btn btn-primary rounded ms-2" data-bs-toggle="modal" data-bs-target="#agregarUsuario">
+                    Añadir Usuario
+                </button>
+                <div class="invalid-feedback">
+                    Debe elegir una opción.
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div id="cardUsuario" class="card mt-4 d-none">
+  <div class="card-body">
+    <h5 class="card-title">Datos del Usuario</h5>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Nombre:</strong> <span id="datoNombre"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="nombre">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Email:</strong> <span id="datoEmail"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="email">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Domicilio:</strong> <span id="datoDomicilio"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="domicilio">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Teléfono:</strong> <span id="datoTelefono"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="telefono">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Fecha Nac.:</strong> <span id="datoFechaNac"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="fechaNac">
+          <i class="bi bi-pencil"></i>
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- Modal popUp Agregar Usuario -->
+<div class="modal fade" id="agregarUsuario" tabindex="-1" aria-labelledby="agregarUsuarioModal" aria-hidden="true">
+  <div class="modal-dialog">
+  <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="agregarUsuarioModal">Agregar Usuario</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+    <form id="agregarUsuarioForm" class="needs-validation" novalidate>
+    <div class="mb-4">
+        <label for="nombre" class="form-label">Nombre completo del usuario</label>
+        <input type="text" 
+               class="form-control" 
+               id="nombre" 
+               name="nombre" 
+               placeholder="Apellido y nombre"
+               minlength="3"
+               required>
+        <div class="invalid-feedback">
+            El nombre debe tener al menos 3 caracteres.
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="email" class="form-label">E-Mail</label>
+        <input type="text" 
+               class="form-control" 
+               id="email" 
+               name="email" 
+               placeholder="Dirección de correo electrónico"
+               min="5"
+               required>
+        <div class="invalid-feedback">
+            El email ingresado no es válido.
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="domicilio" class="form-label">Domicilio</label>
+            <input type="text" 
+                 class="form-control" 
+                 id="domicilio" 
+                 name="domicilio" 
+                 placeholder="Calle, número y localidad"
+                 required>
+        <div class="invalid-feedback">
+            El campo debe tener al menos 5 caracteres.
+        </div>
+     </div>
+    <div class="mb-4">
+        <label for="telefono" class="form-label">Teléfono</label>
+        <input type="text" 
+               class="form-control" 
+               id="telefono" 
+               name="telefono" 
+               placeholder="Número de teléfono"
+               minlength="3"
+               required>
+        <div class="invalid-feedback">
+            La ubicación debe tener al menos 3 caracteres.
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="contrasenia" class="form-label">Contraseña de acceso</label>
+        <input type="password" 
+               class="form-control" 
+               id="contrasenia" 
+               name="contrasenia" 
+               placeholder="Contraseña"
+               minlength="6"
+               required>
+        <div class="invalid-feedback">
+            La contraseña debe tener al menos 6 carácteres.
+        </div>
+    </div>
+    <div class="mb-4">
+        <label for="fechaNac" class="form-label">Fecha de Nacimiento</label>
+        <input type="datetime-local" class="form-control" 
+            id="fechaNac" name="fechaNacimiento"
+            required>
+        <div class="invalid-feedback">
+            Seleccione una fecha válida.
+        </div>
+    </div>
+</form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btnAgregarUsuario">Agregar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function cargarSelectUsuarios() {
+    //Iniciar tabla, cargar opción por default.
+    const selectUsuarios = document.getElementById('selectUsuario');
+    selectUsuarios.innerHTML = '';
+    const defaultOption = document.createElement('option');
+    defaultOption.text = 'Seleccione un usuario';
+    defaultOption.value = '';
+    selectUsuarios.appendChild(defaultOption);
+
+    // Realizar la solicitud AJAX para obtener las granjas
+    fetch('index.php?opt=usuarios&ajax=getUsuarios')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error en la solicitud: ' + response.statusText);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Agregar los usuarios desde la API
+        data.forEach(user => {
+            const optionAgregar = document.createElement('option');
+            optionAgregar.value = user.idUsuario;
+            optionAgregar.text = user.nombre + " - " + user.email;
+            selectUsuarios.appendChild(optionAgregar);
+        });
+
+        // Si hay un valor previamente seleccionado, restaurarlo y cargar los galpones
+        const previouslySelected = selectUsuarios.getAttribute('data-selected');
+        if (previouslySelected) {
+            selectUsuarios.value = previouslySelected;
+            cargarCardUsuarios();
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar usuarios:', error);
+        showToastError('Error al cargar los usuarios');
+    });
+}
+
+// Listado Usuarios - Filtrar al presionar opción del select
+document.getElementById('selectUsuario').addEventListener('change', function(e) {
+    this.setAttribute('data-selected', e.target.value);
+    if (e.target.value) {
+        cargarCardUsuarios();
+    }
+});
+
+// USUARIOS - CAPTAR EL FORMULARIO AGREGAR
+document.getElementById('btnAgregarUsuario').addEventListener('click', function() {
+    agregarUsuario();
+});
+document.getElementById('agregarUsuarioForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    agregarUsuario();
+});
+
+// ------- RELLENAR CARD -------
+function cargarCardUsuarios() {
+    const idUsuario = document.getElementById('selectUsuario').value;
+    if (!idUsuario) return;
+
+    fetch('index.php?opt=usuarios&ajax=getUsuario&idUsuario=' + idUsuario)
+        .then(response => {
+            if (!response.ok) throw new Error('Error al obtener usuario');
+            return response.json();
+        })
+        .then(usuarios => {
+            if (!Array.isArray(usuarios) || usuarios.length === 0) {
+                throw new Error('No se encontró el usuario');
+            }
+            const usuario = usuarios[0];  // Tomo el primer usuario del array
+
+            // Mostrar card
+            document.getElementById('cardUsuario').classList.remove('d-none');
+
+            // Rellenar datos
+            document.getElementById('datoNombre').textContent = usuario.nombre || '';
+            document.getElementById('datoEmail').textContent = usuario.email || '';
+            document.getElementById('datoDomicilio').textContent = usuario.direccion || '';
+            document.getElementById('datoTelefono').textContent = usuario.telefono || '';
+            document.getElementById('datoFechaNac').textContent = usuario.fechaNac || '';
+        })
+        .catch(error => {
+            console.error(error);
+            showToastError('Error al cargar datos del usuario.');
+        });
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.btnEditar')) {
+        const btn = e.target.closest('.btnEditar');
+        const campo = btn.getAttribute('data-campo');
+        const spanDato = document.getElementById('dato' + campo.charAt(0).toUpperCase() + campo.slice(1));
+        
+        // Si está en modo edición → guardar
+        if (btn.classList.contains('modo-edicion')) {
+            const nuevoValor = spanDato.querySelector('input').value;
+            actualizarCampoUsuario(campo, nuevoValor, btn, spanDato);
+        } else {
+            // Cambiar a modo edición
+            const valorActual = spanDato.textContent;
+            spanDato.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + valorActual + '">';
+
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.add('modo-edicion');
+        }
+    }
+});
+
+function actualizarCampoUsuario(campo, valor, btn, spanDato) {
+    const idUsuario = document.getElementById('selectUsuario').value;
+
+    fetch('index.php?opt=usuarios&ajax=updateCampo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'idUsuario=' + encodeURIComponent(idUsuario) +
+              '&campo=' + encodeURIComponent(campo) +
+              '&valor=' + encodeURIComponent(valor)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                spanDato.textContent = valor;
+                btn.innerHTML = '<i class="bi bi-pencil"></i>';
+                btn.classList.remove('modo-edicion');
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error(error);
+        showToastError('Error al actualizar el dato.');
+    });
+}
+
+// USUARIOS - ELIMINAR
+function eliminarUsuario(idUsuario) {
+    // Realizar la solicitud AJAX
+    fetch('index.php?opt=usuarios&ajax=delUsuario&idUsuario=' + idUsuario, {
+        method: 'GET'
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                cargarTablaGranjas();
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error('Error en la solicitud AJAX:', error);
+        showToastError('Error desconocido.');
+    });
+}
+
+// ... Otras funciones comentadas (si quieres las activas, quítales /* */ y ajusta comentarios JS)
+
+// Activar funciones al cargar la página
+window.addEventListener('load', function() {
+    cargarSelectUsuarios();
+});
+</script>
+
+HTML;
+
+// Agregar las funciones y el contenedor de los toast
+// Para mostrar notificaciones
+include 'view/toast.php';
+$body .= $toast;
+?>

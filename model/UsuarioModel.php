@@ -103,30 +103,36 @@ class Usuario{
     public function getall()
     {
         $sql = "SELECT * FROM Usuarios";
-        if ( $resultado = $this->mysqli->query($sql) )
+        if ( $result = $this->mysqli->query($sql) )
 		{
-			if ( $resultado->num_rows > 0 ){
-                 return $resultado;
+            $data = []; 
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            return $data;
 			}else{
-                return false;
+                return [];
             }
         }
-        unset($resultado);
-        $this->mysqli->close();
+        unset($result);
     }
 
     public function getUsuarioPorId($idUsuario)
     {
         $sql = "SELECT * FROM usuarios WHERE idUsuario=".$idUsuario;
-        if ( $resultado = $this->mysqli->query($sql) ){
-			if ( $resultado->num_rows > 0 ){
-                 return $resultado;
+        if ( $result = $this->mysqli->query($sql) ){
+			$data = []; 
+            if ($result->num_rows > 0) {
+                while($row = $result->fetch_assoc()) {
+                    $data[] = $row;
+                }
+            return $data;
 			}else{
-                return false;
+                return [];
             }
         }
-        unset($resultado);
-        $this->mysqli->close();
+        unset($result);
     }
 
     public function validar()
