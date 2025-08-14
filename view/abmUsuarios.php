@@ -54,6 +54,16 @@ $body = <<<HTML
           <i class="bi bi-pencil"></i>
         </button>
       </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span style="width:100%;">
+            <strong>Contraseña:</strong> 
+            <span id="datoPassword">
+            <button class="btn btn-sm btn-outline-primary btnEditarPassword">
+                <i class="bi bi-pencil"></i> Cambiar
+            </button>
+            </span>
+        </span>
+     </li>
     </ul>
   </div>
 </div>
@@ -268,7 +278,6 @@ document.addEventListener('click', function(e) {
 
 function actualizarCampoUsuario(campo, valor, btn, spanDato) {
     const idUsuario = document.getElementById('selectUsuario').value;
-
     fetch('index.php?opt=usuarios&ajax=updateCampo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -291,6 +300,56 @@ function actualizarCampoUsuario(campo, valor, btn, spanDato) {
     .catch(error => {
         console.error(error);
         showToastError('Error al actualizar el dato.');
+    });
+}
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.btnEditarPassword')) {
+        const btn = e.target.closest('.btnEditarPassword');
+        const contenedor = document.getElementById('datoPassword');
+
+        // Si está en modo edición → enviar
+        if (btn.classList.contains('modo-edicion')) {
+            const actual = contenedor.querySelector('input[name="passwordActual"]').value;
+            const nueva = contenedor.querySelector('input[name="passwordNueva"]').value;
+            actualizarPasswordUsuario(actual, nueva, btn, contenedor);
+        } else {
+            // Modo edición: mostrar inputs
+            contenedor.innerHTML = `
+                <input type="password" name="passwordActual" class="form-control form-control-sm mb-1" placeholder="Contraseña actual">
+                <input type="password" name="passwordNueva" class="form-control form-control-sm" placeholder="Nueva contraseña">
+                <button class="btn btn-sm btn-success btnEditarPassword modo-edicion mt-1">
+                    <i class="bi bi-check"></i> Confirmar
+                </button>
+            `;
+        }
+    }
+});
+
+function actualizarPasswordUsuario(passwordActual, passwordNueva, btn, contenedor) {
+    const idUsuario = document.getElementById('selectUsuario').value;
+    fetch('index.php?opt=usuarios&ajax=updatePassword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'idUsuario=' + encodeURIComponent(idUsuario) +
+              '&campo=' + encodeURIComponent(passwordActual) +
+              '&valor=' + encodeURIComponent(passwordNueva)
+    })
+    .then(response => {
+        return response.json().then(data => {
+            if (response.ok) {
+                contenedor.innerHTML = `<button class="btn btn-sm btn-outline-primary btnEditarPassword">
+                                            <i class="bi bi-pencil"></i> Cambiar
+                                         </button>`;
+                showToastOkay(data.msg);
+            } else {
+                showToastError(data.msg);
+            }
+        });
+    })
+    .catch(error => {
+        console.error(error);
+        showToastError('Error al actualizar la contraseña.');
     });
 }
 

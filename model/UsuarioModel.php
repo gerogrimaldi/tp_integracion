@@ -142,7 +142,6 @@ class Usuario{
             $_SESSION["captcha_error"] = "Por favor complete el captcha";
             return false;
         }
-    
         try {
             // Prepare the statement to prevent SQL injection
             $sql = "SELECT idUsuario, email, password, tipoUsuario, nombre FROM usuarios WHERE email = ? LIMIT 1";
@@ -167,12 +166,11 @@ class Usuario{
             
             if ($result->num_rows === 1) {
                 $usuario = $result->fetch_assoc();
-                if ($this->password === $usuario['password'])
+                if ($this->verifyPassword($this->password, $usuario['password']))
                 {
                     $this->setidUsuario($usuario['idUsuario']);
                     $this->setTipoUsuario($usuario['tipoUsuario']);
                     $this->setNombre($usuario['nombre']);
-                    $this->iniciarSesion();
                     return true;
                 }
             }
@@ -182,6 +180,47 @@ class Usuario{
         } catch (Exception $e) {
             error_log("Login error: " . $e->getMessage());
             $_SESSION["login_error"] = $e->getMessage();
+            return false;
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
+        }
+    }
+
+    public function validarPorID()
+    {
+        try {
+            // Prepare the statement to prevent SQL injection
+            $sql = "SELECT idUsuario, password FROM usuarios WHERE idUsuario = ? LIMIT 1";
+            $stmt = $this->mysqli->prepare($sql);
+
+            if (!$stmt) {
+             error_log("Error preparing statement: " . $this->mysqli->error);
+                $_SESSION["login_error"] = "Error en el sistema: Validación SQL User.";
+                return false;
+            }
+            // Bind the username parameter
+            $stmt->bind_param("s", $this->idUsuario);
+            
+            // Execute the query
+            if (!$stmt->execute()) {
+                error_log("Error executing statement: " . $stmt->error);
+                $_SESSION["login_error"] = "Error en el sistema. Ejecución SQL User.";
+                return false;
+            }
+            // Get the result
+            $result = $stmt->get_result();
+            if ($result->num_rows === 1) {
+                $usuario = $result->fetch_assoc();
+                if ($this->verifyPassword($this->password, $usuario['password']))
+                {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception $e) {
+            error_log("Login error: " . $e->getMessage());
             return false;
         } finally {
             if (isset($stmt)) {
@@ -205,7 +244,6 @@ class Usuario{
                 FROM usuarios 
                 WHERE idUsuario = ? 
                 LIMIT 1";
-
         $stmt = $this->mysqli->prepare($sql);
         if (!$stmt) {
             return false;
@@ -226,52 +264,44 @@ class Usuario{
 // CARGA; UPDATE, DELTE
     public function save()
     {
-        // Consulta para verificar si el usuario ya existe
+        // Verificar si el usuario ya existe
         $sqlCheck = "SELECT email FROM usuarios WHERE email = ?";
         $stmtCheck = $this->mysqli->prepare($sqlCheck);
-
         if (!$stmtCheck) {
             die("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
         }
-
-        // Enlazar parametro
         $stmtCheck->bind_param("s", $this->email);
         $stmtCheck->execute();
         $stmtCheck->store_result();
-
-        // Verificar
         if ($stmtCheck->num_rows > 0) {
-            echo '<script type="text/javascript">alert("Error: El usuario con este correo electrónico ya está registrado.");</script>';
             $stmtCheck->close();
             $this->mysqli->close();
             return false; 
         }
-
         $stmtCheck->close();
-
-        // Inserción del nuevo usuario
-        $sql = "INSERT INTO usuarios (nombre, email, direccion, telefono, password, fechaNac) 
-                VALUES (?, ?, ?, ?, ?, ?)";
+        // Hashear la contraseña antes de insertar
+        $hashedPassword = $this->encryptPassword($this->password);
+        $sql = "INSERT INTO usuarios (nombre, email, direccion, telefono, password, fechaNac, tipoUsuario) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->mysqli->prepare($sql);
-
         if (!$stmt) {
             die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
         }
+        $stmt->bind_param(
+            "sssssss",
+            $this->nombre,
+            $this->email,
+            $this->direccion,
+            $this->telefono,
+            $hashedPassword,
+            $this->fechaNac,
+            $this->tipoUsuario
+        );
 
-        // Enlaza los parámetros y ejecuta la consulta
-        $stmt->bind_param("ssssss", $this->nombre, $this->email, $this->direccion, $this->telefono, $this->password, $this->fechaNac);
         $stmt->execute();
-
-        // Cerrar la consulta y la conexión
         $stmt->close();
         $this->mysqli->close();
         return true;
-    }
-
-    public function update()
-    {
-        $sql="UPDATE Usuarios SET 'password='$this->password',email='$this->email',nombre='$this->nombre',direccion='$this->direccion',telefono='$this->telefono'',fechaNac='$this->fechaNac'', WHERE idUsuario=$this->idUsuario"; 
-        $this->mysqli->query($sql);
     }
 
     public function updateCampo($campo, $valor)
@@ -281,6 +311,9 @@ class Usuario{
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            if ($campo === 'password') {
+                $valor = $this->encryptPassword($valor); // Hashear la contraseña antes de guardarla
             }
             $stmt->bind_param("si", $valor, $this->idUsuario);
             if ($stmt->execute()) {
@@ -298,7 +331,17 @@ class Usuario{
         $this->mysqli->query($sql);
     } 
 
-    private Function iniciarSesion()
+    private function encryptPassword($password)
+    {
+        return password_hash($password, PASSWORD_BCRYPT);
+    }
+
+    private function verifyPassword($password, $hash)
+    {
+        return password_verify($password, $hash);
+    }
+
+    public Function iniciarSesion()
     {
         $_SESSION['user_id'] = $this->idUsuario;
         $_SESSION['token'] = bin2hex(random_bytes(32)); // Genera un token de sesión seguro

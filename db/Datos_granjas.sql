@@ -1,7 +1,7 @@
 
 INSERT INTO usuarios (idUsuario, nombre, email, direccion, telefono, password, fechaNac, tipoUsuario) VALUES
-(0, 'Brian', 'bngbrian@gmail.com', 'Los Talas 180', '+54934345555', '123456', '2000-03-01', 'encargado'),
-(1, 'Nahuel', 'nahuel@gmail.com', 'Los Colibries 1130', '+54933345555', '123456', '1998-03-01', 'dueno');
+(0, 'Brian', 'bngbrian@gmail.com', 'Los Talas 180', '+54934345555', '$2y$10$87AuVnPR/6KMWJua9KwBJeAqIAPWeUSr0FPtmWQ9lsqZ4ywxqy4ny', '2000-03-01', 'encargado'),
+(1, 'Nahuel', 'nahuel@gmail.com', 'Los Colibries 1130', '+54933345555', '$2y$10$87AuVnPR/6KMWJua9KwBJeAqIAPWeUSr0FPtmWQ9lsqZ4ywxqy4ny', '1998-03-01', 'dueno');
 
 INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubicacion) VALUES
 (0, 'Granja la chorlita', '07-892-0467', '80', 'Aldea San Rafael'),

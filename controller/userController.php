@@ -12,7 +12,7 @@ if ( !empty($_POST) && isset($_POST['btLogin']) ) {
             unset($_POST['email']);
             if ($oUsuario->validar())
             {
-                //Si es correcto, envio a la pantalla de home
+                $oUsuario->iniciarSesion();
                 header('Location: index.php?opt=home'); exit;
             }else{
                 //Si falla en el inicio de sesión, redirige al login
@@ -105,6 +105,37 @@ if (isset($_GET['ajax']))
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error en el procedimiento para actualizar el campo.']);
                 }
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error al actualizar el campo: ' . $e->getMessage()]);
+            }
+            exit();
+
+        case 'updatePassword':
+            header('Content-Type: application/json');
+            try {
+                if( !isset($_POST['idUsuario']) || $_POST['idUsuario'] === '' ||
+                    !isset($_POST['campo']) || $_POST['campo'] === '' ||
+                    !isset($_POST['valor']) || $_POST['valor'] === '' )
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: datos incompletos para actualizar.']);
+                    exit();
+                }
+                $oUser = new Usuario();
+                $oUser->setPassword($_POST['campo']);
+                unset($_POST['password']);
+                $oUser->setidUsuario($_POST['idUsuario']);
+                if ($oUser->validarPorID()){
+                    if ($oUser->updateCampo('password', $_POST['valor'])) {
+                        http_response_code(200);
+                        echo json_encode(['msg' => 'Contraseña actualizada.']);
+                    }
+                }else {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error al actualizar la contraseña. No coincide la contraseña actual.']);
+                }
+                unset($_POST['valor']);
             } catch (RuntimeException $e) {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error al actualizar el campo: ' . $e->getMessage()]);

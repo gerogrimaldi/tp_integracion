@@ -29,7 +29,8 @@ if (!empty($_POST)) {
                 $oTest->borrarBD();
                 break;
             case 'cargarDatos':
-                echo "Cargando datos de prueba...";
+                
+                echo "Cargando datos de prueba... Los password del test estan hasheados usar: 12345678";
                 $oTest->cargarDatos();
                 break;
             case 'crearTablas':
