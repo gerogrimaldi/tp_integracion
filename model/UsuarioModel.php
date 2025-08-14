@@ -274,6 +274,24 @@ class Usuario{
         $this->mysqli->query($sql);
     }
 
+    public function updateCampo($campo, $valor)
+    {
+        if (in_array($campo, ['nombre', 'email', 'direccion', 'telefono', 'fechaNac', 'password', 'tipoUsuario']) && !empty($valor)) {
+            $sql = "UPDATE usuarios SET $campo = ? WHERE idUsuario = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                die("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            $stmt->bind_param("si", $valor, $this->idUsuario);
+            if ($stmt->execute()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+
     public function deleteUsuarioPorId($idUsuario)
     {
         $sql="DELETE FROM Usuarios WHERE idUsuario=$idUsuario"; 

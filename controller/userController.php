@@ -84,6 +84,33 @@ if (isset($_GET['ajax']))
             }
             exit();
 
+        //index.php?opt=usuarios&ajax=updateCampo
+        case 'updateCampo':
+            header('Content-Type: application/json');
+            try {
+                if( !isset($_POST['idUsuario']) || $_POST['idUsuario'] === '' ||
+                    !isset($_POST['campo']) || $_POST['campo'] === '' ||
+                    !isset($_POST['valor']) || $_POST['valor'] === '' )
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: datos incompletos para actualizar.']);
+                    exit();
+                }
+                $oUser = new Usuario();
+                $oUser->setidUsuario($_POST['idUsuario']);
+                if ($oUser->updateCampo($_POST['campo'], $_POST['valor'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Campo actualizado correctamente.']);
+                }else {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error en el procedimiento para actualizar el campo.']);
+                }
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error al actualizar el campo: ' . $e->getMessage()]);
+            }
+            exit();
+
         case 'registrar':
             try {
                 $oUsuario = new Usuario();

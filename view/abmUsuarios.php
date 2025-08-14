@@ -134,7 +134,7 @@ $body = <<<HTML
     </div>
     <div class="mb-4">
         <label for="fechaNac" class="form-label">Fecha de Nacimiento</label>
-        <input type="datetime-local" class="form-control" 
+        <input type="date" class="form-control" 
             id="fechaNac" name="fechaNacimiento"
             required>
         <div class="invalid-feedback">
@@ -253,12 +253,17 @@ document.addEventListener('click', function(e) {
         } else {
             // Cambiar a modo edición
             const valorActual = spanDato.textContent;
-            spanDato.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + valorActual + '">';
-
-            btn.innerHTML = '<i class="bi bi-check"></i>';
-            btn.classList.add('modo-edicion');
+            if (campo === "fechaNac") {
+            // Si el valor viene con hora (YYYY-MM-DDTHH:MM:SS), cortamos la fecha
+            const valorSoloFecha = valorActual.includes('T') ? valorActual.split('T')[0] : valorActual;
+                spanDato.innerHTML = '<input type="date" class="form-control form-control-sm" value="' + valorSoloFecha + '">';
+            } else {
+                spanDato.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + valorActual + '">';
+            }
+                    btn.innerHTML = '<i class="bi bi-check"></i>';
+                    btn.classList.add('modo-edicion');
+            }
         }
-    }
 });
 
 function actualizarCampoUsuario(campo, valor, btn, spanDato) {
