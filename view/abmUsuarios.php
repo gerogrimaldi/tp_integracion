@@ -54,16 +54,21 @@ $body = <<<HTML
           <i class="bi bi-pencil"></i>
         </button>
       </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span style="width:100%;">
-            <strong>Contraseña:</strong> 
-            <span id="datoPassword">
-            <button class="btn btn-sm btn-outline-primary btnEditarPassword">
-                <i class="bi bi-pencil"></i> Cambiar
-            </button>
-            </span>
-        </span>
+     <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Tipo de usuario:</strong> <span id="datoTipoUsuario"></span></span>
+        <button class="btn btn-sm btn-outline-primary btn-editar btnEditar" data-campo="tipoUsuario">
+            <i class="bi bi-pencil"></i>
+        </button>
      </li>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span><strong>Contraseña</strong> <span id="datoPassword"></span></span>
+        <button class="btn btn-sm btn-outline-primary btnEditarPassword">
+            <i class="bi bi-pencil"></i> Cambiar
+        </button>
+    </li>
+     <div class="mt-3 d-flex justify-content-end">
+        <button id="btnEliminarUsuario" class="btn btn-danger">Eliminar Usuario</button>
+     </div>
     </ul>
   </div>
 </div>
@@ -149,6 +154,16 @@ $body = <<<HTML
             required>
         <div class="invalid-feedback">
             Seleccione una fecha válida.
+        </div>
+    </div>
+    <div class="mb-3">
+        <label for="tipoUsuario" class="form-label">Tipo de usuario</label>
+        <select class="form-select" id="tipoUsuario" name="tipoUsuario" required>
+            <option value="Encargado">Encargado</option>
+            <option value="Propietario">Propietario</option>
+        </select>
+        <div class="invalid-feedback">
+            Por favor, seleccione un tipo de usuario.
         </div>
     </div>
 </form>
@@ -243,6 +258,7 @@ function cargarCardUsuarios() {
             document.getElementById('datoDomicilio').textContent = usuario.direccion || '';
             document.getElementById('datoTelefono').textContent = usuario.telefono || '';
             document.getElementById('datoFechaNac').textContent = usuario.fechaNac || '';
+            document.getElementById('datoTipoUsuario').textContent = usuario.tipoUsuario || '';
         })
         .catch(error => {
             console.error(error);
@@ -353,16 +369,34 @@ function actualizarPasswordUsuario(passwordActual, passwordNueva, btn, contenedo
     });
 }
 
-// USUARIOS - ELIMINAR
-function eliminarUsuario(idUsuario) {
-    // Realizar la solicitud AJAX
-    fetch('index.php?opt=usuarios&ajax=delUsuario&idUsuario=' + idUsuario, {
-        method: 'GET'
+function agregarUsuario() {
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const domicilio = document.getElementById('domicilio').value;
+    const telefono = document.getElementById('telefono').value;
+    const contrasenia = document.getElementById('contrasenia').value;
+    const fechaNac = document.getElementById('fechaNac').value;
+    const tipoUsuario = document.getElementById('tipoUsuario').value;
+
+    fetch('index.php?opt=usuarios&ajax=registrar', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'nombre=' + encodeURIComponent(nombre) +
+              '&email=' + encodeURIComponent(email) +
+              '&direccion=' + encodeURIComponent(domicilio) + // backend espera 'direccion'
+              '&telefono=' + encodeURIComponent(telefono) +
+              '&password=' + encodeURIComponent(contrasenia) + // backend espera 'password'
+              '&fechaNac=' + encodeURIComponent(fechaNac) +
+              '&tipoUsuario=' + encodeURIComponent(tipoUsuario)
     })
     .then(response => {
         return response.json().then(data => {
             if (response.ok) {
-                cargarTablaGranjas();
+                cargarSelectUsuarios(); // recarga lista de usuarios
+                const modal = bootstrap.Modal.getInstance(document.getElementById('agregarUsuario'));
+                modal.hide();
                 showToastOkay(data.msg);
             } else {
                 showToastError(data.msg);
@@ -371,7 +405,45 @@ function eliminarUsuario(idUsuario) {
     })
     .catch(error => {
         console.error('Error en la solicitud AJAX:', error);
-        showToastError('Error desconocido.');
+        showToastError('Error en la solicitud AJAX: ' + error.message);
+    });
+}
+
+// Evento para el botón de eliminar
+document.getElementById('btnEliminarUsuario').addEventListener('click', function() {
+    const idUsuario = document.getElementById('selectUsuario').value;
+    if (!idUsuario) {
+        showToastError('Seleccione un usuario primero');
+        return;
+    }
+    
+    if (confirm('¿Está seguro de eliminar este usuario permanentemente?')) {
+        eliminarUsuario(idUsuario);
+    }
+});
+
+function eliminarUsuario(idUsuario) {
+    fetch('index.php?opt=usuarios&ajax=delUsuario&idUsuario=' + idUsuario, {
+        method: 'GET'
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.msg || 'Error en la solicitud');
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Ocultar card y recargar lista
+        document.getElementById('cardUsuario').classList.add('d-none');
+        document.getElementById('selectUsuario').value = '';
+        cargarSelectUsuarios();
+        showToastOkay(data.msg);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToastError(error.message || 'Error al eliminar usuario');
     });
 }
 

@@ -135,6 +135,29 @@ class Usuario{
         unset($result);
     }
 
+    public function setMaxIDUsuario()
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT MAX(idUsuario) AS maxID FROM usuarios";
+            $result = $this->mysqli->query($sql);
+            if (!$result) {
+                throw new RuntimeException('Error al consultar el máximo ID: ' . $this->mysqli->error);
+            }
+            if ($result && $row = $result->fetch_assoc()) {
+                $maxID = $row['maxID'] ?? 0;
+                $this->idUsuario = $maxID + 1;
+                return true;
+            } else {
+                throw new RuntimeException('Error al obtener el máximo ID: ' . $this->mysqli->error);
+            }
+        } catch (RuntimeException $e) {
+            throw $e; 
+        }
+    }
+
     public function validar()
     {
         require_once("captcha_process.php");
@@ -281,14 +304,15 @@ class Usuario{
         $stmtCheck->close();
         // Hashear la contraseña antes de insertar
         $hashedPassword = $this->encryptPassword($this->password);
-        $sql = "INSERT INTO usuarios (nombre, email, direccion, telefono, password, fechaNac, tipoUsuario) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO usuarios (idUsuario, nombre, email, direccion, telefono, password, fechaNac, tipoUsuario) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->mysqli->prepare($sql);
         if (!$stmt) {
             die("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
         }
         $stmt->bind_param(
-            "sssssss",
+            "isssssss",
+            $this->idUsuario,
             $this->nombre,
             $this->email,
             $this->direccion,
@@ -297,7 +321,6 @@ class Usuario{
             $this->fechaNac,
             $this->tipoUsuario
         );
-
         $stmt->execute();
         $stmt->close();
         $this->mysqli->close();
@@ -325,11 +348,25 @@ class Usuario{
         return false;
     }
 
-    public function deleteUsuarioPorId($idUsuario)
-    {
-        $sql="DELETE FROM Usuarios WHERE idUsuario=$idUsuario"; 
-        $this->mysqli->query($sql);
-    } 
+public function deleteUsuarioPorId($idUsuario)
+{
+    try {
+        $sql = "DELETE FROM usuarios WHERE idUsuario = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) {
+            throw new RuntimeException("Error en preparación: " . $this->mysqli->error);
+        }
+        $stmt->bind_param("i", $idUsuario);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            throw new RuntimeException("Error al ejecutar: " . $stmt->error);
+        }
+    } catch (Exception $e) {
+        error_log("Error al eliminar usuario: " . $e->getMessage());
+        return false;
+    }
+}
 
     private function encryptPassword($password)
     {

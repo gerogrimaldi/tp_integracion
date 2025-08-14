@@ -14,7 +14,7 @@ if (!empty($_POST)) {
         }
     } else {
         // Handle other test cases
-        echo "<h1 class='bg-white'>";
+        echo "<h1 class='bg-dark text-white p-3 text-center'>";
         switch ($_POST['btTest']) {
             case 'testConnect':
                 echo "Testeando conexión MariaDB";
@@ -29,7 +29,6 @@ if (!empty($_POST)) {
                 $oTest->borrarBD();
                 break;
             case 'cargarDatos':
-                
                 echo "Cargando datos de prueba... Los password del test estan hasheados usar: 12345678";
                 $oTest->cargarDatos();
                 break;

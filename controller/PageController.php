@@ -4,9 +4,7 @@
 require_once __DIR__ . '/../includes/auth.php';
 $_GET['opt'] = $_GET['opt'] ?? '';
 
-
 switch ($_GET['opt']) {
-
 	case '':
 	case 'login':
 		$auth = checkAuth();
@@ -30,6 +28,7 @@ switch ($_GET['opt']) {
 	case 'test':
 		require_once 'controller/testController.php';
 		require_once 'view/test.php';
+		echo "Testeando conexión MariaDB";
 		break;
 
 	case 'compuestos':
@@ -56,7 +55,7 @@ switch ($_GET['opt']) {
 		switch ($_GET['opt']) {
 			case 'granjas':
 				require_once 'controller/abmGranjasController.php';
-				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				if ( $_SESSION['tipoUsuario'] === 'Propietario' )
 				{
 					require_once 'view/abmGranjas.php';
 				}else{
@@ -66,7 +65,7 @@ switch ($_GET['opt']) {
 				break;
 			case 'galpones':
 				require_once 'controller/abmGalponesController.php';
-				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				if ( $_SESSION['tipoUsuario'] === 'Propietario' )
 				{
 					require_once 'view/abmGalpones.php';
 				}else{
@@ -90,7 +89,7 @@ switch ($_GET['opt']) {
 				break;
 			case 'usuarios':
 				require_once 'controller/userController.php';
-				if ( $_SESSION['tipoUsuario'] === 'dueno' )
+				if ($_SESSION['tipoUsuario'] === 'Propietario' )
 				{
 					require_once 'view/abmUsuarios.php';
 				}else{

@@ -60,6 +60,30 @@ if (isset($_GET['ajax']))
             }
             exit();
 
+        case 'delUsuario':
+            header('Content-Type: application/json');
+            try {
+                if( !isset($_GET['idUsuario']) || $_GET['idUsuario'] === '' )
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: no se ha seleccionado un usuario.']);
+                    exit();
+                }
+                $oUser = new Usuario();
+                if ($Usuarios = $oUser->deleteUsuarioPorId($_GET['idUsuario'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Usuario eliminado correctamente.']);
+                }else{
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Error al eliminar usuario.']);
+                }
+            } catch (RuntimeException $e) {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error al eliminar usuario: ' . $e->getMessage()]);
+            }
+            exit();
+
+
         case 'getUsuario':
             header('Content-Type: application/json');
             try {
@@ -70,7 +94,6 @@ if (isset($_GET['ajax']))
                     exit();
                 }
                 $oUser = new Usuario();
-                $Usuarios = $oUser->getall();
                 if ($Usuarios = $oUser->getUsuarioPorId($_GET['idUsuario'])) {
                     http_response_code(200);
                     echo json_encode($Usuarios);
@@ -80,7 +103,7 @@ if (isset($_GET['ajax']))
                 }
             } catch (RuntimeException $e) {
                     http_response_code(400);
-                    echo json_encode(['msg' => 'Error al obtener usuario.']);
+                    echo json_encode(['msg' => 'Error al actualizar el campo: ' . $e->getMessage()]);
             }
             exit();
 
@@ -145,11 +168,14 @@ if (isset($_GET['ajax']))
         case 'registrar':
             try {
                 $oUsuario = new Usuario();
+                $oUsuario->setMaxIDUsuario();
                 $oUsuario->setPassword($_POST['password']);
                 $oUsuario->setNombre($_POST['nombre']);
                 $oUsuario->setDireccion($_POST['direccion']);
                 $oUsuario->setTelefono($_POST['telefono']);
                 $oUsuario->setEmail($_POST['email']);
+                $oUsuario->setDate($_POST['fechaNac']);
+                $oUsuario->setTipoUsuario($_POST['tipoUsuario']);
                 if ($oUsuario->save()) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Usuario registrado correctamente.']);
@@ -161,42 +187,6 @@ if (isset($_GET['ajax']))
                 http_response_code(500);
                 echo json_encode(['msg' => 'Error interno del servidor: ' . $e->getMessage()]);
             }
-
-
+            exit();
     }
 }
-
-/*
-CASOS QUE PUEDEN SERVIR LUEGO PARA HACER EL AJAX
-        case 'registrar': 
-            $oUsuario = new Usuario();
-            $oUsuario->setPassword($_POST['password']);
-            $oUsuario->setNombre($_POST['nombre']);
-            $oUsuario->setDireccion($_POST['direccion']);
-            $oUsuario->setTelefono($_POST['telefono']);
-            $oUsuario->setEmail($_POST['email']);
-            $oUsuario->setDate($_POST['date']);
-            $todo_ok = $oUsuario->save();
-            break;
-
-        case 'editarUsuario':
-            require_once 'model/UsuarioModel.php';
-            $oUsuario = new Usuario();
-            $oUsuario->setidUsuario($_POST['idUsuario']);
-            $oUsuario->setPassword($_POST['password']);
-            $oUsuario->setNombre($_POST['nombres']);
-            $oUsuario->setDireccion($_POST['direccion']);
-            $oUsuario->setTelefono($_POST['telefono']);
-            $oUsuario->setEmail($_POST['email']);
-            $oUsuario->update();
-            break;
-
-4. Backend – Endpoints necesarios
-Para que funcione, tu backend debe tener:
-
-getUsuario&idUsuario=... → Devuelve un JSON con todos los campos del usuario.
-
-updateCampo (POST) → Recibe idUsuario, campo, valor y actualiza en la base de datos.
-
-
-*/

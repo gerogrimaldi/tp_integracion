@@ -1,6 +1,5 @@
 <?php
 $recaptcha_key = RECAPTCHA_KEY;
-
 if (empty($idUsuario)) {
     $idUsuario = '';
     $password = '';
