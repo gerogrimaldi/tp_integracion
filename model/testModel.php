@@ -114,7 +114,6 @@ class test{
             if (ob_get_level()) {
                 ob_end_clean();
             }
-
             // Set headers
             header('Content-Description: File Transfer');
             header('Content-Type: application/octet-stream');
@@ -129,6 +128,24 @@ class test{
             // This shouldn't be reached if backupDB() returned true
             die("El archivo de backup no existe.");
         }
+    }
+
+    public function restaurarBackupBD($rutaArchivo) {
+        if (!file_exists($rutaArchivo) || !is_readable($rutaArchivo)) {
+            error_log("Archivo de backup no encontrado o sin permisos.");
+            return false;
+        }
+        // Escapar parámetros para evitar inyección en el shell
+        $host = escapeshellarg(DB_HOST);
+        $user = escapeshellarg(DB_USER);
+        $pass = escapeshellarg(DB_PASS);
+        $db   = escapeshellarg(DB_NAME);
+        $file = escapeshellarg($rutaArchivo);
+        // Comando para restaurar usando el cliente mysql
+        $comando = "mysql -h $host -u $user -p$pass $db < $file";
+        // Ejecutar el comando
+        exec($comando, $output, $resultado);
+        return $resultado === 0;
     }
 
     public function guardarFechaBackup()
