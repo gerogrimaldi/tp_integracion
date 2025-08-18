@@ -9,10 +9,10 @@ if (!empty($_POST)) {
                 $oTest->descargarBackupBD();
                 $oTest->guardarFechaBackup();
                 $oTest->destruirBackup();
+                echo json_encode(['msg' => 'Backup completado.']);
                 exit;
             } else {
-                $error = 'db';
-                require_once 'view/error.php';
+                echo json_encode(['msg' => 'Error al realizar backup.']);
             }
             break;
 
@@ -29,22 +29,27 @@ if (!empty($_POST)) {
     //Casos que no van a estar en producción
         case 'testConnect':
             //echo "Testeando conexión MariaDB";
+            $oTest = new Test();
             $oTest->testConnect();
             break;
         case 'crearBD':
             //echo "Creando base de datos...";
+            $oTest = new Test();
             $oTest->crearBD();
             break;
         case 'borrarDB':
             //echo "Borrando base de datos...";
+            $oTest = new Test();
             $oTest->borrarBD();
             break;
         case 'cargarDatos':
             //echo "Cargando datos de prueba... Los password del test estan hasheados usar: 12345678";
+            $oTest = new Test();
             $oTest->cargarDatos();
             break;
         case 'crearTablas':
             //echo "Creando tablas...";
+            $oTest = new Test();
             $oTest->crearTablas();
             break;
         }

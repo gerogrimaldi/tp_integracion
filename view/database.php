@@ -10,17 +10,17 @@ if ($ultimoBackup) {
 
 $body = <<<HTML
 <div class="container">
-    <h1>Backup y restauración</h1>
+    <h1>Gestión de base de datos</h1>
+    <div class="d-flex flex-wrap gap-2 mb-3">
+        <form id="formBackup" action="index.php?opt=test" method="POST" class="m-0">
+            <input type="hidden" name="btTest" value="backupDB">
+            <button type="submit" class="btn btn-primary" id="btnBackup">Crear y descargar backup</button>
+        </form>
 
-    <form id="formBackup" enctype="multipart/form-data" style="display:none;">
-        <input type="hidden" name="btTest" id="btTest">
-        <input type="file" name="archivoBackup" id="archivoBackup" style="display:none;">
-    </form>
-
-    <p class="d-inline-flex gap-1">
-        <button class="btn btn-primary" type="button" id="btnBackup">Realizar copia de seguridad</button>
-        <button class="btn btn-primary" type="button" id="btnRestore">Restaurar copia de seguridad</button>
-    </p>
+        <button class="btn btn-primary" type="button" id="btnRestore">
+            Restaurar copia de seguridad
+        </button>
+    </div>
 
     <div class="card">
         <div class="card-body">
@@ -29,6 +29,8 @@ $body = <<<HTML
         </div>
     </div>
 
+    <!-- Input oculto para seleccionar archivo -->
+    <input type="file" id="archivoBackup" name="archivoBackup" accept=".sql" style="display:none">
 </div>
 
 <script>
@@ -36,32 +38,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const btTest = document.getElementById('btTest');
     const archivoBackup = document.getElementById('archivoBackup');
 
-    // Backup
-    document.getElementById('btnBackup').addEventListener('click', function () {
-        const formData = new FormData();
-        formData.append('btTest', 'backupDB');
-
-        fetch('index.php?opt=test', {
-            method: 'POST',
-            body: formData
-        })
-        .then(resp => resp.ok ? resp.json() : Promise.reject(resp.json()))
-        .then(data => {
-            if (data.msg) {
-                showToastOkay(data.msg);
-            }
-        })
-        .catch(async err => {
-            const data = await err;
-            showToastError(data.msg || 'Error al realizar el backup.');
-        });
-    });
-
-    // Restaurar
     document.getElementById('btnRestore').addEventListener('click', function () {
         archivoBackup.click();
     });
-
     archivoBackup.addEventListener('change', function () {
         if (archivoBackup.files.length > 0) {
             const formData = new FormData();

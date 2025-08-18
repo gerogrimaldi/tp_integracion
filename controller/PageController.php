@@ -35,13 +35,15 @@ switch ($_GET['opt']) {
 		require_once 'controller/compuestosController.php';
 		require_once 'view/abmCompuestos.php';
 		break;
-
+			case 'database':
+				require_once 'view/database.php';
+				break;
 	case 'granjas':
 	case 'galpones':
 	case 'mantenimientos':
 	case 'vacunas':
 	case 'home':
-	case 'database':
+
 	case 'usuarios':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {

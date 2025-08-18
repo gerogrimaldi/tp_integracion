@@ -130,23 +130,30 @@ class test{
         }
     }
 
-    public function restaurarBackupBD($rutaArchivo) {
-        if (!file_exists($rutaArchivo) || !is_readable($rutaArchivo)) {
-            error_log("Archivo de backup no encontrado o sin permisos.");
-            return false;
-        }
-        // Escapar parámetros para evitar inyección en el shell
-        $host = escapeshellarg(DB_HOST);
-        $user = escapeshellarg(DB_USER);
-        $pass = escapeshellarg(DB_PASS);
-        $db   = escapeshellarg(DB_NAME);
-        $file = escapeshellarg($rutaArchivo);
-        // Comando para restaurar usando el cliente mysql
-        $comando = "mysql -h $host -u $user -p$pass $db < $file";
-        // Ejecutar el comando
-        exec($comando, $output, $resultado);
-        return $resultado === 0;
+public function restaurarBackupBD($rutaArchivo) {
+    if (!file_exists($rutaArchivo) || !is_readable($rutaArchivo)) {
+        error_log("Archivo de backup no encontrado o sin permisos.");
+        return false;
     }
+    $host = DB_HOST;
+    $user = DB_USER;
+    $pass = DB_PASS;
+    $db   = DB_NAME;
+    $file = escapeshellarg($rutaArchivo);
+    // Si hay password, lo incluimos. Si no, no ponemos -p (porque queda esperando).
+    if ($pass !== '') {
+        $comando = "mysql -h $host -u $user -p$pass $db < $file";
+    } else {
+        $comando = "mysql -h $host -u $user $db < $file";
+    }
+    error_log("Ejecutando comando: restaurar backup");
+    // Ejecutar el comando y capturar salida
+    exec($comando . " 2>&1", $output, $resultado);
+    error_log("Resultado: $resultado");
+    error_log("Output: " . implode("\n", $output));
+    return $resultado === 0;
+}
+
 
     public function guardarFechaBackup()
     {

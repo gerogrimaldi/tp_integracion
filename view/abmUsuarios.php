@@ -18,59 +18,58 @@ $body = <<<HTML
             </div>
         </div>
     </form>
-</div>
-
-<div id="cardUsuario" class="card mt-4 d-none">
-  <div class="card-body">
-    <h5 class="card-title">Datos del Usuario</h5>
-    <ul class="list-group list-group-flush">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Nombre:</strong> <span id="datoNombre"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="nombre">
-          <i class="bi bi-pencil"></i>
-        </button>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Email:</strong> <span id="datoEmail"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="email">
-          <i class="bi bi-pencil"></i>
-        </button>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Domicilio:</strong> <span id="datoDomicilio"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="domicilio">
-          <i class="bi bi-pencil"></i>
-        </button>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Teléfono:</strong> <span id="datoTelefono"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="telefono">
-          <i class="bi bi-pencil"></i>
-        </button>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Fecha Nac.:</strong> <span id="datoFechaNac"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="fechaNac">
-          <i class="bi bi-pencil"></i>
-        </button>
-      </li>
-     <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Tipo de usuario:</strong> <span id="datoTipoUsuario"></span></span>
-        <button class="btn btn-sm btn-outline-primary btn-editar btnEditar" data-campo="tipoUsuario">
+    <div id="cardUsuario" class="card mt-4 d-none">
+    <div class="card-body">
+        <h5 class="card-title">Datos del Usuario</h5>
+        <ul class="list-group list-group-flush">
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Nombre:</strong> <span id="datoNombre"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="nombre">
             <i class="bi bi-pencil"></i>
-        </button>
-     </li>
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-        <span><strong>Contraseña</strong> <span id="datoPassword"></span></span>
-        <button class="btn btn-sm btn-outline-primary btnEditarPassword">
-            <i class="bi bi-pencil"></i> Cambiar
-        </button>
-    </li>
-     <div class="mt-3 d-flex justify-content-end">
-        <button id="btnEliminarUsuario" class="btn btn-danger">Eliminar Usuario</button>
-     </div>
-    </ul>
-  </div>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Email:</strong> <span id="datoEmail"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="email">
+            <i class="bi bi-pencil"></i>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Domicilio:</strong> <span id="datoDomicilio"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="domicilio">
+            <i class="bi bi-pencil"></i>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Teléfono:</strong> <span id="datoTelefono"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="telefono">
+            <i class="bi bi-pencil"></i>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Fecha Nac.:</strong> <span id="datoFechaNac"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditar" data-campo="fechaNac">
+            <i class="bi bi-pencil"></i>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Tipo de usuario:</strong> <span id="datoTipoUsuario"></span></span>
+            <button class="btn btn-sm btn-outline-primary btn-editar btnEditar" data-campo="tipoUsuario">
+                <i class="bi bi-pencil"></i>
+            </button>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span><strong>Contraseña</strong> <span id="datoPassword"></span></span>
+            <button class="btn btn-sm btn-outline-primary btnEditarPassword">
+                <i class="bi bi-pencil"></i> Cambiar
+            </button>
+        </li>
+        <div class="mt-3 d-flex justify-content-end">
+            <button id="btnEliminarUsuario" class="btn btn-danger">Eliminar Usuario</button>
+        </div>
+        </ul>
+    </div>
+    </div>
 </div>
 
 <!-- Modal popUp Agregar Usuario -->
