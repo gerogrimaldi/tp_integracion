@@ -97,7 +97,7 @@ $body = <<<HTML
         <div class="col">
             <div class="row g-2">
                 <div class="col-6">
-                    <a href="index.php?opt=lotes" class="text-decoration-none">
+                    <a href="index.php?opt=lotesAves" class="text-decoration-none">
                         <div class="card h-100 text-center bg-primary text-white shadow">
                             <div class="card-body">
                                 <i class="bi bi-egg-fried display-1"></i>

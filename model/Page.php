@@ -94,7 +94,7 @@ private function setMenu($_menu = ""){
                             Aves
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="avesDropdown">
-                            <li><a class="dropdown-item" href="index.php?opt=lotes">Gestionar Lotes</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=lotesAves">Gestionar Lotes</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=cargarMortandad">Cargar Mortandad</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=cargarPesaje">Cargar Pesaje</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=aplicarVacunas">Aplicar Vacunas</a></li>

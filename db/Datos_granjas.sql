@@ -9,9 +9,9 @@ INSERT INTO granja (idGranja, nombre, habilitacionSenasa, metrosCuadrados, ubica
 (2, 'Avicola Maria Clara', '07-012-0405', '120', 'Aldea Santa Rosa');
 
 INSERT INTO tipoAve (idTipoAve, nombre) VALUES
-(0, 'Ponedora ligera'),
-(1, 'Ponedora pesada'),
-(2, 'Ponedora semipesada');
+(0, 'Ponedora blanca'),
+(1, 'Ponedora Sussex'),
+(2, 'Ponedora Roja');
 
 INSERT INTO galpon (idGalpon, identificacion, idTipoAve, capacidad, idGranja) VALUES
 (0, '001-Frente', '0', '60000', '1'),
