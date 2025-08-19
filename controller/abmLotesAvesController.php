@@ -94,6 +94,132 @@ if (isset($_GET['ajax']))
             }
             exit();
         break;
+    // ------------------------------------
+    // SOLICITUDES AJAX - LOTE DE AVES
+    // ------------------------------------
+        // === Obtener todos los lotes ===
+        case 'getLotesAves':
+            header('Content-Type: application/json');
+            try {
+                $oLotes = new LoteAves();
+                $lotes = $oLotes->getAll();
+                if ($lotes) {
+                    http_response_code(200);
+                    echo json_encode($lotes);
+                } else {
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+
+        // === Obtener un lote por ID ===
+        case 'getLoteAvesById':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: lote no seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                $id = (int)$_GET['idLoteAves'];
+                $lote = $oLotes->getById($id);
+
+                http_response_code(200);
+                echo json_encode($lote);
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+        break;
+
+        // === Eliminar un lote ===
+        case 'delLoteAves': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: lote no seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                $id = (int)$_GET['idLoteAves'];
+                if ($oLotes->deleteLoteAves($id)) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Eliminado correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
+            }
+            exit();
+        break;
+
+        // === Agregar un nuevo lote ===
+        case 'addLoteAves':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['identificador']) || empty($_POST['fechaNac']) || 
+                    empty($_POST['fechaCompra']) || empty($_POST['cantidadAves']) || 
+                    empty($_POST['idTipoAve'])) 
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->agregarNuevo(
+                        $_POST['identificador'],
+                        $_POST['fechaNac'],
+                        $_POST['fechaCompra'],
+                        (int)$_POST['cantidadAves'],
+                        (int)$_POST['idTipoAve']
+                    )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Lote agregado correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al añadir.']);
+            }
+            exit();
+        break;
+
+        // === Editar un lote existente ===
+        case 'editLoteAves':
+            header('Content-Type: application/json');
+            try {
+                if (empty($_POST['idLoteAves']) || empty($_POST['identificador']) ||
+                    empty($_POST['fechaNac']) || empty($_POST['fechaCompra']) ||
+                    empty($_POST['cantidadAves']) || empty($_POST['idTipoAve'])) 
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->updateLoteAves(
+                        (int)$_POST['idLoteAves'],
+                        $_POST['identificador'],
+                        $_POST['fechaNac'],
+                        $_POST['fechaCompra'],
+                        (int)$_POST['cantidadAves'],
+                        (int)$_POST['idTipoAve']
+                )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
 
         default:
             exit();

@@ -221,15 +221,288 @@ function cargarTablaTipoAve() {
         $('#tablaTiposAve').DataTable();
     });
 }
-
-window.addEventListener('load', function() {
-    cargarTablaTipoAve();
-});
 </script>
 HTML;
 // Agregar las funciones y el contenedor de los toast
 // Para mostrar notificaciones
 include 'view/toast.php';
 $body .= $toast;
-?>
 
+$body .= <<<HTML
+<div class="container">
+    <h2>Lotes filtrados por granjas</h2>
+
+    <!-- Seleccionar Granja -->
+    <div class="input-group mb-3">
+        <select id="selectGranja" name="selectGranja" class="form-select rounded-start" required>
+            <!-- opciones cargadas por JS -->
+        </select>
+        <button type="button" class="btn btn-primary rounded-end" data-bs-toggle="modal" data-bs-target="#newLoteAves">
+            Agregar Lote
+        </button>
+        <div class="invalid-feedback">Debe elegir una opción.</div>
+    </div>
+
+    <!-- Filtros de fechas + botones -->
+    <div class="row mb-3 g-2">
+        <div class="col-12 col-md-3">
+            <label for="fechaNacimientoDesde" class="form-label">Fecha nacimiento desde:</label>
+            <input type="date" id="fechaNacimientoDesde" class="form-control">
+        </div>
+        <div class="col-12 col-md-3">
+            <label for="fechaNacimientoHasta" class="form-label">Fecha nacimiento hasta:</label>
+            <input type="date" id="fechaNacimientoHasta" class="form-control">
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button id="btnFiltrar" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+        <div class="col-12 col-md-3 d-flex align-items-end">
+            <button id="btnReporte" class="btn btn-success w-100">Generar Reporte</button>
+        </div>
+    </div>
+
+    <!-- Tabla de lotes -->
+    <table id="tablaLotes" class="table table-bordered bg-white">
+        <thead class="table-light">
+            <tr>
+                <th class="text-primary">ID</th>
+                <th class="text-primary">Fecha Nacimiento</th>
+                <th class="text-primary">Fecha Compra</th>
+                <th class="text-primary">Tipo de Ave</th>
+                <th class="text-primary">Cantidad</th>
+                <th class="text-primary">Galpón</th>
+                <th class="text-primary">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="lotesAves"></tbody>
+    </table>
+</div>
+
+<!-- Modal Agregar Lote de Aves -->
+<div class="modal fade" id="newLoteAves" tabindex="-1" aria-labelledby="newLoteAvesModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="newLoteAvesModal">Agregar Lote de Aves</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newLoteAvesForm" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
+                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="fechaCompra" class="form-label">Fecha de Compra</label>
+                        <input type="date" class="form-control" id="fechaCompra" name="fechaCompra" required>
+                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="selectTipoAve" class="form-label">Tipo de Ave</label>
+                        <select id="selectTipoAve" name="tipoAve" class="form-control" required></select>
+                        <div class="invalid-feedback">Seleccione un tipo de ave válido.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="selectGalpon" class="form-label">Galpón</label>
+                        <select id="selectGalpon" name="galpon" class="form-control" required></select>
+                        <div class="invalid-feedback">Seleccione un galpón válido.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="cantidad" class="form-label">Cantidad de Aves</label>
+                        <input type="number" class="form-control" id="cantidad" name="cantidad" required>
+                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                    </div>
+                    <input type="hidden" id="idGranja" name="idGranja">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btnAgregarLote">Finalizar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// === Cargar granjas ===
+function cargarSelectGranja() {
+    const select = document.getElementById('selectGranja');
+    select.innerHTML = '<option value="">Seleccione una granja</option>';
+    fetch('index.php?opt=granjas&ajax=getGranjas')
+        .then(res => res.json())
+        .then(data => data.forEach(g => { const opt=document.createElement('option'); opt.value=g.idGranja; opt.text=g.nombre; select.appendChild(opt); }))
+        .catch(err => { console.error('Error al cargar granjas:', err); showToastError('Error al cargar las granjas'); });
+}
+
+// === Cargar tipos de ave ===
+function cargarSelectTipoAve() {
+    const selectTipo = document.getElementById('selectTipoAve'); selectTipo.innerHTML = '';
+    fetch('index.php?opt=lotesAves&ajax=getTipoAve')
+        .then(res => res.json())
+        .then(data => data.forEach(t => { const opt=document.createElement('option'); opt.value=t.idTipoAve; opt.text=t.nombre; selectTipo.appendChild(opt); }))
+        .catch(err => { console.error('Error al cargar tipos de ave:', err); showToastError('Error al cargar tipos de ave'); });
+}
+
+// === Cargar galpones según granja ===
+function cargarSelectGalpon(idGranja) {
+    const selectGalpon = document.getElementById('selectGalpon');
+    selectGalpon.innerHTML = '';
+    if(!idGranja) return;
+
+    fetch('index.php?opt=galpones&ajax=getGalponesGranja&idGranja=' + idGranja)
+        .then(res => res.json())
+        .then(data => data.forEach(g => {
+            const opt = document.createElement('option');
+            opt.value = g.idGalpon;
+            opt.text = g.identificacion;
+            selectGalpon.appendChild(opt);
+        }))
+        .catch(err => { console.error('Error al cargar galpones:', err); showToastError('Error al cargar galpones'); });
+}
+
+
+// === Abrir modal: asignar granja y cargar selects ===
+document.getElementById('newLoteAves').addEventListener('show.bs.modal', function(){
+    const selectedGranjaId = document.getElementById('selectGranja').value;
+    if(!selectedGranjaId){ 
+        showToastError('Debe seleccionar una granja primero'); 
+        return; 
+    }
+    document.getElementById('idGranja').value = selectedGranjaId;
+    // Setear fechas actuales
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('fechaNacimiento').value = today;
+    document.getElementById('fechaCompra').value = today;
+
+    // Cargar selects
+    cargarSelectTipoAve();             // tipos de ave
+    cargarSelectGalpon(selectedGranjaId);  // galpones según granja
+});
+
+
+// === Agregar lote ===
+document.getElementById('btnAgregarLote').addEventListener('click', agregarLote);
+document.getElementById('newLoteAvesForm').addEventListener('submit', function(e){ e.preventDefault(); agregarLote(); });
+function agregarLote() {
+    const fechaNac = document.getElementById('fechaNacimiento').value;
+    const fechaCompra = document.getElementById('fechaCompra').value;
+    const tipoAve = document.getElementById('selectTipoAve').value;
+    const galpon = document.getElementById('selectGalpon').value;
+    const cantidad = document.getElementById('cantidad').value;
+    const idGranja = document.getElementById('idGranja').value;
+
+    fetch('index.php?opt=lotesAves&ajax=addLoteAves', {
+        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'fechaNacimiento='+encodeURIComponent(fechaNac)
+            +'&fechaCompra='+encodeURIComponent(fechaCompra)
+            +'&tipoAve='+encodeURIComponent(tipoAve)
+            +'&galpon='+encodeURIComponent(galpon)
+            +'&cantidad='+encodeURIComponent(cantidad)
+            +'&idGranja='+encodeURIComponent(idGranja)
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.success){ document.getElementById('btnFiltrar').click(); $('#newLoteAves').modal('hide'); showToastOkay(data.msg); }
+        else{ showToastError(data.msg); }
+    })
+    .catch(err=>{ console.error('Error AJAX:', err); showToastError('Error en la solicitud'); });
+}
+
+// === Filtrar lotes ===
+document.getElementById("btnFiltrar").addEventListener("click", function() {
+    const idGranja = document.getElementById("selectGranja").value;
+    const desde = document.getElementById("fechaNacimientoDesde").value;
+    const hasta = document.getElementById("fechaNacimientoHasta").value;
+    if(!idGranja){ showToastError("Debe seleccionar una granja primero"); return; }
+    if(!desde||!hasta){ showToastError("Debe seleccionar fechas Desde y Hasta"); return; }
+
+    if($.fn.DataTable.isDataTable('#tablaLotes')) $('#tablaLotes').DataTable().destroy();
+    document.getElementById("lotesAves").innerHTML = '';
+
+    fetch("index.php?opt=lotesAves&ajax=getLotes&idGranja="+idGranja+"&desde="+desde+"&hasta="+hasta)
+    .then(res=>res.json())
+    .then(data=>{
+        data.forEach(function(l){
+            const row = "<tr class='table-light'>"
+                + "<td>"+l.idLote+"</td>"
+                + "<td>"+l.fechaNacimiento+"</td>"
+                + "<td>"+l.fechaCompra+"</td>"
+                + "<td>"+l.tipoAve+"</td>"
+                + "<td>"+l.cantidad+"</td>"
+                + "<td>"+l.galpon+"</td>"
+                + "<td><button class='btn btn-danger btn-sm' onclick='eliminarLote("+l.idLote+")'>Borrar</button></td>"
+                + "</tr>";
+            document.getElementById("lotesAves").insertAdjacentHTML("beforeend", row);
+        });
+        $('#tablaLotes').DataTable();
+    })
+    .catch(err=>{ console.error("Error:", err); $('#tablaLotes').DataTable(); });
+});
+
+// === Eliminar lote ===
+function eliminarLote(idLote){
+    fetch("index.php?opt=lotesAves&ajax=delLote&idLote="+idLote)
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.success){ document.getElementById("btnFiltrar").click(); showToastOkay(data.msg); }
+        else{ showToastError(data.msg); }
+    })
+    .catch(err=>{ console.error("Error:",err); showToastError("Error desconocido"); });
+}
+
+// === Reporte imprimible ===
+document.getElementById("btnReporte").addEventListener("click", function(){
+    const desde=document.getElementById("fechaNacimientoDesde").value;
+    const hasta=document.getElementById("fechaNacimientoHasta").value;
+    const granjaNombre=document.querySelector("#selectGranja option:checked").text;
+    if(!desde||!hasta){ showToastError("Debe seleccionar fechas Desde y Hasta"); return; }
+
+    let rows="";
+    document.querySelectorAll("#lotesAves tr").forEach(function(tr){
+        const tds=tr.querySelectorAll("td");
+        rows += "<tr>"
+            + "<td>"+tds[0].innerText+"</td>"
+            + "<td>"+tds[1].innerText+"</td>"
+            + "<td>"+tds[2].innerText+"</td>"
+            + "<td>"+tds[3].innerText+"</td>"
+            + "<td>"+tds[4].innerText+"</td>"
+            + "<td>"+tds[5].innerText+"</td>"
+            + "</tr>";
+    });
+
+    const reporte = "<html>"
+        + "<head>"
+        + "<title>Reporte Lotes de Aves</title>"
+        + "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>"
+        + "<style>body{padding:20px;} h2,h4{text-align:center;margin-bottom:20px;} table{width:100%;border-collapse:collapse;margin-top:20px;} th,td{border:1px solid #000;padding:8px;text-align:left;}</style>"
+        + "</head>"
+        + "<body>"
+        + "<h2>"+granjaNombre+"</h2>"
+        + "<h4>Listado de Lotes de Aves</h4>"
+        + "<p><strong>Desde:</strong> "+desde+" &nbsp;&nbsp; <strong>Hasta:</strong> "+hasta+"</p>"
+        + "<table><thead><tr><th>ID</th><th>Fecha Nacimiento</th><th>Fecha Compra</th><th>Tipo Ave</th><th>Cantidad</th><th>Galpón</th></tr></thead><tbody>"
+        + rows
+        + "</tbody></table>"
+        + "</body></html>";
+
+    const ventana=window.open("","_blank");
+    ventana.document.write(reporte);
+    ventana.document.close();
+    ventana.print();
+});
+
+// === Inicialización ===
+window.addEventListener("load", function(){
+    cargarSelectGranja();
+    cargarTablaTipoAve();
+    const fechaHasta = new Date();
+    const fechaDesde = new Date(); fechaDesde.setMonth(fechaHasta.getMonth()-1);
+    function formatDate(d){ return d.toISOString().split("T")[0]; }
+    document.getElementById("fechaNacimientoDesde").value = formatDate(fechaDesde);
+    document.getElementById("fechaNacimientoHasta").value = formatDate(fechaHasta);
+    $('#tablaLotes').DataTable();
+});
+
+</script>
+HTML;
