@@ -250,7 +250,7 @@ class mantenimientoGranja{
         }
     }
 
-    public function getMantGranjas($idGranja)
+    public function getMantGranjas($idGranja, $desde, $hasta)
     {
         try {
             if ($this->mysqli === null) {
@@ -259,32 +259,38 @@ class mantenimientoGranja{
             if (!is_numeric($idGranja)) {
                 throw new RuntimeException('El ID de la granja debe ser un número.');
             }
-            // Preparar la consulta
-            $sql = "SELECT mantenimientoGranja.idMantenimientoGranja, mantenimientoGranja.fecha, mantenimientoGranja.idGranja,
-                mantenimientoGranja.idTipoMantenimiento, tipoMantenimiento.nombre 
-                FROM mantenimientoGranja 
-                INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGranja.idTipoMantenimiento)
-                WHERE mantenimientoGranja.idGranja = ?";
+            // Validar fechas
+            $fechaDesde = DateTime::createFromFormat('Y-m-d', $desde);
+            $fechaHasta = DateTime::createFromFormat('Y-m-d', $hasta);
+            if (!$fechaDesde || !$fechaHasta) {
+                throw new RuntimeException('Formato de fecha inválido. Se espera YYYY-MM-DD.');
+            }
+            // Preparar la consulta con rango de fechas
+            $sql = "SELECT mg.idMantenimientoGranja, mg.fecha, mg.idGranja, mg.idTipoMantenimiento, tm.nombre
+                    FROM mantenimientoGranja mg
+                    INNER JOIN tipoMantenimiento tm ON tm.idTipoMantenimiento = mg.idTipoMantenimiento
+                    WHERE mg.idGranja = ?
+                    AND DATE(mg.fecha) BETWEEN ? AND ?
+                    ORDER BY mg.fecha ASC";
+
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
             }
-            // Enlazar el parámetro y ejecutar la consulta
-            $stmt->bind_param('i', $idGranja);
+            // Pasar parámetros (idGranja: int, fechas: string)
+            $desdeStr = $fechaDesde->format('Y-m-d');
+            $hastaStr = $fechaHasta->format('Y-m-d');
+            $stmt->bind_param('iss', $idGranja, $desdeStr, $hastaStr);
             if (!$stmt->execute()) {
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
-            // Obtener el resultado de la consulta
             $result = $stmt->get_result();
             if ($result === false) {
-                //Se activa con error, del SQL. Si 0 columnas, sigue sin error.
                 throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);
             }
-            $data = []; // Array para almacenar los datos
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $data[] = $row;
-                }
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
             }
             $stmt->close();
             return $data;
@@ -423,7 +429,7 @@ class mantenimientoGalpon{
         }
     }
 
-    public function getMantGalpon($idGalpon)
+    public function getMantGalpon($idGalpon, $desde, $hasta)
     {
         try {
             if ($this->mysqli === null) {
@@ -432,31 +438,38 @@ class mantenimientoGalpon{
             if (!is_numeric($idGalpon)) {
                 throw new RuntimeException('El ID del galpón debe ser un número.');
             }
-            // Preparar la consulta
-            $sql = "SELECT mantenimientoGalpon.idMantenimientoGalpon, mantenimientoGalpon.fecha, mantenimientoGalpon.idGalpon,
-                    mantenimientoGalpon.idTipoMantenimiento, tipoMantenimiento.nombre FROM mantenimientoGalpon 
-                    INNER JOIN tipoMantenimiento ON (tipoMantenimiento.idTipoMantenimiento = mantenimientoGalpon.idTipoMantenimiento)
-                    WHERE mantenimientoGalpon.idGalpon= ?";
+            // Validar fechas
+            $fechaDesde = DateTime::createFromFormat('Y-m-d', $desde);
+            $fechaHasta = DateTime::createFromFormat('Y-m-d', $hasta);
+            if (!$fechaDesde || !$fechaHasta) {
+                throw new RuntimeException('Formato de fecha inválido. Se espera YYYY-MM-DD.');
+            }
+            // Preparar la consulta con rango de fechas
+            $sql = "SELECT mg.idMantenimientoGalpon, mg.fecha, mg.idGalpon, mg.idTipoMantenimiento, tm.nombre
+                    FROM mantenimientoGalpon mg
+                    INNER JOIN tipoMantenimiento tm ON tm.idTipoMantenimiento = mg.idTipoMantenimiento
+                    WHERE mg.idGalpon = ?
+                    AND DATE(mg.fecha) BETWEEN ? AND ?
+                    ORDER BY mg.fecha ASC";
+
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
             }
-            // Enlazar el parámetro y ejecutar la consulta
-            $stmt->bind_param('i', $idGalpon);
+            // Pasar parámetros (idGranja: int, fechas: string)
+            $desdeStr = $fechaDesde->format('Y-m-d');
+            $hastaStr = $fechaHasta->format('Y-m-d');
+            $stmt->bind_param('iss', $idGalpon, $desdeStr, $hastaStr);
             if (!$stmt->execute()) {
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
-            // Obtener el resultado de la consulta
             $result = $stmt->get_result();
             if ($result === false) {
-                //Se activa con error, del SQL. Si 0 columnas, sigue sin error.
                 throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);
             }
-            $data = []; // Array para almacenar los datos
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $data[] = $row;
-                }
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
             }
             $stmt->close();
             return $data;

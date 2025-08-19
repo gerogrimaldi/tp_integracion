@@ -141,8 +141,13 @@ if (isset($_GET['ajax']))
                     echo json_encode(['msg' => 'Error: no se ha seleccionado una granja.']);
                     exit();
                 }
+                If (!isset($_GET['desde']) || $_GET['desde'] === '' || !isset($_GET['hasta']) || $_GET['hasta'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: rango de fechas no válido.']);
+                    exit();
+                }
                 $oMantenimientoGranja = new MantenimientoGranja();
-                if ($mantGranjas = $oMantenimientoGranja->getMantGranjas($_GET['idGranja'])) {
+                if ($mantGranjas = $oMantenimientoGranja->getMantGranjas($_GET['idGranja'], $_GET['desde'], $_GET['hasta'])){
                     http_response_code(200);
                     echo json_encode($mantGranjas);
                 }else{
@@ -206,7 +211,7 @@ if (isset($_GET['ajax']))
             }
             exit();
         break;
-
+        
         case 'getMantGalpon':
             header('Content-Type: application/json');
             try {
@@ -216,8 +221,13 @@ if (isset($_GET['ajax']))
                     echo json_encode(['msg' => 'Error: no se ha seleccionado un galpón.']);
                     exit();
                 }
+                If (!isset($_GET['desde']) || $_GET['desde'] === '' || !isset($_GET['hasta']) || $_GET['hasta'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: rango de fechas no válido.']);
+                    exit();
+                }
                 $oMantenimientoGalpon = new mantenimientoGalpon();
-                if ($mantGalpon = $oMantenimientoGalpon->getMantGalpon($_GET['idGalpon'])) {
+                if ($mantGalpon = $oMantenimientoGalpon->getMantGalpon($_GET['idGalpon'], $_GET['desde'], $_GET['hasta'])) {
                     http_response_code(200);
                     echo json_encode($mantGalpon);
                 }else{

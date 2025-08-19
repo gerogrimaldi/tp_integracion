@@ -585,6 +585,10 @@ window.addEventListener('load', function() {
     //cargarTablaLotesVacuna();
     cargarSelectViaAplicacion('selectViaAplicacion');
     cargarSelectViaAplicacion('editarSelectViaAplicacion')
+    if ($.fn.DataTable.isDataTable('#tablaLotesVacuna')) {
+        $('#tablaLotesVacuna').DataTable().destroy();
+    }
+    $('#tablaLotesVacuna').DataTable();
 });
 </script>
 

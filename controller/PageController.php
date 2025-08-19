@@ -35,15 +35,13 @@ switch ($_GET['opt']) {
 		require_once 'controller/compuestosController.php';
 		require_once 'view/abmCompuestos.php';
 		break;
-			case 'database':
-				require_once 'view/database.php';
-				break;
+	case 'database':
 	case 'granjas':
 	case 'galpones':
 	case 'mantenimientos':
 	case 'vacunas':
 	case 'home':
-
+	case 'mantenimientosGalpones':
 	case 'usuarios':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
@@ -80,7 +78,11 @@ switch ($_GET['opt']) {
 				break;
 			case 'mantenimientos':
 				require_once 'controller/mantenimientosController.php';
-				require_once 'view/abmMantenimientos.php';
+				require_once 'view/abmMantenimientosGranjas.php';
+				break;
+			case 'mantenimientosGalpones':
+				require_once 'controller/mantenimientosController.php';
+				require_once 'view/abmMantenimientosGalpones.php';
 				break;
 			case 'vacunas':
 				require_once 'controller/vacunasController.php';
@@ -98,6 +100,9 @@ switch ($_GET['opt']) {
 					$error = '403';
 					require_once 'view/error.php';
 				}
+				break;
+			case 'database':
+				require_once 'view/database.php';
 				break;
 		}
 		break;

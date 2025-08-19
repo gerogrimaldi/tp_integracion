@@ -11,4 +11,4 @@ define('RECAPTCHA_ENABLED', false);
 
 define('EMPRESA_NOMBRE', 'Avícola María Clara');
 
-
+define('TEST', 'true'); // Activar entorno de pruebas (true/false)

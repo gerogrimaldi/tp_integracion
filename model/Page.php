@@ -55,16 +55,66 @@ private function setMenu($_menu = ""){
             $userDropdown = '';
             if ($isLogged) {
                 $navItems = '
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=granjas">Granjas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=galpones">Galpones</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=mantenimientos">Mantenimientos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=vacunas">Vacunas</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=compuestos">Compuestos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=usuarios">Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=database">Configuración</a></li>
-                    <li class="nav-item"><a class="nav-link" href="index.php?opt=test">Test</a></li>
+                    <!-- Menú desplegable de Granjas -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="granjasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Granjas
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="granjasDropdown">
+                            <li><a class="dropdown-item" href="index.php?opt=granjas">Gestionar Granjas</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=mantenimientos">Mantenimientos Granjas</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable de Galpones -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="galponesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Galpones
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="galponesDropdown">
+                            <li><a class="dropdown-item" href="index.php?opt=galpones">Gestionar Galpones</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=mantenimientosGalpones">Mantenimientos Galpones</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable de Compras -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="comprasDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Compras
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="comprasDropdown">
+                            <li><a class="dropdown-item" href="index.php?opt=vacunas">Vacunas</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=compuestos">Compuestos</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable de Aves -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="avesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Aves
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="avesDropdown">
+                            <li><a class="dropdown-item" href="index.php?opt=lotes">Gestionar Lotes</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=cargarMortandad">Cargar Mortandad</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=cargarPesaje">Cargar Pesaje</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=aplicarVacunas">Aplicar Vacunas</a></li>
+                        </ul>
+                    </li>
+
+                    <!-- Menú desplegable de Configuración -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Configuración
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="configDropdown">
+                            <li><a class="dropdown-item" href="index.php?opt=database">Base de datos</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=usuarios">Usuarios</a></li>
+                            __TESTMENU__
+                        </ul>
+                    </li>
                 ';
-                $userName = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Usuario';
+                $userName = isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'Usuario no disponible';
+                $userEmail = isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : 'Correo no disponible';
                 $userDropdown = '
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item dropdown">
@@ -72,7 +122,9 @@ private function setMenu($_menu = ""){
                                 <i class="bi bi-person-circle me-1"></i> ' . $userName . '
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><span class="dropdown-item-text fw-bold"><i class="bi bi-person me-1"></i>Ha iniciado sesión como ' . $userName . '</span></li>
+                                <li><span class="dropdown-item-text fw-bold"><i class="bi bi-person me-1"></i>
+                                    Ha iniciado sesión como ' . $userName . ' ('. $userEmail .')
+                                </span></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="#" id="logoutBtn"><i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión</a></li>
                             </ul>
@@ -102,6 +154,11 @@ private function setMenu($_menu = ""){
                         }
                     });
                     </script>';
+                    if (TEST === 'true') {
+                        $navItems = str_replace('__TESTMENU__', '<li><a class="dropdown-item" href="index.php?opt=test">Test</a></li>', $navItems);
+                    } else {
+                        $navItems = str_replace('__TESTMENU__', '', $navItems);
+                    }
             } else {
                 $navItems = '
                     <li class="nav-item"><a class="nav-link" href="index.php">Inicio</a></li>

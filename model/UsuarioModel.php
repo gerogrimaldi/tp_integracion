@@ -384,6 +384,7 @@ public function deleteUsuarioPorId($idUsuario)
         $_SESSION['token'] = bin2hex(random_bytes(32)); // Genera un token de sesión seguro
         $_SESSION['tipoUsuario'] = $this->tipoUsuario;
         $_SESSION['user_name'] = $this->nombre;
+        $_SESSION['user_email'] = $this->email;
         // Inserción del token en el usuario, para validaciones
         $sql = "UPDATE usuarios SET user_token = ?, user_token_expir = DATE_ADD(NOW(), INTERVAL 12 HOUR) WHERE idUsuario = ?"; 
         $stmt = $this->mysqli->prepare($sql);
