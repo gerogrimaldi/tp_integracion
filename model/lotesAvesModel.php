@@ -401,32 +401,61 @@ class LoteAves{
         }
     }
 
-    public function getAll()
+    public function getAll($idGranja, $desde, $hasta)
+    //Getall seria muy bestia. Se aplicaron 3 filtros básicos. 
+    //Se podría aplicar filtro por galpón, pero en la datatable
+    //con escribirse el nombre del galpon basta para filtrar por eso.
     {
         try {
             if ($this->mysqli === null) { 
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            $sql = "SELECT l.idLoteAves, l.identificador, l.fechaNacimiento, l.fechaCompra, 
-                        l.cantidadAves, l.idTipoAve, t.nombre AS tipoAveNombre
+
+            $sql = "SELECT 
+                        l.idLoteAves,
+                        l.identificador,
+                        l.fechaNacimiento,
+                        l.fechaCompra,
+                        l.cantidadAves,
+                        t.nombre AS tipoAveNombre,
+                        g.idGalpon,
+                        g.identificacion AS galponIdentificacion,
+                        gr.idGranja,
+                        gr.nombre AS granjaNombre
                     FROM loteAves l
-                INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
-                ORDER BY l.idLoteAves ASC";
-            $result = $this->mysqli->query($sql);
-            if ($result === false) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $this->mysqli->error);
+                    INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                    INNER JOIN galpon_loteAves gl ON l.idLoteAves = gl.idLoteAves
+                    INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                    INNER JOIN granja gr ON g.idGranja = gr.idGranja
+                    WHERE gr.idGranja = ?
+                    AND l.fechaNacimiento BETWEEN ? AND ?
+                    ORDER BY l.idLoteAves ASC";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
             }
+
+            $stmt->bind_param('iss', $idGranja, $desde, $hasta);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
             $data = [];
-            if ($result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $data[] = $row;
-                }
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
             }
+
+            $stmt->close();
             return $data;
+
         } catch (RuntimeException $e) {
             throw $e;
         }
     }
+
 
     public function getById($idLoteAves)
     {
@@ -434,32 +463,46 @@ class LoteAves{
             if ($this->mysqli === null) { 
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            if (!is_numeric($idLoteAves) || $idLoteAves <= 0) {
-                throw new RuntimeException('El ID debe ser un número válido.');
-            }
-            $sql = "SELECT l.idLoteAves, l.identificador, l.fechaNacimiento, l.fechaCompra, 
-                        l.cantidadAves, l.idTipoAve, t.nombre AS tipoAveNombre
+            $sql = "SELECT 
+                        l.idLoteAves,
+                        l.identificador,
+                        l.fechaNacimiento,
+                        l.fechaCompra,
+                        l.cantidadAves,
+                        t.nombre AS tipoAveNombre,
+                        g.idGalpon,
+                        g.identificacion AS galponIdentificacion,
+                        gr.idGranja,
+                        gr.nombre AS granjaNombre
                     FROM loteAves l
-                INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                    INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                    INNER JOIN galpon_loteAves gl ON l.idLoteAves = gl.idLoteAves
+                    INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                    INNER JOIN granja gr ON g.idGranja = gr.idGranja
                     WHERE l.idLoteAves = ?";
+
             $stmt = $this->mysqli->prepare($sql);
-            if (!$stmt) {
-                throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
             }
-            $stmt->bind_param("i", $idLoteAves);
+
+            $stmt->bind_param('i', $idLoteAves);
+
             if (!$stmt->execute()) {
-                throw new RuntimeException("Error al ejecutar la consulta: " . $stmt->error);
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
+
             $result = $stmt->get_result();
-            if ($result === false) {
-                throw new RuntimeException("Error al obtener el resultado: " . $this->mysqli->error);
-            }
             $data = $result->fetch_assoc();
+            
             $stmt->close();
+            
             if (!$data) {
                 throw new RuntimeException("No se encontró un lote de aves con el ID especificado.");
             }
+            
             return $data;
+
         } catch (RuntimeException $e) {
             throw $e;
         }

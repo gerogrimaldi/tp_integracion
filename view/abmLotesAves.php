@@ -265,7 +265,7 @@ $body .= <<<HTML
     <table id="tablaLotes" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
-                <th class="text-primary">ID</th>
+                <th class="text-primary">Identificador</th>
                 <th class="text-primary">Fecha Nacimiento</th>
                 <th class="text-primary">Fecha Compra</th>
                 <th class="text-primary">Tipo de Ave</th>
@@ -288,6 +288,11 @@ $body .= <<<HTML
             </div>
             <div class="modal-body">
                 <form id="newLoteAvesForm" class="needs-validation" novalidate>
+                    <div class="mb-4">
+                        <label for="identificador" class="form-label">Identificador</label>
+                        <input type="text" class="form-control" id="identificador" name="identificador" required>
+                        <div class="invalid-feedback">Ingrese un identificador válido.</div>
+                    </div>
                     <div class="mb-4">
                         <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
                         <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
@@ -323,7 +328,58 @@ $body .= <<<HTML
         </div>
     </div>
 </div>
+<!-- Modal Editar Lote de Aves -->
+<div class="modal fade" id="editLoteAves" tabindex="-1" aria-labelledby="editLoteAvesModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editLoteAvesModal">Editar Lote de Aves</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editLoteAvesForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="editIdLote" name="idLoteAves">
 
+                    <div class="mb-4">
+                        <label for="editIdentificador" class="form-label">Identificador</label>
+                        <input type="text" class="form-control" id="editIdentificador" name="identificador" required>
+                        <div class="invalid-feedback">Ingrese un identificador válido.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento</label>
+                        <input type="date" class="form-control" id="editFechaNacimiento" name="fechaNacimiento" required>
+                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editFechaCompra" class="form-label">Fecha de Compra</label>
+                        <input type="date" class="form-control" id="editFechaCompra" name="fechaCompra" required>
+                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editSelectTipoAve" class="form-label">Tipo de Ave</label>
+                        <select id="editSelectTipoAve" name="tipoAve" class="form-control" required></select>
+                        <div class="invalid-feedback">Seleccione un tipo de ave válido.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editSelectGalpon" class="form-label">Galpón</label>
+                        <select id="editSelectGalpon" name="galpon" class="form-control" required></select>
+                        <div class="invalid-feedback">Seleccione un galpón válido.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editCantidad" class="form-label">Cantidad de Aves</label>
+                        <input type="number" class="form-control" id="editCantidad" name="cantidad" required>
+                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                    </div>
+                    <input type="hidden" id="editIdGranja" name="idGranja">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="btnGuardarCambios">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
 // === Cargar granjas ===
 function cargarSelectGranja() {
@@ -337,30 +393,34 @@ function cargarSelectGranja() {
 
 // === Cargar tipos de ave ===
 function cargarSelectTipoAve() {
-    const selectTipo = document.getElementById('selectTipoAve'); selectTipo.innerHTML = '';
-    fetch('index.php?opt=lotesAves&ajax=getTipoAve')
+    return fetch("index.php?opt=lotesAves&ajax=getTipoAve")
         .then(res => res.json())
-        .then(data => data.forEach(t => { const opt=document.createElement('option'); opt.value=t.idTipoAve; opt.text=t.nombre; selectTipo.appendChild(opt); }))
-        .catch(err => { console.error('Error al cargar tipos de ave:', err); showToastError('Error al cargar tipos de ave'); });
+        .then(data => {
+            let select = document.getElementById('editSelectTipoAve');
+            select.innerHTML = "";
+            data.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item.idTipoAve;
+                opt.textContent = item.nombre;
+                select.appendChild(opt);
+            });
+        });
 }
-
 // === Cargar galpones según granja ===
 function cargarSelectGalpon(idGranja) {
-    const selectGalpon = document.getElementById('selectGalpon');
-    selectGalpon.innerHTML = '';
-    if(!idGranja) return;
-
-    fetch('index.php?opt=galpones&ajax=getGalponesGranja&idGranja=' + idGranja)
+    return fetch("index.php?opt=galpones&ajax=getGalponesGranja&idGranja="+idGranja)
         .then(res => res.json())
-        .then(data => data.forEach(g => {
-            const opt = document.createElement('option');
-            opt.value = g.idGalpon;
-            opt.text = g.identificacion;
-            selectGalpon.appendChild(opt);
-        }))
-        .catch(err => { console.error('Error al cargar galpones:', err); showToastError('Error al cargar galpones'); });
+        .then(data => {
+            let select = document.getElementById('editSelectGalpon');
+            select.innerHTML = "";
+            data.forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = item.idGalpon;
+                opt.textContent = item.identificacion + " - " + item.nombre;
+                select.appendChild(opt);
+            });
+        });
 }
-
 
 // === Abrir modal: asignar granja y cargar selects ===
 document.getElementById('newLoteAves').addEventListener('show.bs.modal', function(){
@@ -382,9 +442,8 @@ document.getElementById('newLoteAves').addEventListener('show.bs.modal', functio
 
 
 // === Agregar lote ===
-document.getElementById('btnAgregarLote').addEventListener('click', agregarLote);
-document.getElementById('newLoteAvesForm').addEventListener('submit', function(e){ e.preventDefault(); agregarLote(); });
 function agregarLote() {
+    const identificador = document.getElementById('identificador').value;
     const fechaNac = document.getElementById('fechaNacimiento').value;
     const fechaCompra = document.getElementById('fechaCompra').value;
     const tipoAve = document.getElementById('selectTipoAve').value;
@@ -393,13 +452,14 @@ function agregarLote() {
     const idGranja = document.getElementById('idGranja').value;
 
     fetch('index.php?opt=lotesAves&ajax=addLoteAves', {
-        method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:'fechaNacimiento='+encodeURIComponent(fechaNac)
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'identificador='+encodeURIComponent(identificador)
+            +'&fechaNac='+encodeURIComponent(fechaNac)
             +'&fechaCompra='+encodeURIComponent(fechaCompra)
-            +'&tipoAve='+encodeURIComponent(tipoAve)
-            +'&galpon='+encodeURIComponent(galpon)
-            +'&cantidad='+encodeURIComponent(cantidad)
-            +'&idGranja='+encodeURIComponent(idGranja)
+            +'&idTipoAve='+encodeURIComponent(tipoAve)
+            +'&idGalpon='+encodeURIComponent(galpon)
+            +'&cantidadAves='+encodeURIComponent(cantidad)
     })
     .then(res=>res.json())
     .then(data=>{
@@ -420,18 +480,21 @@ document.getElementById("btnFiltrar").addEventListener("click", function() {
     if($.fn.DataTable.isDataTable('#tablaLotes')) $('#tablaLotes').DataTable().destroy();
     document.getElementById("lotesAves").innerHTML = '';
 
-    fetch("index.php?opt=lotesAves&ajax=getLotes&idGranja="+idGranja+"&desde="+desde+"&hasta="+hasta)
+    fetch("index.php?opt=lotesAves&ajax=getLotesAves&idGranja="+idGranja+"&desde="+desde+"&hasta="+hasta)
     .then(res=>res.json())
     .then(data=>{
         data.forEach(function(l){
             const row = "<tr class='table-light'>"
-                + "<td>"+l.idLote+"</td>"
+                + "<td>"+l.identificador+"</td>"
                 + "<td>"+l.fechaNacimiento+"</td>"
                 + "<td>"+l.fechaCompra+"</td>"
-                + "<td>"+l.tipoAve+"</td>"
-                + "<td>"+l.cantidad+"</td>"
-                + "<td>"+l.galpon+"</td>"
-                + "<td><button class='btn btn-danger btn-sm' onclick='eliminarLote("+l.idLote+")'>Borrar</button></td>"
+                + "<td>"+l.tipoAveNombre+"</td>"
+                + "<td>"+l.cantidadAves+"</td>"
+                + "<td>"+l.galponIdentificacion+"</td>"
+                + "<td>"
+                    + "<button class='btn btn-warning btn-sm me-1' onclick='editarLote("+l.idLoteAves+")'>Editar</button>"
+                    + "<button class='btn btn-danger btn-sm' onclick='eliminarLote("+l.idLoteAves+")'>Borrar</button>"
+                + "</td>"
                 + "</tr>";
             document.getElementById("lotesAves").insertAdjacentHTML("beforeend", row);
         });
@@ -491,7 +554,68 @@ document.getElementById("btnReporte").addEventListener("click", function(){
     ventana.document.close();
     ventana.print();
 });
+function editarLote(idLote){
+    fetch("index.php?opt=lotesAves&ajax=getLoteAvesById&idLoteAves="+idLote)
+    .then(res=>res.json())
+    .then(async lote=>{
+        // Precargar inputs simples
+        document.getElementById('editIdLote').value = lote.idLoteAves;
+        document.getElementById('editIdentificador').value = lote.identificador;
+        document.getElementById('editFechaNacimiento').value = lote.fechaNacimiento;
+        document.getElementById('editFechaCompra').value = lote.fechaCompra;
+        document.getElementById('editCantidad').value = lote.cantidadAves;
+        document.getElementById('editIdGranja').value = lote.idGranja;
 
+        // Cargar selects y esperar que terminen
+        await cargarSelectTipoAve();
+        await cargarSelectGalpon(lote.idGranja);
+
+        // Ahora sí, setear valores
+        document.getElementById('editSelectTipoAve').value = lote.idTipoAve;
+        document.getElementById('editSelectGalpon').value = lote.idGalpon;
+
+        // Mostrar modal
+        $('#editLoteAves').modal('show');
+    })
+    .catch(err=>{
+        console.error("Error:", err);
+        showToastError("No se pudo cargar el lote");
+    });
+}
+document.getElementById('btnGuardarCambios').addEventListener('click', guardarCambios);
+document.getElementById('editLoteAvesForm').addEventListener('submit', function(e){ e.preventDefault(); guardarCambios(); });
+function guardarCambios(){
+    const idLote = document.getElementById('editIdLote').value;
+    const identificador = document.getElementById('editIdentificador').value;
+    const fechaNac = document.getElementById('editFechaNacimiento').value;
+    const fechaCompra = document.getElementById('editFechaCompra').value;
+    const tipoAve = document.getElementById('editSelectTipoAve').value;
+    const galpon = document.getElementById('editSelectGalpon').value;
+    const cantidad = document.getElementById('editCantidad').value;
+
+    fetch('index.php?opt=lotesAves&ajax=updateLoteAves', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'idLote='+encodeURIComponent(idLote)
+            +'&identificador='+encodeURIComponent(identificador)
+            +'&fechaNac='+encodeURIComponent(fechaNac)
+            +'&fechaCompra='+encodeURIComponent(fechaCompra)
+            +'&idTipoAve='+encodeURIComponent(tipoAve)
+            +'&idGalpon='+encodeURIComponent(galpon)
+            +'&cantidadAves='+encodeURIComponent(cantidad)
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        if(data.success){
+            document.getElementById("btnFiltrar").click();
+            $('#editLoteAves').modal('hide');
+            showToastOkay(data.msg);
+        } else {
+            showToastError(data.msg);
+        }
+    })
+    .catch(err=>{ console.error('Error AJAX:', err); showToastError('Error en la solicitud'); });
+}
 // === Inicialización ===
 window.addEventListener("load", function(){
     cargarSelectGranja();

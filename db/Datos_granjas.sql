@@ -52,3 +52,13 @@ INSERT INTO loteVacuna (idLoteVacuna, numeroLote, fechaCompra, cantidad, vencimi
 (0, '00123-5482', '2025-03-01', '5200', '2028-01-01', '2'),
 (1, '129-2025', '2025-01-25', '3560', '2028-02-01', '1'),
 (2, 'A12025', '2024-09-11','20000', '2028-03-01', '0');
+
+INSERT INTO loteAves (idLoteAves, identificador, fechaNacimiento, fechaCompra, cantidadAves, idTipoAve) VALUES
+(0, 'L001-2025', '2024-12-15', '2025-01-10', 5000, 0), -- Ponedora blanca
+(1, 'L002-2025', '2025-01-01', '2025-01-20', 8000, 1), -- Ponedora Sussex
+(2, 'L003-2025', '2025-02-01', '2025-02-15', 12000, 2); -- Ponedora Roja
+
+INSERT INTO galpon_loteAves (idGalpon_loteAve, idLoteAves, idGalpon, fechaInicio, fechaFin) VALUES
+(0, 0, 0, '2025-01-11', NULL), -- Lote 0 en galpón 001-Frente - granja 1
+(1, 1, 1, '2025-01-21', NULL), -- Lote 1 en galpón 002-Fondo - granja 1
+(2, 2, 2, '2025-02-16', NULL); -- Lote 2 en galpón 003-Medio - granja 1
