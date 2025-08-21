@@ -430,6 +430,7 @@ function cargarSelectTipoAves(select) {
 <!-------------------------------------------------> 
 document.getElementById("editarGalpon").addEventListener("show.bs.modal", function (event) {
     // Botón que activó el modal
+    cargarSelectTipoAves(idTipoAveEditar);
     const button = event.relatedTarget;
     // Extraer datos del atributo data-* del botón que abrió el modal
     const idGalpon = button.getAttribute("data-id");

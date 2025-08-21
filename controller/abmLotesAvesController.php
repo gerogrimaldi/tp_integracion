@@ -172,12 +172,12 @@ if (isset($_GET['ajax']))
         case 'addLoteAves':
             header('Content-Type: application/json');
             try {
-                if (!isset($_GET['identificador']) || $_GET['identificador'] === '' ||
-                    !isset($_GET['fechaNac']) || $_GET['fechaNac'] === '' ||
-                    !isset($_GET['fechaCompra']) || $_GET['fechaCompra'] === '' ||
-                    !isset($_GET['cantidadAves']) || $_GET['cantidadAves'] === '' ||
-                    !isset($_GET['idTipoAve']) || $_GET['idTipoAve'] === '' ||
-                    !isset($_GET['idGalpon']) || $_GET['idGalpon'] === '')
+                if (!isset($_POST['identificador']) || $_POST['identificador'] === '' ||
+                    !isset($_POST['fechaNac']) || $_POST['fechaNac'] === '' ||
+                    !isset($_POST['fechaCompra']) || $_POST['fechaCompra'] === '' ||
+                    !isset($_POST['cantidadAves']) || $_POST['cantidadAves'] === '' ||
+                    !isset($_POST['idTipoAve']) || $_POST['idTipoAve'] === '' ||
+                    !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '')
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -189,13 +189,15 @@ if (isset($_GET['ajax']))
                         $_POST['fechaNac'],
                         $_POST['fechaCompra'],
                         (int)$_POST['cantidadAves'],
-                        (int)$_POST['idTipoAve']
+                        (int)$_POST['idTipoAve'],
+                        (int)$_POST['idGalpon']
                     )) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Lote agregado correctamente']);
                 } 
             } catch (RuntimeException $e) {
                 http_response_code(400);
+                error_log($e);
                 echo json_encode(['msg' => 'Error al añadir.']);
             }
             exit();
@@ -205,12 +207,12 @@ if (isset($_GET['ajax']))
         case 'editLoteAves':
             header('Content-Type: application/json');
             try {
-                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '' ||
-                    !isset($_GET['identificador']) || $_GET['identificador'] === '' ||
-                    !isset($_GET['fechaNac']) || $_GET['fechaNac'] === '' ||
-                    !isset($_GET['fechaCompra']) || $_GET['fechaCompra'] === '' ||
-                    !isset($_GET['cantidadAves']) || $_GET['cantidadAves'] === '' ||
-                    !isset($_GET['idTipoAve']) || $_GET['idTipoAve'] === '')
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['identificador']) || $_POST['identificador'] === '' ||
+                    !isset($_POST['fechaNac']) || $_POST['fechaNac'] === '' ||
+                    !isset($_POST['fechaCompra']) || $_POST['fechaCompra'] === '' ||
+                    !isset($_POST['cantidadAves']) || $_POST['cantidadAves'] === '' ||
+                    !isset($_POST['idTipoAve']) || $_POST['idTipoAve'] === '')
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);

@@ -223,6 +223,7 @@ class LoteAves{
     private $fechaCompra;
     private $cantidadAves;
     private $tipoAves; //Los datos del tipo de aves lo maneja ese objeto. Uso -> para obtenerlos.
+    private $idGalpon_loteAve; // Para manejar la relación con galpon_loteAves
     private $mysqli;
 
     public function __construct()
@@ -276,23 +277,33 @@ class LoteAves{
             throw $e;
         }
     }
-    public function agregarNuevo($identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve)
+
+    public function setMaxIDGalponLoteAve()
+    {
+        $result = $this->mysqli->query("SELECT MAX(idGalpon_loteAve) AS maxID FROM galpon_loteAves");
+        $row = $result->fetch_assoc();
+        $this->idGalpon_loteAve = ($row['maxID'] !== null) ? $row['maxID'] + 1 : 1;
+    }
+    
+    public function agregarNuevo($identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve, $idGalpon)
     {
         $this->setIdentificador($identificador);
         $this->setFechaNac($fechaNac);
         $this->setFechaCompra($fechaCompra);
         $this->setCantAves($cantidadAves);
         $this->setIdTipoAve($idTipoAve);
-        $this->setMaxID();
+        $this->setMaxID(); 
+        $this->setMaxIDGalponLoteAve(); // <- Nuevo
 
         try {
-            if ($this->mysqli === null) {throw new RuntimeException('La conexión a la base de datos no está inicializada.');}
-            // === Verificación previa: evitar duplicados por identificador ===
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            // === Verificación duplicados ===
             $sqlCheck = "SELECT idLoteAves FROM loteAves WHERE identificador = ?";
             $stmtCheck = $this->mysqli->prepare($sqlCheck);
-            if (!$stmtCheck) {
-                throw new RuntimeException("Error en la preparación de la consulta de verificación: " . $this->mysqli->error);
-            }
+            if (!$stmtCheck) throw new RuntimeException("Error en la preparación de verificación: " . $this->mysqli->error);
             $stmtCheck->bind_param("s", $this->identificador);
             $stmtCheck->execute();
             $stmtCheck->store_result();
@@ -301,26 +312,24 @@ class LoteAves{
                 throw new RuntimeException("Error: ya existe un lote con identificador '{$this->identificador}'.");
             }
             $stmtCheck->close();
+
             // === Inserción del nuevo lote ===
             $sql = "INSERT INTO loteAves (idLoteAves, identificador, fechaNacimiento, fechaCompra, cantidadAves, idTipoAve)
                     VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($sql);
-            if (!$stmt) {
-                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-            }
-            $stmt->bind_param(
-                "isssii",
-                $this->idLoteAves,
-                $this->identificador,
-                $this->fechaNacimiento,
-                $this->fechaCompra,
-                $this->cantidadAves,
-                $this->idTipoAve
-            );
-            if (!$stmt->execute()) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-            }
+            if (!$stmt) throw new RuntimeException("Error en la preparación de inserción: " . $this->mysqli->error);
+            $stmt->bind_param("isssii", $this->idLoteAves, $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve);
+            if (!$stmt->execute()) throw new RuntimeException('Error al ejecutar la inserción: ' . $stmt->error);
             $stmt->close();
+
+            // === Inserción en galpon_loteAves con fecha de compra ===
+            $sqlGalpon = "INSERT INTO galpon_loteAves (idGalpon_loteAve, idLoteAves, idGalpon, fechaInicio) VALUES (?, ?, ?, ?)";
+            $stmtGalpon = $this->mysqli->prepare($sqlGalpon);
+            if (!$stmtGalpon) throw new RuntimeException("Error en preparación de galpon_loteAves: " . $this->mysqli->error);
+            $stmtGalpon->bind_param("iiis", $this->idGalpon_loteAve, $this->idLoteAves, $idGalpon, $this->fechaCompra);
+            if (!$stmtGalpon->execute()) throw new RuntimeException('Error al insertar en galpon_loteAves: ' . $stmtGalpon->error);
+            $stmtGalpon->close();
+
             return true;
 
         } catch (RuntimeException $e) {
@@ -339,29 +348,72 @@ class LoteAves{
             }
             $this->setIdLoteAves($idLoteAves);
 
+            // Verificar registros en galpon_loteAves
+            $sql = "SELECT COUNT(*) AS cnt, idGalpon_loteAve FROM galpon_loteAves WHERE idLoteAves = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) throw new RuntimeException('Error al preparar consulta de galpon_loteAves: ' . $this->mysqli->error);
+            $stmt->bind_param("i", $this->idLoteAves);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $galpones = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
+
+            if (count($galpones) > 1) {
+                throw new RuntimeException('No se puede eliminar: el lote tiene más de un galpón asociado.');
+            }
+
+            // Verificar registros en otras tablas asociadas
+            $tablas = ['mortandadAves', 'pesajeLoteAves', 'ventaLoteAves'];
+            foreach ($tablas as $tabla) {
+                $sql = "SELECT COUNT(*) AS cnt FROM $tabla WHERE idLoteAves = ?";
+                $stmt = $this->mysqli->prepare($sql);
+                if (!$stmt) throw new RuntimeException("Error al preparar consulta en $tabla: " . $this->mysqli->error);
+                $stmt->bind_param("i", $this->idLoteAves);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                $stmt->close();
+
+                if ($row['cnt'] > 0) {
+                    throw new RuntimeException("No se puede eliminar: hay registros en $tabla.");
+                }
+            }
+
+            // Eliminar registro único en galpon_loteAves
+            if (count($galpones) === 1) {
+                $idGalpon_loteAve = $galpones[0]['idGalpon_loteAve'];
+                $sql = "DELETE FROM galpon_loteAves WHERE idGalpon_loteAve = ?";
+                $stmt = $this->mysqli->prepare($sql);
+                if (!$stmt) throw new RuntimeException('Error al preparar la eliminación de galpon_loteAves: ' . $this->mysqli->error);
+                $stmt->bind_param("i", $idGalpon_loteAve);
+                if (!$stmt->execute()) {
+                    throw new RuntimeException('Error al eliminar el registro de galpon_loteAves: ' . $stmt->error);
+                }
+                $stmt->close();
+            }
+
+            // Eliminar el lote
             $sql = "DELETE FROM loteAves WHERE idLoteAves = ?";
             $stmt = $this->mysqli->prepare($sql);
-            if ($stmt === false) {
-                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
-            }
+            if (!$stmt) throw new RuntimeException('Error al preparar la consulta de eliminación del lote: ' . $this->mysqli->error);
             $stmt->bind_param('i', $this->idLoteAves);
             if (!$stmt->execute()) {
-                if ($this->mysqli->errno == 1451) {
-                    throw new RuntimeException('El lote de aves tiene registros asociados.');
-                } else {
-                    throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
-                }
+                throw new RuntimeException('Error al ejecutar la eliminación del lote: ' . $stmt->error);
             }
             $affectedRows = $stmt->affected_rows;
             $stmt->close();
+
             if ($affectedRows === 0) {
-                error_log('No se encontró el lote de aves con el ID especificado: ' . $this->idLoteAves);
+                throw new RuntimeException('No se encontró el lote de aves con el ID especificado.');
             }
+
             return true;
+
         } catch (RuntimeException $e) {
             throw $e;
         }
     }
+
 
     public function updateLoteAves($idLoteAves, $identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve)
     {
@@ -424,7 +476,8 @@ class LoteAves{
                         gr.nombre AS granjaNombre
                     FROM loteAves l
                     INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
-                    INNER JOIN galpon_loteAves gl ON l.idLoteAves = gl.idLoteAves
+                    INNER JOIN galpon_loteAves gl 
+                        ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
                     INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
                     INNER JOIN granja gr ON g.idGranja = gr.idGranja
                     WHERE gr.idGranja = ?
@@ -476,7 +529,8 @@ class LoteAves{
                         gr.nombre AS granjaNombre
                     FROM loteAves l
                     INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
-                    INNER JOIN galpon_loteAves gl ON l.idLoteAves = gl.idLoteAves
+                    INNER JOIN galpon_loteAves gl 
+                        ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
                     INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
                     INNER JOIN granja gr ON g.idGranja = gr.idGranja
                     WHERE l.idLoteAves = ?";
