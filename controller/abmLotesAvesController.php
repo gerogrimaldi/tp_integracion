@@ -110,6 +110,25 @@ if (isset($_GET['ajax']))
                 }
             try {
                 $oLotes = new LoteAves();
+                $lotes = $oLotes->getAllFiltro($_GET['idGranja'], $_GET['desde'], $_GET['hasta']);
+                if ($lotes) {
+                    http_response_code(200);
+                    echo json_encode($lotes);
+                } else {
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+
+        case 'getAllLotesAves':
+            header('Content-Type: application/json');
+            //index.php?opt=lotesAves&ajax=getAllLotesAves
+            try {
+                $oLotes = new LoteAves();
                 $lotes = $oLotes->getAll($_GET['idGranja'], $_GET['desde'], $_GET['hasta']);
                 if ($lotes) {
                     http_response_code(200);
@@ -123,6 +142,7 @@ if (isset($_GET['ajax']))
                 echo json_encode(['msg' => $e->getMessage()]);
             }
             exit();
+
 
         // === Obtener un lote por ID ===
         case 'getLoteAvesById':
@@ -147,6 +167,9 @@ if (isset($_GET['ajax']))
         break;
 
         // === Eliminar un lote ===
+        //Solo se puede eliminar un lote si este tiene un solo galpón asociados,
+        //caso de tener más registros o de alguna otra cosa, dará error.
+        //de ser necesario se implementará el "activo" por ejemplo al vender un lote.
         case 'delLoteAves': 
             header('Content-Type: application/json');
             try {
@@ -233,6 +256,91 @@ if (isset($_GET['ajax']))
             } catch (RuntimeException $e) {
                 http_response_code(400);
                 echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
+    // ------------------------------------
+    // AJAX - LOTE DE AVES - MORTANDAD
+    // ------------------------------------
+        case 'addMuertes':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['fecha']) || $_POST['fecha'] === '' ||
+                    !isset($_POST['causa']) || $_POST['causa'] === '' ||
+                    !isset($_POST['cantidad']) || $_POST['cantidad'] === '')
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->agregarMortandad(
+                        (int)$_POST['idLoteAves'],
+                        $_POST['fecha'],
+                        $_POST['causa'],
+                        (int)$_POST['cantidad']
+                    )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Registro cargado correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                error_log($e);
+                echo json_encode(['msg' => 'Error al añadir.']);
+            }
+            exit();
+        break;
+
+        case 'editMuertes':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['fecha']) || $_POST['fecha'] === '' ||
+                    !isset($_POST['causa']) || $_POST['causa'] === '' ||
+                    !isset($_POST['cantidad']) || $_POST['cantidad'] === '')
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->editarMortandad(
+                        (int)$_POST['idLoteAves'],
+                        $_POST['fecha'],
+                        $_POST['causa'],
+                        (int)$_POST['cantidad']
+                )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
+
+        case 'getMuertes':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: lote no seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                $lotes = $oLotes->getMortandad((int)$_GET['idLoteAves']);
+                if ($lotes){
+                    http_response_code(200);
+                    echo json_encode($lote);
+                }else {
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
             }
             exit();
         break;

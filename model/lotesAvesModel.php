@@ -453,8 +453,8 @@ class LoteAves{
         }
     }
 
-    public function getAll($idGranja, $desde, $hasta)
-    //Getall seria muy bestia. Se aplicaron 3 filtros básicos. 
+    public function getAllFiltro($idGranja, $desde, $hasta)
+    //Getall seria muy bestia para el ABM. Se aplicaron 3 filtros básicos. 
     //Se podría aplicar filtro por galpón, pero en la datatable
     //con escribirse el nombre del galpon basta para filtrar por eso.
     {
@@ -509,6 +509,49 @@ class LoteAves{
         }
     }
 
+    public function getAll()
+    //Getall para el select de los registros sobre lotes como mortandad, vacunas, movimientos de galpones.
+    {
+        try {
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT 
+                        l.idLoteAves,
+                        l.identificador,
+                        l.fechaNacimiento,
+                        l.fechaCompra,
+                        l.cantidadAves,
+                        t.nombre AS tipoAveNombre,
+                        g.idGalpon,
+                        g.identificacion AS galponIdentificacion,
+                        gr.idGranja,
+                        gr.nombre AS granjaNombre
+                    FROM loteAves l
+                    INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                    INNER JOIN galpon_loteAves gl 
+                        ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
+                    INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                    INNER JOIN granja gr ON g.idGranja = gr.idGranja
+                    ORDER BY l.idLoteAves ASC";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
 
     public function getById($idLoteAves)
     {
@@ -561,5 +604,103 @@ class LoteAves{
             throw $e;
         }
     }
+
+    // ============================
+    // MORTANDAD AVES
+    // ============================
+    public function agregarMortandad(int $idLoteAves, string $fecha, string $causa, int $cantidad): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "INSERT INTO mortandadAves (fecha, causa, cantidad, idLoteAves)
+                    VALUES (?, ?, ?, ?)";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('ssii', $fecha, $causa, $cantidad, $idLoteAves);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function editarMortandad(int $idMortandad, string $fecha, string $causa, int $cantidad): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "UPDATE mortandadAves
+                    SET fecha = ?, causa = ?, cantidad = ?
+                    WHERE idMortandad = ?";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('ssii', $fecha, $causa, $cantidad, $idMortandad);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function getMortandad(int $idLoteAves): array
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "SELECT idMortandad, fecha, causa, cantidad, idLoteAves
+                    FROM mortandadAves
+                    WHERE idLoteAves = ?
+                ORDER BY fecha DESC";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('i', $idLoteAves);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
+            $data = $result->fetch_all(MYSQLI_ASSOC);
+
+            $stmt->close();
+            return $data;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+
 
 }

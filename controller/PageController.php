@@ -44,6 +44,7 @@ switch ($_GET['opt']) {
 	case 'mantenimientosGalpones':
 	case 'usuarios':
 	case 'lotesAves':
+	case 'cargarMortandad':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
 			$error = 'db';
@@ -92,6 +93,10 @@ switch ($_GET['opt']) {
 			case 'lotesAves':
 				require_once 'controller/abmLotesAvesController.php';
 				require_once 'view/abmLotesAves.php';
+				break;
+			case 'cargarMortandad':
+				require_once 'controller/abmLotesAvesController.php';
+				require_once 'view/LotesAvesMortandad.php';
 				break;
 			case 'home':
 				require_once 'controller/homeController.php';
