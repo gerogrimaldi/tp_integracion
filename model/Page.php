@@ -90,6 +90,7 @@ private function setMenu($_menu = ""){
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="comprasDropdown">
                             <li><a class="dropdown-item" href="index.php?opt=vacunas">Vacunas</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=lotesVacunas">Lotes de vacunas</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=compuestos">Compuestos</a></li>
                         </ul>
                     </li>
@@ -103,7 +104,9 @@ private function setMenu($_menu = ""){
                             <li><a class="dropdown-item" href="index.php?opt=lotesAves">Gestionar Lotes</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=cargarMortandad">Cargar Mortandad</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=cargarPesaje">Cargar Pesaje</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=moverGalpon">Cambiar ubicación</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=aplicarVacunas">Aplicar Vacunas</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=bajaLote">Dar de baja</a></li>
                         </ul>
                     </li>
 

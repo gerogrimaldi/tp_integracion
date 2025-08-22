@@ -270,6 +270,7 @@ $body .= <<<HTML
                 <th class="text-primary">Fecha Compra</th>
                 <th class="text-primary">Tipo de Ave</th>
                 <th class="text-primary">Cantidad</th>
+                <th class="text-primary">Precio Compra</th>
                 <th class="text-primary">Galpón</th>
                 <th class="text-primary">Acciones</th>
             </tr>
@@ -317,6 +318,11 @@ $body .= <<<HTML
                         <label for="cantidad" class="form-label">Cantidad de Aves</label>
                         <input type="number" class="form-control" id="cantidad" name="cantidad" required>
                         <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="precioCompra" class="form-label">Precio de Compra</label>
+                        <input type="number" step="0.01" class="form-control" id="precioCompra" name="precioCompra" required>
+                        <div class="invalid-feedback">Ingrese un precio válido.</div>
                     </div>
                     <input type="hidden" id="idGranja" name="idGranja">
                 </form>
@@ -369,6 +375,11 @@ $body .= <<<HTML
                         <label for="editCantidad" class="form-label">Cantidad de Aves</label>
                         <input type="number" class="form-control" id="editCantidad" name="cantidad" required>
                         <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="editPrecioCompra" class="form-label">Precio de Compra</label>
+                        <input type="number" step="0.01" class="form-control" id="editPrecioCompra" name="precioCompra" required>
+                        <div class="invalid-feedback">Ingrese un precio válido.</div>
                     </div>
                     <input type="hidden" id="editIdGranja" name="idGranja">
                 </form>
@@ -488,7 +499,7 @@ function agregarLote() {
     const galpon = document.getElementById('selectGalpon').value;
     const cantidad = document.getElementById('cantidad').value;
     const idGranja = document.getElementById('idGranja').value;
-
+    const precioCompra = document.getElementById('precioCompra').value;
     fetch('index.php?opt=lotesAves&ajax=addLoteAves', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -499,6 +510,7 @@ function agregarLote() {
             +'&idGalpon='+encodeURIComponent(galpon)
             +'&cantidadAves='+encodeURIComponent(cantidad)
             +'&idGranja='+encodeURIComponent(idGranja)
+            +'&precioCompra='+encodeURIComponent(precioCompra)
     })
     .then(response => {
         return response.json().then(data => {
@@ -540,6 +552,7 @@ document.getElementById("btnFiltrar").addEventListener("click", function() {
                 + "<td>"+l.fechaCompra+"</td>"
                 + "<td>"+l.tipoAveNombre+"</td>"
                 + "<td>"+l.cantidadAves+"</td>"
+                + "<td>"+l.precioCompra+"</td>"
                 + "<td>"+l.galponIdentificacion+"</td>"
                 + "<td>"
                     + "<div class='dropdown'>"
@@ -551,6 +564,7 @@ document.getElementById("btnFiltrar").addEventListener("click", function() {
                             + "<li><a class='dropdown-item' href='index.php?opt=cargarPesaje&idLoteAves="+l.idLoteAves+"'>Registrar pesaje</a></li>"
                             + "<li><a class='dropdown-item' href='index.php?opt=aplicarVacunas&idLoteAves="+l.idLoteAves+"'>Aplicar vacunas</a></li>"
                             + "<li><a class='dropdown-item' href='index.php?opt=moverGalpon&idLoteAves="+l.idLoteAves+"'>Mover de galpón</a></li>"
+                            + "<li><a class='dropdown-item' href='index.php?opt=bajaLote&idLoteAves="+l.idLoteAves+"'>Dar de baja</a></li>"
                         + "</ul>"
                     + "</div>"
                 + "</td>"
@@ -634,7 +648,7 @@ function editarLote(idLote){
         document.getElementById('editFechaCompra').value = lote.fechaCompra;
         document.getElementById('editCantidad').value = lote.cantidadAves;
         document.getElementById('editIdGranja').value = lote.idGranja;
-
+        document.getElementById('editPrecioCompra').value = lote.precioCompra;
         // Cargar selects con preselección integrada
         await cargarSelectTipoAve("editSelectTipoAve", lote.idTipoAve);
         //await cargarSelectGalpon(lote.idGranja, "editSelectGalpon", lote.idGalpon);
@@ -659,7 +673,7 @@ function guardarCambios(){
     const tipoAve = document.getElementById('editSelectTipoAve').value;
     const galpon = document.getElementById('editSelectGalpon').value;
     const cantidad = document.getElementById('editCantidad').value;
-
+    const precioCompra = document.getElementById('editPrecioCompra').value;
    fetch('index.php?opt=lotesAves&ajax=editLoteAves', {
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
@@ -670,6 +684,7 @@ function guardarCambios(){
             +'&idTipoAve='+encodeURIComponent(tipoAve)
             +'&idGalpon='+encodeURIComponent(galpon)
             +'&cantidadAves='+encodeURIComponent(cantidad)
+            +'&precioCompra='+encodeURIComponent(precioCompra)
     })
     .then(response => {
         return response.json().then(data => {

@@ -31,10 +31,7 @@ switch ($_GET['opt']) {
 		echo "Testeando conexión MariaDB";
 		break;
 
-	case 'compuestos':
-		require_once 'controller/compuestosController.php';
-		require_once 'view/abmCompuestos.php';
-		break;
+	//Todos estos casos necesita que esté iniciada la sesión
 	case 'database':
 	case 'granjas':
 	case 'galpones':
@@ -46,6 +43,11 @@ switch ($_GET['opt']) {
 	case 'lotesAves':
 	case 'cargarMortandad':
 	case 'cargarPesaje':
+	case 'aplicarVacunas':
+	case 'moverGalpon':
+	case 'bajaLote':
+	case 'compuestos':
+	case 'lotesVacunas':
 		$auth = checkAuth();
 		if ($auth === 'error_db') {
 			$error = 'db';
@@ -91,6 +93,10 @@ switch ($_GET['opt']) {
 				require_once 'controller/vacunasController.php';
 				require_once 'view/abmVacunas.php';
 				break;
+			case 'lotesVacunas':
+				require_once 'controller/vacunasController.php';
+				require_once 'view/abmLotesVacunas.php';
+				break;
 			case 'lotesAves':
 				require_once 'controller/abmLotesAvesController.php';
 				require_once 'view/abmLotesAves.php';
@@ -102,6 +108,23 @@ switch ($_GET['opt']) {
 			case 'cargarPesaje':
 				require_once 'controller/abmLotesAvesController.php';
 				require_once 'view/abmAvesPesajes.php';
+				break;
+			case 'moverGalpon':
+				require_once 'controller/abmLotesAvesController.php';
+				require_once 'view/abmAvesGalpones.php';
+				break;
+			case 'bajaLote':
+				require_once 'controller/abmLotesAvesController.php';
+				require_once 'view/abmAvesBaja.php';
+				break;
+			case 'aplicarVacunas':
+				require_once 'controller/abmLotesAvesController.php';
+				require_once 'controller/vacunasController.php';
+				require_once 'view/abmAvesVacunas.php';
+				break;
+			case 'compuestos':
+				require_once 'controller/compuestosController.php';
+				require_once 'view/abmCompuestos.php';
 				break;
 			case 'home':
 				require_once 'controller/homeController.php';
@@ -128,8 +151,7 @@ switch ($_GET['opt']) {
 		break;
 }
 
+//Este es un caso especial que toma el botón del formulario iniciar sesión que no va por Get.
 if (!empty($_POST['btLogin'])) {
-	//Cargo el controlador de usuario
-	//Internamente, cada controlador sabe como manejar los POST y los GET que le corresponden.
 	require_once 'controller/userController.php';
 }

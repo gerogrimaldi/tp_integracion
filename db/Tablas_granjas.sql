@@ -77,6 +77,7 @@ CREATE TABLE loteAves (
     fechaCompra DATE,
     cantidadAves INT,
     idTipoAve INT,
+    precioCompra DECIMAL(10, 2),
     FOREIGN KEY (idTipoAve) REFERENCES tipoAve(idTipoAve),
     PRIMARY KEY (idLoteAves)
 );

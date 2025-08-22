@@ -199,7 +199,8 @@ if (isset($_GET['ajax']))
                     !isset($_POST['fechaCompra']) || $_POST['fechaCompra'] === '' ||
                     !isset($_POST['cantidadAves']) || $_POST['cantidadAves'] === '' ||
                     !isset($_POST['idTipoAve']) || $_POST['idTipoAve'] === '' ||
-                    !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '')
+                    !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ||
+                    !isset($_POST['precioCompra']) || $_POST['precioCompra'] === '')
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -212,7 +213,8 @@ if (isset($_GET['ajax']))
                         $_POST['fechaCompra'],
                         (int)$_POST['cantidadAves'],
                         (int)$_POST['idTipoAve'],
-                        (int)$_POST['idGalpon']
+                        (int)$_POST['idGalpon'],
+                        $_POST['precioCompra']
                     )) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Lote agregado correctamente']);
@@ -234,7 +236,8 @@ if (isset($_GET['ajax']))
                     !isset($_POST['fechaNac']) || $_POST['fechaNac'] === '' ||
                     !isset($_POST['fechaCompra']) || $_POST['fechaCompra'] === '' ||
                     !isset($_POST['cantidadAves']) || $_POST['cantidadAves'] === '' ||
-                    !isset($_POST['idTipoAve']) || $_POST['idTipoAve'] === '')
+                    !isset($_POST['idTipoAve']) || $_POST['idTipoAve'] === '' ||
+                    !isset($_POST['precioCompra']) || $_POST['precioCompra'] === '')
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
@@ -247,7 +250,8 @@ if (isset($_GET['ajax']))
                         $_POST['fechaNac'],
                         $_POST['fechaCompra'],
                         (int)$_POST['cantidadAves'],
-                        (int)$_POST['idTipoAve']
+                        (int)$_POST['idTipoAve'],
+                        $_POST['precioCompra']
                 )) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Cambios guardados correctamente']);
@@ -258,6 +262,55 @@ if (isset($_GET['ajax']))
             }
             exit();
         break;
+
+        //Editar ubicacion (galpon)
+        case 'editUbicacionAve':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ||
+                    !isset($_POST['fechaInicio']) || $_POST['fechaInicio'] === '')
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->cambiarUbicacion(
+                        (int)$_POST['idLoteAves'],
+                        (int)$_POST['idGalpon'],
+                        $_POST['fechaInicio'],
+                )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al editar. Recuerde: la fecha debe ser mayor a la del último cambio.']);
+            }
+            exit();
+        break;
+
+        //Obtener los cambios de ubicacion (galpon)
+        case 'getUbicacionAve':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: lote no seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                $lote = $oLotes->getCambiosUbicacion((int)$_GET['idLoteAves']);
+                http_response_code(200);
+                echo json_encode($lote);
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+        break;
+
     // ------------------------------------
     // AJAX - LOTE DE AVES - MORTANDAD
     // ------------------------------------

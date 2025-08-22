@@ -224,6 +224,7 @@ class LoteAves{
     private $cantidadAves;
     private $tipoAves; //Los datos del tipo de aves lo maneja ese objeto. Uso -> para obtenerlos.
     private $idGalpon_loteAve; // Para manejar la relación con galpon_loteAves
+    private $precioCompra;
     private $mysqli;
 
     public function __construct()
@@ -255,6 +256,7 @@ class LoteAves{
     }
     public function setCantAves($cantidadAves){$this->cantidadAves = $cantidadAves;}
     public function setIdLoteAves($idLoteAves){$this->idLoteAves = $idLoteAves;}
+    public function setPrecioCompra($precio){$this->precioCompra = $precio;}
 
     public function setMaxID()
     {
@@ -285,8 +287,9 @@ class LoteAves{
         $this->idGalpon_loteAve = ($row['maxID'] !== null) ? $row['maxID'] + 1 : 1;
     }
     
-    public function agregarNuevo($identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve, $idGalpon)
+    public function agregarNuevo($identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve, $idGalpon, $precioCompra)
     {
+        $this->setPrecioCompra($precioCompra);
         $this->setIdentificador($identificador);
         $this->setFechaNac($fechaNac);
         $this->setFechaCompra($fechaCompra);
@@ -314,15 +317,14 @@ class LoteAves{
             $stmtCheck->close();
 
             // === Inserción del nuevo lote ===
-            $sql = "INSERT INTO loteAves (idLoteAves, identificador, fechaNacimiento, fechaCompra, cantidadAves, idTipoAve)
+            $sql = "INSERT INTO loteAves (idLoteAves, identificador, fechaNacimiento, fechaCompra, cantidadAves, idTipoAve, precioCompra)
                     VALUES (?, ?, ?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) throw new RuntimeException("Error en la preparación de inserción: " . $this->mysqli->error);
-            $stmt->bind_param("isssii", $this->idLoteAves, $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve);
+            $stmt->bind_param("isssid", $this->idLoteAves, $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve, $this->precioCompra);
             if (!$stmt->execute()) throw new RuntimeException('Error al ejecutar la inserción: ' . $stmt->error);
             $stmt->close();
 
-            // === Inserción en galpon_loteAves con fecha de compra ===
             $sqlGalpon = "INSERT INTO galpon_loteAves (idGalpon_loteAve, idLoteAves, idGalpon, fechaInicio) VALUES (?, ?, ?, ?)";
             $stmtGalpon = $this->mysqli->prepare($sqlGalpon);
             if (!$stmtGalpon) throw new RuntimeException("Error en preparación de galpon_loteAves: " . $this->mysqli->error);
@@ -414,9 +416,118 @@ class LoteAves{
         }
     }
 
-
-    public function updateLoteAves($idLoteAves, $identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve)
+    public function cambiarUbicacion($idLoteAves, $idNuevoGalpon, $fechaDesdeNueva)
     {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            if (!is_numeric($idLoteAves) || $idLoteAves < 0) {
+                throw new RuntimeException('ID de lote inválido.');
+            }
+
+            // 1. Obtener la ubicación actual del lote
+            $sqlActual = "SELECT idGalpon_loteAve, fechaInicio, fechaFin 
+                        FROM galpon_loteAves 
+                        WHERE idLoteAves = ? 
+                        ORDER BY fechaInicio DESC 
+                        LIMIT 1";
+            $stmtActual = $this->mysqli->prepare($sqlActual);
+            if (!$stmtActual) throw new RuntimeException('Error al preparar consulta de ubicación actual: ' . $this->mysqli->error);
+            $stmtActual->bind_param("i", $idLoteAves);
+            $stmtActual->execute();
+            $result = $stmtActual->get_result();
+            $ubicacionActual = $result->fetch_assoc();
+            $stmtActual->close();
+
+            if (!$ubicacionActual) {
+                throw new RuntimeException('No se encontró la ubicación actual del lote.');
+            }
+
+            // 2. Validar fecha
+            $fechaActualDesde = $ubicacionActual['fechaInicio'];
+            if ($fechaDesdeNueva < $fechaActualDesde) {
+                throw new RuntimeException('La fecha de inicio de la nueva ubicación no puede ser anterior a la fecha de la ubicación actual.');
+            }
+
+            // 3. Actualizar la fechaHasta del registro actual
+            $sqlUpdate = "UPDATE galpon_loteAves SET fechaFin = ? WHERE idGalpon_loteAve = ?";
+            $stmtUpdate = $this->mysqli->prepare($sqlUpdate);
+            if (!$stmtUpdate) throw new RuntimeException('Error al preparar actualización de ubicación: ' . $this->mysqli->error);
+            $stmtUpdate->bind_param("si", $fechaDesdeNueva, $ubicacionActual['idGalpon_loteAve']);
+            if (!$stmtUpdate->execute()) {
+                throw new RuntimeException('Error al actualizar fechaHasta: ' . $stmtUpdate->error);
+            }
+            $stmtUpdate->close();
+
+            // 4. Insertar el nuevo registro con fechaHasta NULL
+            $this->setMaxIDGalponLoteAve(); // Asegurarse de obtener el nuevo ID
+            $sqlInsert = "INSERT INTO galpon_loteAves (idGalpon_loteAve, idLoteAves, idGalpon, fechaInicio, fechaFin)
+                        VALUES (?, ?, ?, ?, NULL)";
+            $stmtInsert = $this->mysqli->prepare($sqlInsert);
+            if (!$stmtInsert) throw new RuntimeException('Error al preparar inserción de nueva ubicación: ' . $this->mysqli->error);
+            $stmtInsert->bind_param("iiis", $this->idGalpon_loteAve, $idLoteAves, $idNuevoGalpon, $fechaDesdeNueva);
+            if (!$stmtInsert->execute()) {
+                throw new RuntimeException('Error al insertar nueva ubicación: ' . $stmtInsert->error);
+            }
+            $stmtInsert->close();
+
+            return true;
+
+        } catch (RuntimeException $e) {
+            error_log($e);
+            throw $e;
+        }
+    }
+
+    public function getCambiosUbicacion($idLoteAves)
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            if (!is_numeric($idLoteAves) || $idLoteAves < 0) {
+                throw new RuntimeException('ID de lote inválido.');
+            }
+            $sql = "SELECT 
+                        gl.idGalpon_loteAve,
+                        gl.idLoteAves,
+                        gl.idGalpon,
+                        g.identificacion AS galponIdentificacion,
+                        gl.fechaInicio,
+                        gl.fechaFin,
+                        gr.nombre as nombreGranja
+                    FROM galpon_loteAves gl
+                    INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                    INNER JOIN granja gr ON g.idGranja = gr.idGranja
+                    WHERE gl.idLoteAves = ?
+                    ORDER BY gl.fechaInicio ASC";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idLoteAves);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+
+    public function updateLoteAves($idLoteAves, $identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve, $precioCompra)
+    {
+        $this->setPrecioCompra($precioCompra);
         $this->setIdLoteAves($idLoteAves);
         $this->setIdentificador($identificador);
         $this->setFechaNac($fechaNac);
@@ -427,13 +538,15 @@ class LoteAves{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            $sql = "UPDATE loteAves 
-                    SET identificador = ?, fechaNacimiento = ?, fechaCompra = ?, cantidadAves = ?, idTipoAve = ? 
+            $sql = "UPDATE loteAves
+                    SET identificador = ?, fechaNacimiento = ?, fechaCompra = ?, cantidadAves = ?, idTipoAve = ?, precioCompra = ?
                     WHERE idLoteAves = ?";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
             }
+            $stmt->bind_param("sssiidi", $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve, $this->precioCompra, $this->idLoteAves);
+
             $stmt->bind_param(
                 "sssiii",
                 $this->identificador,
@@ -473,6 +586,7 @@ class LoteAves{
                         g.idGalpon,
                         g.identificacion AS galponIdentificacion,
                         gr.idGranja,
+                        l.precioCompra,
                         gr.nombre AS granjaNombre
                     FROM loteAves l
                     INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
@@ -521,6 +635,7 @@ class LoteAves{
                         l.identificador,
                         l.fechaNacimiento,
                         l.fechaCompra,
+                        l.precioCompra,
                         l.cantidadAves,
                         t.nombre AS tipoAveNombre,
                         g.idGalpon,
@@ -567,6 +682,7 @@ class LoteAves{
                     l.fechaNacimiento,
                     l.fechaCompra,
                     l.cantidadAves,
+                    l.precioCompra,
                     t.nombre AS tipoAveNombre,
                     g.idGalpon,
                     g.identificacion AS galponIdentificacion,
@@ -618,7 +734,6 @@ class LoteAves{
             throw $e;
         }
     }
-
 
     // ============================
     // MORTANDAD AVES
@@ -869,6 +984,10 @@ class LoteAves{
             throw $e;
         }
     }
+    // ============================
+    // MOVIMIENTO DE GALPON (Y CONSECUENTE GRANJA)
+    // ============================
+
 
 
 }
