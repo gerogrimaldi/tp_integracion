@@ -96,7 +96,7 @@ switch ($_GET['opt']) {
 				break;
 			case 'cargarMortandad':
 				require_once 'controller/abmLotesAvesController.php';
-				require_once 'view/LotesAvesMortandad.php';
+				require_once 'view/abmAvesMortandad.php';
 				break;
 			case 'home':
 				require_once 'controller/homeController.php';

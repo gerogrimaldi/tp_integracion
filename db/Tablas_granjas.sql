@@ -127,7 +127,7 @@ CREATE TABLE pesajeLoteAves (
 );
 
 CREATE TABLE mortandadAves (
-    idMortandad INT NOT NULL,
+    idMortandad INT NOT NULL AUTO_INCREMENT,
     fecha DATE,
     causa VARCHAR (100),
     cantidad INT,

@@ -559,24 +559,33 @@ class LoteAves{
             if ($this->mysqli === null) { 
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            $sql = "SELECT 
-                        l.idLoteAves,
-                        l.identificador,
-                        l.fechaNacimiento,
-                        l.fechaCompra,
-                        l.cantidadAves,
-                        t.nombre AS tipoAveNombre,
-                        g.idGalpon,
-                        g.identificacion AS galponIdentificacion,
-                        gr.idGranja,
-                        gr.nombre AS granjaNombre
-                    FROM loteAves l
-                    INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
-                    INNER JOIN galpon_loteAves gl 
-                        ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
-                    INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
-                    INNER JOIN granja gr ON g.idGranja = gr.idGranja
-                    WHERE l.idLoteAves = ?";
+
+            $sql = "
+                SELECT 
+                    l.idLoteAves,
+                    l.identificador,
+                    l.fechaNacimiento,
+                    l.fechaCompra,
+                    l.cantidadAves,
+                    t.nombre AS tipoAveNombre,
+                    g.idGalpon,
+                    g.identificacion AS galponIdentificacion,
+                    gr.idGranja,
+                    gr.nombre AS granjaNombre,
+                    -- Cantidad actual = cantidad inicial - suma de mortandades
+                    (l.cantidadAves - IFNULL(
+                        (SELECT SUM(m.cantidad) 
+                        FROM mortandadAves m 
+                        WHERE m.idLoteAves = l.idLoteAves), 0)
+                    ) AS cantidadActual
+                FROM loteAves l
+                INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                INNER JOIN galpon_loteAves gl 
+                    ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
+                INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                INNER JOIN granja gr ON g.idGranja = gr.idGranja
+                WHERE l.idLoteAves = ?
+            ";
 
             $stmt = $this->mysqli->prepare($sql);
             if ($stmt === false) {
@@ -591,13 +600,12 @@ class LoteAves{
 
             $result = $stmt->get_result();
             $data = $result->fetch_assoc();
-            
             $stmt->close();
-            
+
             if (!$data) {
                 throw new RuntimeException("No se encontró un lote de aves con el ID especificado.");
             }
-            
+
             return $data;
 
         } catch (RuntimeException $e) {
@@ -662,6 +670,32 @@ class LoteAves{
             $stmt->close();
             return true;
 
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function deleteMortandad(int $idMortandad): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "DELETE FROM mortandadAves WHERE idMortandad = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            $stmt->bind_param('i', $idMortandad);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+            if ($affectedRows === 0) {
+                throw new RuntimeException("No se encontró un registro de mortandad con el ID especificado.");
+            }
+            return true;
         } catch (RuntimeException $e) {
             throw $e;
         }

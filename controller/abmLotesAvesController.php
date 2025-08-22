@@ -126,10 +126,9 @@ if (isset($_GET['ajax']))
 
         case 'getAllLotesAves':
             header('Content-Type: application/json');
-            //index.php?opt=lotesAves&ajax=getAllLotesAves
             try {
                 $oLotes = new LoteAves();
-                $lotes = $oLotes->getAll($_GET['idGranja'], $_GET['desde'], $_GET['hasta']);
+                $lotes = $oLotes->getAll();
                 if ($lotes) {
                     http_response_code(200);
                     echo json_encode($lotes);
@@ -295,7 +294,7 @@ if (isset($_GET['ajax']))
         case 'editMuertes':
             header('Content-Type: application/json');
             try {
-                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                if (!isset($_POST['idMortandad']) || $_POST['idMortandad'] === '' ||
                     !isset($_POST['fecha']) || $_POST['fecha'] === '' ||
                     !isset($_POST['causa']) || $_POST['causa'] === '' ||
                     !isset($_POST['cantidad']) || $_POST['cantidad'] === '')
@@ -306,7 +305,7 @@ if (isset($_GET['ajax']))
                 }
                 $oLotes = new LoteAves();
                 if ($oLotes->editarMortandad(
-                        (int)$_POST['idLoteAves'],
+                        (int)$_POST['idMortandad'],
                         $_POST['fecha'],
                         $_POST['causa'],
                         (int)$_POST['cantidad']
@@ -317,6 +316,26 @@ if (isset($_GET['ajax']))
             } catch (RuntimeException $e) {
                 http_response_code(400);
                 echo json_encode(['msg' => 'Error al editar.']);
+            }
+            exit();
+        break;
+
+        case 'delMuertes': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idMortandad']) || $_GET['idMortandad'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: registro seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->deleteMortandad((int)$_GET['idMortandad'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Eliminado correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
             }
             exit();
         break;
@@ -333,7 +352,7 @@ if (isset($_GET['ajax']))
                 $lotes = $oLotes->getMortandad((int)$_GET['idLoteAves']);
                 if ($lotes){
                     http_response_code(200);
-                    echo json_encode($lote);
+                    echo json_encode($lotes);
                 }else {
                     http_response_code(200);
                     echo '[]';

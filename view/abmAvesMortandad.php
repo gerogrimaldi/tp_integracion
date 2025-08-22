@@ -119,14 +119,7 @@ $body = <<<HTML
 </div>
 
 <script>
-var idLotePreseleccion = <?php echo $idLoteAves; ?>;
-//------------------------------------------------
-// Inicialización: cargar lotes en el select
-//------------------------------------------------
-document.addEventListener('DOMContentLoaded', function () {
-    cargarLotes();
-});
-
+var idLote = $idLoteAves;
 //------------------------------------------------
 // Listeners de botones principales
 //------------------------------------------------
@@ -173,32 +166,27 @@ document.addEventListener('click', function (event) {
 // Funciones AJAX
 //------------------------------------------------
 function cargarLotes() {
-    fetch('index.php?opt=lotesAves&ajax=getAllLotes')
+    return fetch('index.php?opt=lotesAves&ajax=getAllLotesAves')
     .then(r => r.json())
     .then(data => {
-        var select = document.getElementById('selectLote');
-        select.innerHTML = '<option value="">Seleccione un lote...</option>';
-
+        var select = $('#selectLote');
+        select.empty();
+        select.append('<option value="">Seleccione un lote...</option>');
         data.forEach(function(l){
-            var selected = (idLotePreseleccion && idLotePreseleccion == l.idLoteAves) ? ' selected' : '';
-            select.innerHTML += '<option value="' + l.idLoteAves + '"' + selected + '>' + l.identificador + '</option>';
+            // Si coincide con idLote, marcar como seleccionado
+            var isSelected = (l.idLoteAves == idLote) ? true : false;
+            var opcion = new Option(l.identificador, l.idLoteAves, isSelected, isSelected);
+            select.append(opcion);
         });
-
-        // Si venía preseleccionado desde PHP, cargo mortandad
-        if (idLotePreseleccion) {
-            cargarMortandad(idLotePreseleccion);
-        }
-
-        // Si usás Select2, refrescarlo
-        if ($(select).data('select2')) {
-            $(select).trigger('change.select2');
-        }
+        // Actualizar Select2
+        select.trigger('change');
+        return data;
     })
     .catch(err => console.error('Error cargando lotes:', err));
 }
 
 function cargarDatosLote(idLote) {
-    fetch('index.php?opt=lotesAves&ajax=getById&idLoteAves=' + idLote)
+    fetch('index.php?opt=lotesAves&ajax=getLoteAvesById&idLoteAves=' + idLote)
     .then(r => r.json())
     .then(l => {
         document.getElementById('datoCantidadOriginal').textContent = l.cantidadAves;
@@ -214,31 +202,71 @@ function cargarDatosLote(idLote) {
 }
 
 function cargarMortandad(idLote) {
+    //Vaciar la tabla
+    if ($.fn.DataTable.isDataTable('#tablaMortandad')) {
+        $('#tablaMortandad').DataTable().destroy();
+    }
+    var tablaMortandadTbody = document.getElementById("mortandadAves");
+    tablaMortandadTbody.innerHTML = '';
+
     fetch('index.php?opt=lotesAves&ajax=getMuertes&idLoteAves=' + idLote)
-    .then(r => r.json())
-    .then(data => {
-        var tbody = document.getElementById('mortandadAves');
-        tbody.innerHTML = '';
-        data.forEach(function(m){
-            var btn = '<button class="btn btn-sm btn-warning btn-edit" ' +
-                      'data-id="' + m.idMortandad + '" ' +
-                      'data-fecha="' + m.fecha + '" ' +
-                      'data-causa="' + m.causa + '" ' +
-                      'data-cantidad="' + m.cantidad + '">Editar</button>';
-
-            var row = '<tr>'
-                    + '<td>' + m.idMortandad + '</td>'
-                    + '<td>' + m.fecha + '</td>'
-                    + '<td>' + m.causa + '</td>'
-                    + '<td>' + m.cantidad + '</td>'
-                    + '<td>' + btn + '</td>'
-                    + '</tr>';
-
-            tbody.insertAdjacentHTML('beforeend', row);
-        });
+    .then(response => {
+        if (!response.ok) throw new Error('Error en la solicitud: ' + response.statusText);
+        return response.json();
     })
-    .catch(err => console.error('Error cargando mortandad:', err));
+    .then(data => {
+        data.forEach(m => {
+            var row = document.createElement("tr");
+            row.innerHTML =
+                '<td>' + m.idMortandad + '</td>' +
+                '<td>' + m.fecha + '</td>' +
+                '<td>' + m.causa + '</td>' +
+                '<td>' + m.cantidad + '</td>' +
+                '<td>' +
+                    '<button class="btn btn-sm btn-warning btn-edit" ' +
+                        'data-id="' + m.idMortandad + '" ' +
+                        'data-fecha="' + m.fecha + '" ' +
+                        'data-causa="' + m.causa + '" ' +
+                        'data-cantidad="' + m.cantidad + '">' +
+                        'Editar' +
+                    '</button> ' +
+                    '<button class="btn btn-sm btn-danger btn-delete" data-id="' + m.idMortandad + '">' +
+                        'Eliminar' +
+                    '</button>' +
+                '</td>';
+            tablaMortandadTbody.appendChild(row);
+        });
+
+        $('#tablaMortandad').DataTable();
+    })
+    .catch(error => {
+        console.error('Error al cargar mortandad:', error);
+        $('#tablaMortandad').DataTable();
+    });
 }
+
+//------------------------------------------------
+// Listener para botón Eliminar
+//------------------------------------------------
+document.addEventListener('click', function(event) {
+    if (event.target && event.target.matches('.btn-delete')) {
+        const idMortandad = event.target.getAttribute('data-id');
+        fetch('index.php?opt=lotesAves&ajax=delMuertes&idMortandad=' + idMortandad, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then(r => r.json().then(data => {
+            if (r.ok) {
+                showToastOkay(data.msg);
+                cargarMortandad(idLote); // refrescar tabla
+                cargarDatosLote(idLote); // refrescar datos del lote
+            } else {
+                showToastError(data.msg);
+            }
+        }))
+        .catch(err => showToastError('Error en AJAX: ' + err.message));
+    }
+});
 
 function agregarMortandad() {
     const idLote = document.getElementById('idLoteSeleccionado').value;
@@ -259,6 +287,7 @@ function agregarMortandad() {
             showToastOkay(data.msg);
             $('#modalMortandad').modal('hide');
             cargarMortandad(idLote);
+            cargarDatosLote(idLote);
         } else {
             showToastError(data.msg);
         }
@@ -267,7 +296,6 @@ function agregarMortandad() {
 }
 
 function editarMortandad() {
-    const idLote = document.getElementById('idLoteSeleccionado').value;
     const idMortandad = document.getElementById('editIdMortandad').value;
     const fecha = document.getElementById('editFechaMortandad').value;
     const causa = document.getElementById('editCausaMortandad').value;
@@ -276,8 +304,7 @@ function editarMortandad() {
     fetch('index.php?opt=lotesAves&ajax=editMuertes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'idLoteAves=' + encodeURIComponent(idLote) +
-              '&idMortandad=' + encodeURIComponent(idMortandad) +
+        body: '&idMortandad=' + encodeURIComponent(idMortandad) +
               '&fecha=' + encodeURIComponent(fecha) +
               '&causa=' + encodeURIComponent(causa) +
               '&cantidad=' + encodeURIComponent(cantidad)
@@ -287,15 +314,49 @@ function editarMortandad() {
             showToastOkay(data.msg);
             $('#modalEditarMortandad').modal('hide');
             cargarMortandad(idLote);
+            cargarDatosLote(idLote);
         } else {
             showToastError(data.msg);
         }
     }))
     .catch(err => showToastError('Error en AJAX: ' + err.message));
 }
+
+window.addEventListener('load', function() {
+    cargarDatosLote(idLote);
+    cargarMortandad(idLote);
+
+    $(document).ready(function() {
+        // Inicializar Select2 primero
+        $('#selectLote').select2({
+            theme: 'bootstrap-5',
+            placeholder: "Seleccione un lote...",
+            allowClear: false,
+            width: 'resolve'
+        });
+        // Luego cargar los lotes
+        cargarLotes();
+    });
+
+    // Evento cuando cambia la selección
+    $('#selectLote').on('change', function() {
+        const idLote = $(this).val();
+        if (idLote) {
+            $('#idLoteSeleccionado').val(idLote);
+            cargarDatosLote(idLote);
+            cargarMortandad(idLote);
+            $('#cardLote').show();
+        } else {
+            $('#cardLote').hide();
+        }
+    });
+
+    // Configurar la fecha actual por defecto
+    const today = new Date().toISOString().split('T')[0];
+    $('#fechaMortandad').val(today);
+});
+
 </script>
-
-
 HTML;
 
 include 'view/toast.php';

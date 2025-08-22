@@ -16,7 +16,6 @@ class Page
 
     private function setHeader($_header = "")
     {
-        // HEAD
         if ($_header!=""){
             $this->header = $_header;
         }else{
@@ -25,17 +24,24 @@ class Page
             '<!DOCTYPE html>
             <html lang="es">
             <head>
-            <meta charset="utf-8">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge">
-            <title>' . EMPRESA_NOMBRE . '</title>
-            <meta name="description" content="">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-            <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico" />
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+                <meta charset="utf-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <title>' . EMPRESA_NOMBRE . '</title>
+                <meta name="description" content="">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                <link rel="shortcut icon" type="image/x-icon" href="./img/favicon.ico" />
+                <!-- Bootstrap CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+                <!-- Bootstrap Icons -->
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+                <!-- CSS Select2 con tema Bootstrap-5 -->
+                <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
+                <!-- Select2 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+                <!-- jQuery -->
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
             </head>
             <body class="bg-dark text-white">
             <div class="container">';
@@ -187,32 +193,38 @@ private function setMenu($_menu = ""){
     }
 
     private function setFooter($_footer = "")
-    {
-        if($_footer!= ""){
-            $this->footer = $_footer;
-        } else{
-        $this->footer = 
-            '<footer class="footer bg-dark text-white text-center py-3 mt-5">
-                <div class="container">
-                    <i>Gotte-Grimaldi-Murguia</i>
+        {
+            if($_footer!= ""){
+                $this->footer = $_footer;
+            } else{
+            $this->footer = 
+                '<footer class="footer bg-dark text-white text-center py-3 mt-5">
+                    <div class="container">
+                        <i>Gotte-Grimaldi-Murguia</i>
+                    </div>
+                </footer>
                 </div>
-            </footer>
-            </div>
-                <script src="js/DataTables/datatables.min.js"></script>
-                <link href="js/DataTables/datatables.min.css" rel="stylesheet">
-                <script>
-                $(document).ready(function() {
-                    $.extend(true, $.fn.dataTable.defaults, {
-                        language: {
-                           url: "js/DataTables/Spanish.json"
-                        }
+                    <!-- Bootstrap JS -->
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+                    <!-- Select2 JS -->
+                    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
+                    <!-- DataTables -->
+                    <script src="js/DataTables/datatables.min.js"></script>
+                    <link href="js/DataTables/datatables.min.css" rel="stylesheet">
+                    <script>
+                    $(document).ready(function() {
+                        $.extend(true, $.fn.dataTable.defaults, {
+                            language: {
+                            url: "js/DataTables/Spanish.json"
+                            }
+                        });
                     });
-                });
-                </script>
-                </body>
-            </html>';
+                    </script>
+
+                    </body>
+                </html>';
+            }
         }
-    }
 
     public function getHtml()
     {
