@@ -2,15 +2,15 @@
 $idLoteAves = isset($_GET['idLoteAves']) ? (int)$_GET['idLoteAves'] : 0;
 $body = <<<HTML
 <div class="container">
-    <h1>Registro de Mortandad</h1>
+    <h1>Registro de Pesajes</h1>
 
     <!-- Seleccionar Lote -->
     <div class="input-group mb-3">
         <select id="selectLote" name="selectLote" class="form-select rounded-start" style="width:70%" required>
             <!-- opciones cargadas por JS (Select2) -->
         </select>
-        <button type="button" class="btn btn-primary rounded-end" data-bs-toggle="modal" data-bs-target="#modalMortandad">
-            Registrar Mortandad
+        <button type="button" class="btn btn-primary rounded-end" data-bs-toggle="modal" data-bs-target="#modalPesaje">
+            Registrar Pesaje
         </button>
         <div class="invalid-feedback">Debe elegir un lote.</div>
     </div>
@@ -32,88 +32,77 @@ $body = <<<HTML
         </div>
     </div>
 
-    <!-- Tabla de registros de mortandad -->
-    <table id="tablaMortandad" class="table table-bordered bg-white">
+    <!-- Tabla de registros de pesaje -->
+    <table id="tablaPesaje" class="table table-bordered bg-white">
         <thead class="table-light">
             <tr>
                 <th class="text-primary">ID</th>
                 <th class="text-primary">Fecha</th>
-                <th class="text-primary">Causa</th>
-                <th class="text-primary">Cantidad</th>
+                <th class="text-primary">Peso (kg)</th>
                 <th class="text-primary">Acciones</th>
             </tr>
         </thead>
-        <tbody id="mortandadAves"></tbody>
+        <tbody id="pesajesAves"></tbody>
     </table>
 </div>
 
-<!-- Modal Registrar Mortandad -->
-<div class="modal fade" id="modalMortandad" tabindex="-1" aria-labelledby="modalMortandadLabel" aria-hidden="true">
+<!-- Modal Registrar Pesaje -->
+<div class="modal fade" id="modalPesaje" tabindex="-1" aria-labelledby="modalPesajeLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="modalMortandadLabel">Registrar Mortandad</h1>
+                <h1 class="modal-title fs-5" id="modalPesajeLabel">Registrar Pesaje</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="formMortandad" class="needs-validation" novalidate>
+                <form id="formPesaje" class="needs-validation" novalidate>
                     <div class="mb-4">
-                        <label for="fechaMortandad" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fechaMortandad" name="fecha" required>
+                        <label for="fechaPesaje" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="fechaPesaje" name="fecha" required>
                         <div class="invalid-feedback">Seleccione una fecha válida.</div>
                     </div>
                     <div class="mb-4">
-                        <label for="causaMortandad" class="form-label">Causa</label>
-                        <input type="text" class="form-control" id="causaMortandad" name="causa" maxlength="100" required>
-                        <div class="invalid-feedback">Ingrese una causa válida.</div>
-                    </div>
-                    <div class="mb-4">
-                        <label for="cantidadMortandad" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="cantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <label for="pesoPesaje" class="form-label">Peso (kg)</label>
+                        <input type="number" class="form-control" id="pesoPesaje" name="peso" step="0.01" min="0" required>
+                        <div class="invalid-feedback">Ingrese un peso válido.</div>
                     </div>
                     <input type="hidden" id="idLoteSeleccionado" name="idLoteAves">
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" id="btnGuardarMortandad">Guardar</button>
+                <button type="submit" class="btn btn-primary" id="btnGuardarPesaje">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Editar Mortandad -->
-<div class="modal fade" id="modalEditarMortandad" tabindex="-1" aria-labelledby="modalEditarMortandadLabel" aria-hidden="true">
+<!-- Modal Editar Pesaje -->
+<div class="modal fade" id="modalEditarPesaje" tabindex="-1" aria-labelledby="modalEditarPesajeLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="modalEditarMortandadLabel">Editar Mortandad</h1>
+                <h1 class="modal-title fs-5" id="modalEditarPesajeLabel">Editar Pesaje</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <form id="formEditarMortandad" class="needs-validation" novalidate>
-                    <input type="hidden" id="editIdMortandad" name="idMortandad">
+                <form id="formEditarPesaje" class="needs-validation" novalidate>
+                    <input type="hidden" id="editIdPesaje" name="idPesaje">
                     <div class="mb-4">
-                        <label for="editFechaMortandad" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="editFechaMortandad" name="fecha" required>
+                        <label for="editFechaPesaje" class="form-label">Fecha</label>
+                        <input type="date" class="form-control" id="editFechaPesaje" name="fecha" required>
                         <div class="invalid-feedback">Seleccione una fecha válida.</div>
                     </div>
                     <div class="mb-4">
-                        <label for="editCausaMortandad" class="form-label">Causa</label>
-                        <input type="text" class="form-control" id="editCausaMortandad" name="causa" maxlength="100" required>
-                        <div class="invalid-feedback">Ingrese una causa válida.</div>
-                    </div>
-                    <div class="mb-4">
-                        <label for="editCantidadMortandad" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="editCantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <label for="editPesoPesaje" class="form-label">Peso (kg)</label>
+                        <input type="number" class="form-control" id="editPesoPesaje" name="peso" step="0.01" min="0" required>
+                        <div class="invalid-feedback">Ingrese un peso válido.</div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" id="btnActualizarMortandad">Actualizar</button>
+                <button type="submit" class="btn btn-primary" id="btnActualizarPesaje">Actualizar</button>
             </div>
         </div>
     </div>
@@ -121,51 +110,42 @@ $body = <<<HTML
 
 <script>
 var idLote = $idLoteAves;
-//------------------------------------------------
-// Listeners de botones principales
-//------------------------------------------------
-document.getElementById('btnGuardarMortandad').addEventListener('click', function() {
-    agregarMortandad();
+
+// Listeners botones
+document.getElementById('btnGuardarPesaje').addEventListener('click', function() {
+    agregarPesaje();
 });
-document.getElementById('btnActualizarMortandad').addEventListener('click', function() {
-    editarMortandad();
+document.getElementById('btnActualizarPesaje').addEventListener('click', function() {
+    editarPesaje();
 });
 
-//------------------------------------------------
-// Cambiar lote -> cargar datos + mortandad
-//------------------------------------------------
+// Cambiar lote -> cargar datos + pesajes
 document.getElementById('selectLote').addEventListener('change', function () {
     const idLote = this.value;
     if (idLote) {
         document.getElementById('idLoteSeleccionado').value = idLote;
         cargarDatosLote(idLote);
-        cargarMortandad(idLote);
+        cargarPesajes(idLote);
     }
 });
 
-//------------------------------------------------
 // Rellenar modal de edición
-//------------------------------------------------
 document.addEventListener('click', function (event) {
     if (event.target && event.target.matches('.btn-edit')) {
         const id = event.target.getAttribute('data-id');
         const fecha = event.target.getAttribute('data-fecha');
-        const causa = event.target.getAttribute('data-causa');
-        const cantidad = event.target.getAttribute('data-cantidad');
+        const peso = event.target.getAttribute('data-peso');
 
-        document.getElementById('editIdMortandad').value = id;
-        document.getElementById('editFechaMortandad').value = fecha;
-        document.getElementById('editCausaMortandad').value = causa;
-        document.getElementById('editCantidadMortandad').value = cantidad;
+        document.getElementById('editIdPesaje').value = id;
+        document.getElementById('editFechaPesaje').value = fecha;
+        document.getElementById('editPesoPesaje').value = peso;
 
-        const modal = new bootstrap.Modal(document.getElementById('modalEditarMortandad'));
+        const modal = new bootstrap.Modal(document.getElementById('modalEditarPesaje'));
         modal.show();
     }
 });
 
-//------------------------------------------------
 // Funciones AJAX
-//------------------------------------------------
 function cargarLotes() {
     return fetch('index.php?opt=lotesAves&ajax=getAllLotesAves')
     .then(r => r.json())
@@ -174,12 +154,10 @@ function cargarLotes() {
         select.empty();
         select.append('<option value="">Seleccione un lote...</option>');
         data.forEach(function(l){
-            // Si coincide con idLote, marcar como seleccionado
             var isSelected = (l.idLoteAves == idLote) ? true : false;
             var opcion = new Option(l.identificador, l.idLoteAves, isSelected, isSelected);
             select.append(opcion);
         });
-        // Actualizar Select2
         select.trigger('change');
         return data;
     })
@@ -203,65 +181,53 @@ function cargarDatosLote(idLote) {
     .catch(err => console.error('Error cargando datos de lote:', err));
 }
 
-function cargarMortandad(idLote) {
-    //Vaciar la tabla
-    if ($.fn.DataTable.isDataTable('#tablaMortandad')) {
-        $('#tablaMortandad').DataTable().destroy();
+function cargarPesajes(idLote) {
+    if ($.fn.DataTable.isDataTable('#tablaPesaje')) {
+        $('#tablaPesaje').DataTable().destroy();
     }
-    var tablaMortandadTbody = document.getElementById("mortandadAves");
-    tablaMortandadTbody.innerHTML = '';
+    var tbody = document.getElementById("pesajesAves");
+    tbody.innerHTML = '';
 
-    fetch('index.php?opt=lotesAves&ajax=getMuertes&idLoteAves=' + idLote)
-    .then(response => {
-        if (!response.ok) throw new Error('Error en la solicitud: ' + response.statusText);
-        return response.json();
-    })
+    fetch('index.php?opt=lotesAves&ajax=getPesaje&idLoteAves=' + idLote)
+    .then(response => response.json())
     .then(data => {
-        data.forEach(m => {
+        data.forEach(p => {
             var row = document.createElement("tr");
             row.innerHTML =
-                '<td>' + m.idMortandad + '</td>' +
-                '<td>' + m.fecha + '</td>' +
-                '<td>' + m.causa + '</td>' +
-                '<td>' + m.cantidad + '</td>' +
+                '<td>' + p.idPesaje + '</td>' +
+                '<td>' + p.fecha + '</td>' +
+                '<td>' + p.peso + '</td>' +
                 '<td>' +
                     '<button class="btn btn-sm btn-warning btn-edit" ' +
-                        'data-id="' + m.idMortandad + '" ' +
-                        'data-fecha="' + m.fecha + '" ' +
-                        'data-causa="' + m.causa + '" ' +
-                        'data-cantidad="' + m.cantidad + '">' +
+                        'data-id="' + p.idPesaje + '" ' +
+                        'data-fecha="' + p.fecha + '" ' +
+                        'data-peso="' + p.peso + '">' +
                         'Editar' +
                     '</button> ' +
-                    '<button class="btn btn-sm btn-danger btn-delete" data-id="' + m.idMortandad + '">' +
+                    '<button class="btn btn-sm btn-danger btn-delete" data-id="' + p.idPesaje + '">' +
                         'Eliminar' +
                     '</button>' +
                 '</td>';
-            tablaMortandadTbody.appendChild(row);
+            tbody.appendChild(row);
         });
-
-        $('#tablaMortandad').DataTable();
+        $('#tablaPesaje').DataTable();
     })
-    .catch(error => {
-        console.error('Error al cargar mortandad:', error);
-        $('#tablaMortandad').DataTable();
-    });
+    .catch(err => console.error('Error al cargar pesajes:', err));
 }
 
-//------------------------------------------------
-// Listener para botón Eliminar
-//------------------------------------------------
+// Eliminar
 document.addEventListener('click', function(event) {
     if (event.target && event.target.matches('.btn-delete')) {
-        const idMortandad = event.target.getAttribute('data-id');
-        fetch('index.php?opt=lotesAves&ajax=delMuertes&idMortandad=' + idMortandad, {
+        const idPesaje = event.target.getAttribute('data-id');
+        fetch('index.php?opt=lotesAves&ajax=delPesaje&idPesaje=' + idPesaje, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         })
         .then(r => r.json().then(data => {
             if (r.ok) {
                 showToastOkay(data.msg);
-                cargarMortandad(idLote); // refrescar tabla
-                cargarDatosLote(idLote); // refrescar datos del lote
+                cargarPesajes(idLote);
+                cargarDatosLote(idLote);
             } else {
                 showToastError(data.msg);
             }
@@ -270,25 +236,24 @@ document.addEventListener('click', function(event) {
     }
 });
 
-function agregarMortandad() {
+// Agregar
+function agregarPesaje() {
     const idLote = document.getElementById('idLoteSeleccionado').value;
-    const fecha = document.getElementById('fechaMortandad').value;
-    const causa = document.getElementById('causaMortandad').value;
-    const cantidad = document.getElementById('cantidadMortandad').value;
+    const fecha = document.getElementById('fechaPesaje').value;
+    const peso = document.getElementById('pesoPesaje').value;
 
-    fetch('index.php?opt=lotesAves&ajax=addMuertes', {
+    fetch('index.php?opt=lotesAves&ajax=addPesaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'idLoteAves=' + encodeURIComponent(idLote) +
               '&fecha=' + encodeURIComponent(fecha) +
-              '&causa=' + encodeURIComponent(causa) +
-              '&cantidad=' + encodeURIComponent(cantidad)
+              '&peso=' + encodeURIComponent(peso)
     })
     .then(r => r.json().then(data => {
         if (r.ok) {
             showToastOkay(data.msg);
-            $('#modalMortandad').modal('hide');
-            cargarMortandad(idLote);
+            $('#modalPesaje').modal('hide');
+            cargarPesajes(idLote);
             cargarDatosLote(idLote);
         } else {
             showToastError(data.msg);
@@ -297,25 +262,24 @@ function agregarMortandad() {
     .catch(err => showToastError('Error en AJAX: ' + err.message));
 }
 
-function editarMortandad() {
-    const idMortandad = document.getElementById('editIdMortandad').value;
-    const fecha = document.getElementById('editFechaMortandad').value;
-    const causa = document.getElementById('editCausaMortandad').value;
-    const cantidad = document.getElementById('editCantidadMortandad').value;
+// Editar
+function editarPesaje() {
+    const idPesaje = document.getElementById('editIdPesaje').value;
+    const fecha = document.getElementById('editFechaPesaje').value;
+    const peso = document.getElementById('editPesoPesaje').value;
 
-    fetch('index.php?opt=lotesAves&ajax=editMuertes', {
+    fetch('index.php?opt=lotesAves&ajax=editPesaje', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '&idMortandad=' + encodeURIComponent(idMortandad) +
+        body: 'idPesaje=' + encodeURIComponent(idPesaje) +
               '&fecha=' + encodeURIComponent(fecha) +
-              '&causa=' + encodeURIComponent(causa) +
-              '&cantidad=' + encodeURIComponent(cantidad)
+              '&peso=' + encodeURIComponent(peso)
     })
     .then(r => r.json().then(data => {
         if (r.ok) {
             showToastOkay(data.msg);
-            $('#modalEditarMortandad').modal('hide');
-            cargarMortandad(idLote);
+            $('#modalEditarPesaje').modal('hide');
+            cargarPesajes(idLote);
             cargarDatosLote(idLote);
         } else {
             showToastError(data.msg);
@@ -324,40 +288,36 @@ function editarMortandad() {
     .catch(err => showToastError('Error en AJAX: ' + err.message));
 }
 
+// Inicialización
 window.addEventListener('load', function() {
     cargarDatosLote(idLote);
-    cargarMortandad(idLote);
+    cargarPesajes(idLote);
 
     $(document).ready(function() {
-        // Inicializar Select2 primero
         $('#selectLote').select2({
             theme: 'bootstrap-5',
             placeholder: "Seleccione un lote...",
             allowClear: false,
             width: 'resolve'
         });
-        // Luego cargar los lotes
         cargarLotes();
     });
 
-    // Evento cuando cambia la selección
     $('#selectLote').on('change', function() {
         const idLote = $(this).val();
         if (idLote) {
             $('#idLoteSeleccionado').val(idLote);
             cargarDatosLote(idLote);
-            cargarMortandad(idLote);
+            cargarPesajes(idLote);
             $('#cardLote').show();
         } else {
             $('#cardLote').hide();
         }
     });
 
-    // Configurar la fecha actual por defecto
     const today = new Date().toISOString().split('T')[0];
-    $('#fechaMortandad').val(today);
+    $('#fechaPesaje').val(today);
 });
-
 </script>
 HTML;
 

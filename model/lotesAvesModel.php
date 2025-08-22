@@ -577,7 +577,13 @@ class LoteAves{
                         (SELECT SUM(m.cantidad) 
                         FROM mortandadAves m 
                         WHERE m.idLoteAves = l.idLoteAves), 0)
-                    ) AS cantidadActual
+                    ) AS cantidadActual,
+                    -- Último peso registrado
+                    (SELECT p.peso 
+                    FROM pesajeLoteAves p 
+                    WHERE p.idLoteAves = l.idLoteAves 
+                    ORDER BY p.fecha DESC, p.idPesaje DESC
+                    LIMIT 1) AS ultimoPeso
                 FROM loteAves l
                 INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
                 INNER JOIN galpon_loteAves gl 
@@ -612,6 +618,7 @@ class LoteAves{
             throw $e;
         }
     }
+
 
     // ============================
     // MORTANDAD AVES
@@ -734,7 +741,134 @@ class LoteAves{
             throw $e;
         }
     }
+    // ============================
+    // PESAJES AVES
+    // ============================
+    public function agregarPesaje(int $idLoteAves, string $fecha, float $peso): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
 
+            $sql = "INSERT INTO pesajeLoteAves (fecha, peso, idLoteAves)
+                    VALUES (?, ?, ?)";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('sdi', $fecha, $peso, $idLoteAves);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function editarPesaje(int $idPesaje, string $fecha, float $peso): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "UPDATE pesajeLoteAves
+                    SET fecha = ?, peso = ?
+                    WHERE idPesaje = ?";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('sdi', $fecha, $peso, $idPesaje);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function deletePesaje(int $idPesaje): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "DELETE FROM pesajeLoteAves WHERE idPesaje = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('i', $idPesaje);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+
+            if ($affectedRows === 0) {
+                throw new RuntimeException("No se encontró un registro de pesaje con el ID especificado.");
+            }
+
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function getPesaje(int $idLoteAves): array
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "SELECT idPesaje, fecha, peso, idLoteAves
+                    FROM pesajeLoteAves
+                    WHERE idLoteAves = ?
+                    ORDER BY fecha DESC";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('i', $idLoteAves);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
+            $data = $result->fetch_all(MYSQLI_ASSOC);
+
+            $stmt->close();
+            return $data;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
 
 
 }

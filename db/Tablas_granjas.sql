@@ -118,7 +118,7 @@ CREATE TABLE ventaLoteAves (
 );
 
 CREATE TABLE pesajeLoteAves (
-    idPesaje INT NOT NULL,
+    idPesaje INT NOT NULL AUTO_INCREMENT,
     fecha DATE,
     peso FLOAT,
     idLoteAves INT,
