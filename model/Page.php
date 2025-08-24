@@ -106,7 +106,7 @@ private function setMenu($_menu = ""){
                             <li><a class="dropdown-item" href="index.php?opt=cargarPesaje">Cargar Pesaje</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=moverGalpon">Cambiar ubicación</a></li>
                             <li><a class="dropdown-item" href="index.php?opt=aplicarVacunas">Aplicar Vacunas</a></li>
-                            <li><a class="dropdown-item" href="index.php?opt=bajaLote">Dar de baja</a></li>
+                            <li><a class="dropdown-item" href="index.php?opt=bajaLote">Bajas</a></li>
                         </ul>
                     </li>
 

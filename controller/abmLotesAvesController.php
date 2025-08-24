@@ -142,7 +142,6 @@ if (isset($_GET['ajax']))
             }
             exit();
 
-
         // === Obtener un lote por ID ===
         case 'getLoteAvesById':
             header('Content-Type: application/json');
@@ -215,7 +214,7 @@ if (isset($_GET['ajax']))
                         (int)$_POST['idTipoAve'],
                         (int)$_POST['idGalpon'],
                         $_POST['precioCompra']
-                    )) {
+                )) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Lote agregado correctamente']);
                 } 
@@ -505,6 +504,77 @@ if (isset($_GET['ajax']))
                 }
                 $oLotes = new LoteAves();
                 $lotes = $oLotes->getPesaje((int)$_GET['idLoteAves']);
+                if ($lotes){
+                    http_response_code(200);
+                    echo json_encode($lotes);
+                }else {
+                    http_response_code(200);
+                    echo '[]';
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+        break;
+
+        //Baja de lotes de aves
+        case 'delBaja': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idBajaLoteAves']) || $_GET['idBajaLoteAves'] === '')
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: registro no seleccionado.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ( $oLotes->deleteBaja($_GET['idBajaLoteAves'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Baja revertida correctamente.']);
+                }
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al revertir la baja']);
+            }
+            exit();
+        break;
+
+        case 'baja':
+            header('Content-Type: application/json');
+            try {
+                //El motivo puede estar vacío aunque no sería lo ideal.
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['fechaBaja']) || $_POST['fechaBaja'] === '' ||
+                    !isset($_POST['precioVenta']) || $_POST['precioVenta'] === '')
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+                $oLotes = new LoteAves();
+                if ($oLotes->addBaja(
+                        (int)$_POST['idLoteAves'],
+                        $_POST['fechaBaja'],
+                        $_POST['precioVenta'],
+                        $_POST['motivo']
+                    )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Lote dado de baja correctamente']);
+                } 
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                error_log($e);
+                echo json_encode(['msg' => 'Error al ejecutar la baja.']);
+            }
+            exit();
+        break;
+
+        case 'getBajas':
+            header('Content-Type: application/json');
+            try {
+                $oLotes = new LoteAves();
+                $lotes = $oLotes->getBajas();
                 if ($lotes){
                     http_response_code(200);
                     echo json_encode($lotes);

@@ -207,15 +207,6 @@ class tipoAves{
 }
 
 class LoteAves{
-    /*CREATE TABLE loteAves (
-    idLoteAves INT NOT NULL,
-    identificador VARCHAR(20),
-    fechaNacimiento DATE,
-    fechaCompra DATE,
-    cantidadAves INT,
-    idTipoAve INT,
-    FOREIGN KEY (idTipoAve) REFERENCES tipoAve(idTipoAve),
-    PRIMARY KEY (idLoteAves)*/
     private $idLoteAves;
     private $idTipoAve;
     private $identificador;
@@ -524,7 +515,6 @@ class LoteAves{
         }
     }
 
-
     public function updateLoteAves($idLoteAves, $identificador, $fechaNac, $fechaCompra, $cantidadAves, $idTipoAve, $precioCompra)
     {
         $this->setPrecioCompra($precioCompra);
@@ -625,6 +615,58 @@ class LoteAves{
 
     public function getAll()
     //Getall para el select de los registros sobre lotes como mortandad, vacunas, movimientos de galpones.
+    //Tiene en cuenta los dados de baja para NO MOSTRARLOS
+    {
+        try {
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT 
+                    l.idLoteAves,
+                    l.identificador,
+                    l.fechaNacimiento,
+                    l.fechaCompra,
+                    l.precioCompra,
+                    l.cantidadAves,
+                    t.nombre AS tipoAveNombre,
+                    g.idGalpon,
+                    g.identificacion AS galponIdentificacion,
+                    gr.idGranja,
+                    gr.nombre AS granjaNombre
+                FROM loteAves l
+                INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                INNER JOIN galpon_loteAves gl 
+                    ON l.idLoteAves = gl.idLoteAves AND gl.fechaFin IS NULL
+                INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
+                INNER JOIN granja gr ON g.idGranja = gr.idGranja
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM bajaLoteAves b 
+                    WHERE b.idLoteAves = l.idLoteAves
+                )
+                ORDER BY l.idLoteAves ASC";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function getAllWithBajas()
+    //Getall para el select de los registros sobre lotes como mortandad, vacunas, movimientos de galpones.
+    //Tiene en cuenta los dados de baja para MOSTRARLOS
     {
         try {
             if ($this->mysqli === null) { 
@@ -985,9 +1027,145 @@ class LoteAves{
         }
     }
     // ============================
-    // MOVIMIENTO DE GALPON (Y CONSECUENTE GRANJA)
+    // BAJAS DE LOTES DE AVES
     // ============================
+    public function addBaja($idLoteAves, $fechaBaja, $precioVenta, $motivo)
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
 
+            // === Verificar que el lote existe y no tenga ya una baja ===
+            $sqlCheck = "SELECT idBajaLoteAves FROM bajaLoteAves WHERE idLoteAves = ?";
+            $stmtCheck = $this->mysqli->prepare($sqlCheck);
+            if (!$stmtCheck) throw new RuntimeException("Error en la preparación de verificación: " . $this->mysqli->error);
+            $stmtCheck->bind_param("i", $idLoteAves);
+            $stmtCheck->execute();
+            $stmtCheck->store_result();
+            if ($stmtCheck->num_rows > 0) {
+                $stmtCheck->close();
+                throw new RuntimeException("Error: el lote $idLoteAves ya fue dado de baja.");
+            }
+            $stmtCheck->close();
 
+            // === Insertar en bajaLoteAves ===
+            $sql = "INSERT INTO bajaLoteAves (fechaBaja, precioVenta, idLoteAves, motivo)
+                    VALUES (?, ?, ?, ?)";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) throw new RuntimeException("Error en la preparación de inserción: " . $this->mysqli->error);
+            $stmt->bind_param("sdis", $fechaBaja, $precioVenta, $idLoteAves, $motivo);
+            if (!$stmt->execute()) throw new RuntimeException('Error al ejecutar la inserción: ' . $stmt->error);
+            $stmt->close();
 
+            // === Opcional: cerrar galpon_loteAves ===
+            $sqlUpdate = "UPDATE galpon_loteAves 
+                        SET fechaFin = ? 
+                        WHERE idLoteAves = ? AND fechaFin IS NULL";
+            $stmtUpdate = $this->mysqli->prepare($sqlUpdate);
+            if (!$stmtUpdate) throw new RuntimeException("Error en preparación de cierre de galpón: " . $this->mysqli->error);
+            $stmtUpdate->bind_param("si", $fechaBaja, $idLoteAves);
+            if (!$stmtUpdate->execute()) throw new RuntimeException('Error al cerrar galpon_loteAves: ' . $stmtUpdate->error);
+            $stmtUpdate->close();
+
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function deleteBaja($idBajaLoteAves)
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            // === Obtener idLoteAves antes de borrar ===
+            $sqlGet = "SELECT idLoteAves, fechaBaja 
+                    FROM bajaLoteAves 
+                    WHERE idBajaLoteAves = ?";
+            $stmtGet = $this->mysqli->prepare($sqlGet);
+            if (!$stmtGet) throw new RuntimeException("Error en preparación de búsqueda: " . $this->mysqli->error);
+            $stmtGet->bind_param("i", $idBajaLoteAves);
+            $stmtGet->execute();
+            $result = $stmtGet->get_result();
+            $row = $result->fetch_assoc();
+            $stmtGet->close();
+
+            if (!$row) {
+                throw new RuntimeException("Error: no se encontró la baja con ID $idBajaLoteAves.");
+            }
+
+            $idLoteAves = $row['idLoteAves'];
+
+            // === Eliminar la baja ===
+            $sqlDel = "DELETE FROM bajaLoteAves WHERE idBajaLoteAves = ?";
+            $stmtDel = $this->mysqli->prepare($sqlDel);
+            if (!$stmtDel) throw new RuntimeException("Error en preparación de borrado: " . $this->mysqli->error);
+            $stmtDel->bind_param("i", $idBajaLoteAves);
+            if (!$stmtDel->execute()) throw new RuntimeException("Error al eliminar baja: " . $stmtDel->error);
+            $stmtDel->close();
+
+            // === Reabrir solo el último galpón asignado ===
+            $sqlUpdate = "UPDATE galpon_loteAves 
+                        SET fechaFin = NULL 
+                        WHERE idLoteAves = ? 
+                        AND fechaFin IS NOT NULL
+                        ORDER BY fechaFin DESC 
+                        LIMIT 1";
+            $stmtUpdate = $this->mysqli->prepare($sqlUpdate);
+            if (!$stmtUpdate) throw new RuntimeException("Error en preparación de reapertura: " . $this->mysqli->error);
+            $stmtUpdate->bind_param("i", $idLoteAves);
+            if (!$stmtUpdate->execute()) throw new RuntimeException('Error al reabrir galpon_loteAves: ' . $stmtUpdate->error);
+            $stmtUpdate->close();
+
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function getBajas()
+    {
+        try {
+            if ($this->mysqli === null) { 
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "SELECT 
+                        l.idLoteAves,
+                        l.identificador,
+                        l.fechaNacimiento,
+                        l.fechaCompra,
+                        l.precioCompra,
+                        l.cantidadAves,
+                        t.nombre AS tipoAveNombre,
+                        bl.idBajaLoteAves,
+                        bl.fechaBaja,
+                        bl.precioVenta,
+                        bl.motivo
+                    FROM loteAves l
+                    INNER JOIN tipoAve t ON l.idTipoAve = t.idTipoAve
+                    INNER JOIN bajaLoteAves bl ON l.idLoteAves = bl.idLoteAves
+                    ORDER BY l.idLoteAves ASC";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $result = $stmt->get_result();
+            $data = [];
+            while ($row = $result->fetch_assoc()) {
+                $data[] = $row;
+            }
+            $stmt->close();
+            return $data;
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
 }

@@ -109,13 +109,14 @@ CREATE TABLE loteVacuna (
     PRIMARY KEY (idLoteVacuna)
 );
 
-CREATE TABLE ventaLoteAves (
-    idVentaLoteAves INT NOT NULL,
-    fechaVenta DATE,
-    precio FLOAT,
+CREATE TABLE bajaLoteAves (
+    idBajaLoteAves INT NOT NULL AUTO_INCREMENT,
+    fechaBaja DATE,
+    precioVenta DECIMAL(10,2),
+    motivo VARCHAR(50),
     idLoteAves INT,
     FOREIGN KEY (idLoteAves) REFERENCES loteAves(idLoteAves),
-    PRIMARY KEY (idVentaLoteAves)
+    PRIMARY KEY (idBajaLoteAves)
 );
 
 CREATE TABLE pesajeLoteAves (
