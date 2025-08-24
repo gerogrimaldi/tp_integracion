@@ -201,7 +201,6 @@ function cargarTablaVacunas() {
         data.forEach(vacuna => {
             var row = document.createElement("tr");
             row.className = "table-light";
-            row.style.cursor = "pointer";
             row.setAttribute('data-id', vacuna.idVacuna);
             row.innerHTML = 
                '<td>' + vacuna.idVacuna + '</td>' +
@@ -226,17 +225,6 @@ function cargarTablaVacunas() {
                 '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarVacuna(' + vacuna.idVacuna + ')">Borrar</button>' +
             '</td>';
             tablaVacunasTbody.appendChild(row);
-            // Add click event to the row
-            row.addEventListener('click', function() {
-            // Remove selected class from all rows
-            document.querySelectorAll('#tablaVacunas tbody tr').forEach(r => {
-                r.classList.remove('table-primary');
-            });
-            // Add selected class to clicked row
-            this.classList.add('table-primary');
-            // Load lotes for this vacuna
-            cargarTablaLotesVacuna(this.getAttribute('data-id'));
-            });
         });
         $('#tablaVacunas').DataTable();
     })
@@ -430,7 +418,24 @@ document.getElementById("editarVacuna").addEventListener("show.bs.modal", functi
 window.addEventListener('load', function() {
     cargarTablaVacunas();
     cargarSelectViaAplicacion('selectViaAplicacion');
-    cargarSelectViaAplicacion('editarSelectViaAplicacion')
+    cargarSelectViaAplicacion('editarSelectViaAplicacion');
+
+    // Agregar click a las filas de vacunas para redirigir a los lotes
+    const tbodyVacunas = document.getElementById('vacunas');
+    tbodyVacunas.addEventListener('click', function(event) {
+        // Encontrar el <tr> correspondiente
+        let tr = event.target.closest('tr');
+        if (!tr) return;
+
+        const idVacuna = tr.getAttribute('data-id');
+        if (!idVacuna) return;
+
+        // Preguntar si quiere cargar los lotes
+        const respuesta = confirm('¿Desea ver los lotes de esta vacuna?');
+        if (respuesta) {
+            window.location.href = 'index.php?opt=lotesVacunas&idVacuna=' + idVacuna;
+        }
+    });
 });
 </script>
 

@@ -201,8 +201,8 @@ if (isset($_GET['ajax']))
             header('Content-Type: application/json');
             try {
                 if (empty($_POST['numeroLote']) || (!isset($_POST['idLoteVacuna']) || $_POST['idLoteVacuna'] === '') || 
-                    empty($_POST['fechaCompra']) || (!isset($_POST['idVacuna']) || $_POST['idVacuna'] === '') || 
-                    empty($_POST['cantidad']) || empty($_POST['vencimiento'])) {
+                    empty($_POST['fechaCompra']) || 
+                    empty($_POST['cantidad']) || empty($_POST['fechaVencimiento'])) {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
                     exit();
@@ -212,8 +212,7 @@ if (isset($_GET['ajax']))
                 $oLoteVacuna->setNumeroLote($_POST['numeroLote']);
                 $oLoteVacuna->setFechaCompra($_POST['fechaCompra']);
                 $oLoteVacuna->setCantidad($_POST['cantidad']);
-                $oLoteVacuna->setVencimiento($_POST['vencimiento']);
-                $oLoteVacuna->setIdVacuna($_POST['idVacuna']);
+                $oLoteVacuna->setVencimiento($_POST['fechaVencimiento']);
                 // Respuesta al frontend
                 if ($oLoteVacuna->update()) {
                     http_response_code(200);
@@ -222,8 +221,8 @@ if (isset($_GET['ajax']))
                 } 
             } catch (RuntimeException $e) {
                 http_response_code(400);
-                // echo json_encode(['msg' => $e->getMessage()]);
-                echo json_encode(['msg' => 'Error al editar.']);
+                echo json_encode(['msg' => $e->getMessage()]);
+                //echo json_encode(['msg' => 'Error al editar.']);
             }
             exit();
         break;

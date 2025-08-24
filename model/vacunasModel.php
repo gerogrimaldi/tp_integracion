@@ -275,24 +275,14 @@ class loteVacuna{
         $this->cantidad = htmlspecialchars(strip_tags(trim($cantidad)), ENT_QUOTES, 'UTF-8'); 
     }
 
-    public function setFechaCompra($fechaCompra)
-    {
-        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $fechaCompra);
-        if ($dateTime) {
-            $this->fechaCompra = $dateTime->format('Y-m-d H:i:s');
-        } else {
-            throw new RuntimeException('Formato de fecha de compra inválido.');
-        }
+    public function setFechaCompra($fecha){
+        $this->fechaCompra = new DateTime($fecha);
+        $this->fechaCompra = $this->fechaCompra->format('Y-m-d H:i:s');
     }
 
-    public function setVencimiento($vencimiento)
-    {
-        $dateTime = DateTime::createFromFormat('Y-m-d\TH:i', $vencimiento);
-        if ($dateTime) {
-            $this->vencimiento = $dateTime->format('Y-m-d H:i:s');
-        } else {
-            throw new RuntimeException('Formato de fecha de vencimiento inválido.');
-        }
+    public function setVencimiento($fecha){
+        $this->vencimiento = new DateTime($fecha);
+        $this->vencimiento = $this->vencimiento->format('Y-m-d H:i:s');
     }
     
     public function setMaxIDLoteVacuna()
@@ -352,11 +342,13 @@ class loteVacuna{
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
             // Preparar la consulta
-            $sql = "SELECT loteVacuna.idLoteVacuna, loteVacuna.numeroLote, loteVacuna.fechaCompra, 
-                loteVacuna.cantidad, loteVacuna.vencimiento, loteVacuna.idVacuna, vacuna.nombre, vacuna.marca 
-                FROM loteVacuna 
-                INNER JOIN vacuna ON (vacuna.idVacuna = loteVacuna.idVacuna) 
-                WHERE loteVacuna.idVacuna = ?";
+        $sql = "SELECT lv.idLoteVacuna, lv.numeroLote, lv.fechaCompra, lv.cantidad, lv.vencimiento, lv.idVacuna, v.nombre, v.marca,
+                    (lv.cantidad - IFNULL(SUM(lvla.cantidad),0)) AS cantidadDisponible
+                FROM loteVacuna lv
+                INNER JOIN vacuna v ON v.idVacuna = lv.idVacuna
+                LEFT JOIN loteVacuna_loteAve lvla ON lvla.idLoteVacuna = lv.idLoteVacuna
+                WHERE lv.idVacuna = ?
+                GROUP BY lv.idLoteVacuna";
         $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);
@@ -419,7 +411,6 @@ class loteVacuna{
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
             $stmt->close();
-            $this->mysqli->close();
             return true;
         } catch (RuntimeException $e) {
             throw $e;
@@ -432,13 +423,13 @@ class loteVacuna{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
             }
-            $sql = "UPDATE loteVacuna SET  numeroLote = ?, fechaCompra = ?, cantidad = ?, vencimiento = ?, idVacuna = ? WHERE idLoteVacuna = ?";
+            $sql = "UPDATE loteVacuna SET  numeroLote = ?, fechaCompra = ?, cantidad = ?, vencimiento = ? WHERE idLoteVacuna = ?";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {
                 throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
             }
             // Enlazar parámetros y ejecutar la consulta
-            $stmt->bind_param("ssisii", $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idVacuna, $this->idLoteVacuna);
+            $stmt->bind_param("ssisi", $this->numeroLote, $this->fechaCompra, $this->cantidad, $this->vencimiento, $this->idLoteVacuna);
             if (!$stmt->execute()) {
                 throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
             }
