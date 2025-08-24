@@ -589,6 +589,120 @@ if (isset($_GET['ajax']))
             exit();
         break;
 
+        // ------------------------------------
+        // AJAX - LOTE DE AVES - VACUNAS
+        // ------------------------------------
+        case 'addVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_POST['idLoteAves']) || $_POST['idLoteAves'] === '' ||
+                    !isset($_POST['idLoteVacuna']) || $_POST['idLoteVacuna'] === '' ||
+                    !isset($_POST['fecha']) || $_POST['fecha'] === '' ||
+                    !isset($_POST['cantidad']) || $_POST['cantidad'] === '') 
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+
+                $oLotes = new LoteAves();
+                if ($oLotes->agregarVacuna(
+                        (int)$_POST['idLoteAves'],
+                        (int)$_POST['idLoteVacuna'],
+                        $_POST['fecha'],
+                        (int)$_POST['cantidad']
+                    )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Vacuna aplicada correctamente']);
+                }
+
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                error_log($e);
+                echo json_encode(['msg' => 'Error al añadir vacuna.']);
+            }
+            exit();
+        break;
+
+        case 'editVacuna':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_POST['idAplicacion']) || $_POST['idAplicacion'] === '' ||
+                    !isset($_POST['idLoteVacuna']) || $_POST['idLoteVacuna'] === '' ||
+                    !isset($_POST['fecha']) || $_POST['fecha'] === '' ||
+                    !isset($_POST['cantidad']) || $_POST['cantidad'] === '') 
+                {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
+                    exit();
+                }
+
+                $oLotes = new LoteAves();
+                if ($oLotes->editarVacuna(
+                        (int)$_POST['idAplicacion'],
+                        (int)$_POST['idLoteVacuna'],
+                        $_POST['fecha'],
+                        (int)$_POST['cantidad']
+                    )) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Cambios guardados correctamente']);
+                }
+
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al editar aplicación de vacuna.']);
+            }
+            exit();
+        break;
+
+        case 'delVacuna': 
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idAplicacion']) || $_GET['idAplicacion'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: registro no seleccionado.']);
+                    exit();
+                }
+
+                $oLotes = new LoteAves();
+                if ($oLotes->deleteVacuna((int)$_GET['idAplicacion'])) {
+                    http_response_code(200);
+                    echo json_encode(['msg' => 'Aplicación eliminada correctamente.']);
+                }
+
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al eliminar, tiene registros asociados']);
+            }
+            exit();
+        break;
+
+        case 'getVacunas':
+            header('Content-Type: application/json');
+            try {
+                if (!isset($_GET['idLoteAves']) || $_GET['idLoteAves'] === '') {
+                    http_response_code(400);
+                    echo json_encode(['msg' => 'Error: lote no seleccionado.']);
+                    exit();
+                }
+
+                $oLotes = new LoteAves();
+                $vacunas = $oLotes->getVacunas((int)$_GET['idLoteAves']);
+                if ($vacunas){
+                    http_response_code(200);
+                    echo json_encode($vacunas);
+                } else {
+                    http_response_code(200);
+                    echo '[]';
+                }
+
+            } catch (RuntimeException $e) {
+                http_response_code(400);
+                echo json_encode(['msg' => $e->getMessage()]);
+            }
+            exit();
+        break;
+
         default:
             exit();
         break;

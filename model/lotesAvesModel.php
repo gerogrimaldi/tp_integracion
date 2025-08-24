@@ -1168,4 +1168,135 @@ class LoteAves{
             throw $e;
         }
     }
+
+    // --- Aplicación de vacunas ---
+    // Agregar aplicación de vacuna a un lote de aves
+    public function agregarVacuna(int $idLoteAves, int $idLoteVacuna, string $fecha, int $cantidad): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "INSERT INTO loteVacuna_loteAve (idLoteAves, idLoteVacuna, fecha, cantidad)
+                    VALUES (?, ?, ?, ?)";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('iisi', $idLoteAves, $idLoteVacuna, $fecha, $cantidad);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    // Editar aplicación de vacuna
+    public function editarVacuna(int $idAplicacion, int $idLoteVacuna, string $fecha, int $cantidad): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "UPDATE loteVacuna_loteAve
+                    SET idLoteVacuna = ?, fecha = ?, cantidad = ?
+                    WHERE idloteVacuna_loteAve = ?";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('isii', $idLoteVacuna, $fecha, $cantidad, $idAplicacion);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $stmt->close();
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    // Eliminar aplicación de vacuna
+    public function deleteVacuna(int $idAplicacion): bool
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "DELETE FROM loteVacuna_loteAve WHERE idloteVacuna_loteAve = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('i', $idAplicacion);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $affectedRows = $stmt->affected_rows;
+            $stmt->close();
+            if ($affectedRows === 0) {
+                throw new RuntimeException("No se encontró un registro de aplicación con el ID especificado.");
+            }
+            return true;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    // Obtener aplicaciones de vacunas de un lote de aves
+    public function getVacunas(int $idLoteAves): array
+    {
+        try {
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+
+            $sql = "SELECT lva.idloteVacuna_loteAve, lva.idLoteVacuna, lv.numeroLote, lv.idVacuna, v.nombre AS vacunaNombre,
+                        lva.fecha, lva.cantidad
+                    FROM loteVacuna_loteAve lva
+                    INNER JOIN loteVacuna lv ON lva.idLoteVacuna = lv.idLoteVacuna
+                    INNER JOIN vacuna v ON lv.idVacuna = v.idVacuna
+                    WHERE lva.idLoteAves = ?
+                    ORDER BY lva.fecha DESC";
+
+            $stmt = $this->mysqli->prepare($sql);
+            if ($stmt === false) {
+                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
+            }
+
+            $stmt->bind_param('i', $idLoteAves);
+
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+
+            $result = $stmt->get_result();
+            $data = $result->fetch_all(MYSQLI_ASSOC);
+
+            $stmt->close();
+            return $data;
+
+        } catch (RuntimeException $e) {
+            throw $e;
+        }
+    }
 }
