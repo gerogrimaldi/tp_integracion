@@ -33,19 +33,24 @@ $body = <<<HTML
     </div>
 
     <!-- Tabla de aplicaciones de vacunas -->
-    <table id="tablaVacunas" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Vacuna</th>
-                <th class="text-primary">Lote</th>
-                <th class="text-primary">Fecha</th>
-                <th class="text-primary">Cantidad</th>
-                <th class="text-primary">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="aplicacionesVacunas"></tbody>
-    </table>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaVacunas" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Vacuna</th>
+                        <th class="text-primary">Lote</th>
+                        <th class="text-primary">Fecha</th>
+                        <th class="text-primary">Cantidad</th>
+                        <th class="text-primary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="aplicacionesVacunas"></tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- Modal Aplicar Vacuna -->
@@ -75,7 +80,7 @@ $body = <<<HTML
                     <div class="mb-3">
                         <label for="fechaVacuna" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="fechaVacuna" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-3">
                         <label for="cantidadVacuna" class="form-label">Cantidad</label>
@@ -135,31 +140,52 @@ function cargarDatosLote(idLote) {
 // Cargar tabla de aplicaciones de vacunas
 //------------------------------------------------
 function cargarAplicacionesVacunas(idLote) {
+    if ($.fn.DataTable.isDataTable('#tablaVacunas')) {
+            $('#tablaVacunas').DataTable().destroy();
+    }
+    var tablaVacunasTbody = document.getElementById("aplicacionesVacunas");
+    tablaVacunasTbody.innerHTML = '';
     fetch('index.php?opt=lotesAves&ajax=getVacunas&idLoteAves=' + idLote)
     .then(r => r.json())
     .then(data => {
+        console.log(data);
         var tbody = $('#aplicacionesVacunas');
         tbody.empty();
         data.forEach(v => {
             var row = '<tr>' +
-                '<td>' + v.idAplicacion + '</td>' +
-                '<td>' + v.nombre + '</td>' +
-                '<td>' + v.identificadorLote + '</td>' +
+                '<td>' + v.idloteVacuna_loteAve + '</td>' +
+                '<td>' + v.vacunaNombre + '</td>' +
+                '<td>' + v.numeroLote + '</td>' +
                 '<td>' + v.fecha + '</td>' +
                 '<td>' + v.cantidad + '</td>' +
                 '<td>' +
-                    '<button class="btn btn-sm btn-warning btn-edit" data-id="' + v.idAplicacion + '">Editar</button> ' +
-                    '<button class="btn btn-sm btn-danger btn-delete" data-id="' + v.idAplicacion + '">Eliminar</button>' +
+                    //'<button class="btn btn-sm btn-warning btn-edit" data-id="' + v.idloteVacuna_loteAve + '">Editar</button> ' +
+                    '<button class="btn btn-sm btn-danger btn-delete" data-id="' + v.idloteVacuna_loteAve + '">Eliminar</button>' +
                 '</td>' +
                 '</tr>';
             tbody.append(row);
         });
-        if ($.fn.DataTable.isDataTable('#tablaVacunas')) {
-            $('#tablaVacunas').DataTable().destroy();
-        }
         $('#tablaVacunas').DataTable();
     });
 }
+
+// Listener delegado para eliminar aplicación de vacuna
+$(document).on('click', '.btn-delete', function () {
+    const idAplicacion = $(this).data('id');
+    fetch('index.php?opt=lotesAves&ajax=delVacuna&idAplicacion=' + idAplicacion, {
+        method: 'DELETE'
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.msg) showToastOkay(data.msg);
+        // recargar tabla
+        cargarAplicacionesVacunas($('#selectLote').val());
+    })
+    .catch(err => {
+        console.error(err);
+        showToastError('Error al eliminar');
+    });
+});
 
 //------------------------------------------------
 // Inicialización Select2 y eventos
@@ -218,7 +244,6 @@ $(document).ready(function() {
         const idVacuna = $(this).val();
         const selectLote = $('#selectLoteVacunaModal');
         selectLote.empty().append('<option value="">Seleccione un lote...</option>');
-
         if (idVacuna) {
             fetch('index.php?opt=vacunas&ajax=getLotesVacuna&idVacuna=' + idVacuna)
             .then(r => r.json())
@@ -236,8 +261,8 @@ $(document).ready(function() {
     // Guardar aplicación de vacuna
     //------------------------------------------------
     $('#btnGuardarVacuna').on('click', function() {
-        const idLoteAves = $('#selectLoteVacunaModal').val();
-        const idLoteVacuna = $('#selectVacunaModal').val();
+        const idLoteAves = $('#selectLote').val(); // ✅ ahora toma el lote de aves
+        const idLoteVacuna = $('#selectLoteVacunaModal').val(); // este es el lote de vacuna seleccionado
         const fecha = $('#fechaVacuna').val();
         const cantidad = $('#cantidadVacuna').val();
 
@@ -257,8 +282,13 @@ $(document).ready(function() {
         .then(r => r.json())
         .then(data => {
             if (data.msg) showToastOkay(data.msg);
-            $('#modalAplicarVacuna').modal('hide');
-            cargarAplicacionesVacunas($('#selectLote').val());
+
+            // Cerrar modal correctamente en Bootstrap 5
+            var modalVacuna = bootstrap.Modal.getInstance(document.getElementById('modalAplicarVacuna'));
+            modalVacuna.hide();
+
+            // Recargar tabla con el lote correcto
+            cargarAplicacionesVacunas(idLoteAves);
         });
     });
 });

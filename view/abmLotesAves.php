@@ -34,20 +34,23 @@ $body = <<<HTML
             </div>
         </div>
         
-        <div class="card card-body text-dark">
-            <table id="tablaTiposAve" class="table table-bordered bg-white">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-primary">ID</th>
-                        <th class="text-primary">Descripción</th>
-                        <th class="text-primary">✏</th>
-                        <th class="text-primary">❌</th>
-                    </tr>
-                </thead>
-                <tbody id="tipoAve">
-                    <!-- Los datos se insertarán aquí -->
-                </tbody>
-            </table>
+        <!-- Tabla de tipos de ave -->
+        <div class="card shadow-sm rounded-3 mb-3">
+            <div class="card-body table-responsive">
+                <table id="tablaTiposAve" class="table table-striped table-hover align-middle mb-0 bg-white">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-primary">ID</th>
+                            <th class="text-primary">Descripción</th>
+                            <th class="text-primary">✏</th>
+                            <th class="text-primary">❌</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tipoAve">
+                        <!-- Los datos se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -261,22 +264,26 @@ $body .= <<<HTML
         </div>
     </div>
 
-    <!-- Tabla de lotes -->
-    <table id="tablaLotes" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">Identificador</th>
-                <th class="text-primary">Fecha Nacimiento</th>
-                <th class="text-primary">Fecha Compra</th>
-                <th class="text-primary">Tipo de Ave</th>
-                <th class="text-primary">Cantidad</th>
-                <th class="text-primary">Precio Compra</th>
-                <th class="text-primary">Galpón</th>
-                <th class="text-primary">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="lotesAves"></tbody>
-    </table>
+    <!-- Tabla de lotes - En vista movil es un parto-->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body">
+            <table id="tablaLotes" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">Identificador</th>
+                        <th class="text-primary">Fecha Nacimiento</th>
+                        <th class="text-primary">Fecha Compra</th>
+                        <th class="text-primary">Tipo de Ave</th>
+                        <th class="text-primary">Cantidad</th>
+                        <th class="text-primary">Precio Compra</th>
+                        <th class="text-primary">Galpón</th>
+                        <th class="text-primary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="lotesAves"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Agregar Lote de Aves -->
@@ -297,12 +304,12 @@ $body .= <<<HTML
                     <div class="mb-4">
                         <label for="fechaNacimiento" class="form-label">Fecha de Nacimiento</label>
                         <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="fechaCompra" class="form-label">Fecha de Compra</label>
                         <input type="date" class="form-control" id="fechaCompra" name="fechaCompra" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="selectTipoAve" class="form-label">Tipo de Ave</label>
@@ -317,12 +324,12 @@ $body .= <<<HTML
                     <div class="mb-4">
                         <label for="cantidad" class="form-label">Cantidad de Aves</label>
                         <input type="number" class="form-control" id="cantidad" name="cantidad" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">Ingrese una cantidad válida (1 o más).</div>
                     </div>
                     <div class="mb-4">
                         <label for="precioCompra" class="form-label">Precio de Compra</label>
                         <input type="number" step="0.01" class="form-control" id="precioCompra" name="precioCompra" required>
-                        <div class="invalid-feedback">Ingrese un precio válido.</div>
+                        <div class="invalid-feedback">Ingrese un precio válido (0 o más).</div>
                     </div>
                     <input type="hidden" id="idGranja" name="idGranja">
                 </form>
@@ -354,12 +361,12 @@ $body .= <<<HTML
                     <div class="mb-4">
                         <label for="editFechaNacimiento" class="form-label">Fecha de Nacimiento</label>
                         <input type="date" class="form-control" id="editFechaNacimiento" name="fechaNacimiento" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="editFechaCompra" class="form-label">Fecha de Compra</label>
                         <input type="date" class="form-control" id="editFechaCompra" name="fechaCompra" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="editSelectTipoAve" class="form-label">Tipo de Ave</label>
@@ -374,12 +381,12 @@ $body .= <<<HTML
                     <div class="mb-4">
                         <label for="editCantidad" class="form-label">Cantidad de Aves</label>
                         <input type="number" class="form-control" id="editCantidad" name="cantidad" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">Ingrese una cantidad válida (1 o más).</div>
                     </div>
                     <div class="mb-4">
                         <label for="editPrecioCompra" class="form-label">Precio de Compra</label>
                         <input type="number" step="0.01" class="form-control" id="editPrecioCompra" name="precioCompra" required>
-                        <div class="invalid-feedback">Ingrese un precio válido.</div>
+                        <div class="invalid-feedback">Ingrese un precio válido (0 o más).</div>
                     </div>
                     <input type="hidden" id="editIdGranja" name="idGranja">
                 </form>

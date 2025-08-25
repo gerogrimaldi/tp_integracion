@@ -2,41 +2,41 @@
 $body = <<<HTML
 <div class="container">
     <h1>Galpones</h1>
-    <form id="selectGranjaForm" class="needs-validation" novalidate>
-        <div class="mb-4">
-            <label for="selectGranja" class="form-label">Seleccione una granja para ver sus galpones.</label>
-            <div class="input-group">
-                <select id="selectGranja" name="selectGranja" class="form-control" required>
-                    <!-- Listado de granjas -->
-                </select>
-                <div class="invalid-feedback">
-                    Debe elegir una opción.
-                </div>
-            </div>
-        </div>
-    </form>
 
-    <div class="text-center mb-3">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
-          Agregar galpón
+    <!-- Seleccionar Granja -->
+    <div class="input-group mb-3">
+        <select id="selectGranja" name="selectGranja" class="form-select rounded-start" required>
+            <!-- Listado de granjas -->
+        </select>
+        <button type="button" class="btn btn-primary rounded-end" data-bs-toggle="modal" data-bs-target="#agregarGalpon">
+            Agregar galpón
         </button>
+        <div class="invalid-feedback">
+            Debe elegir una opción.
+        </div>
     </div>
-    
-    <table id="tablaGalpones" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Identificación</th>
-                <th class="text-primary">Tipo de Aves</th>
-                <th class="text-primary">Capacidad</th>
-                <th class="text-primary">✏</th>
-                <th class="text-primary">❌</th>
-            </tr>
-        </thead>
-        <tbody id="galpones">
-            <!-- Los datos se insertarán aquí -->
-        </tbody>
-    </table>
+
+    <!-- Tabla de galpones -->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaGalpones" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Identificación</th>
+                        <th class="text-primary">Tipo de Aves</th>
+                        <th class="text-primary">Capacidad</th>
+                        <th class="text-primary">✏</th>
+                        <th class="text-primary">❌</th>
+                    </tr>
+                </thead>
+                <tbody id="galpones">
+                    <!-- Los datos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- Modal popUp Agregar Galpon -->

@@ -33,17 +33,22 @@ $body = <<<HTML
     </div>
 
     <!-- Tabla de registros de pesaje -->
-    <table id="tablaPesaje" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Fecha</th>
-                <th class="text-primary">Peso (kg)</th>
-                <th class="text-primary">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="pesajesAves"></tbody>
-    </table>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaPesaje" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Fecha</th>
+                        <th class="text-primary">Peso (kg)</th>
+                        <th class="text-primary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="pesajesAves"></tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- Modal Registrar Pesaje -->

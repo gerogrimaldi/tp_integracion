@@ -15,28 +15,32 @@ $body = <<<HTML
 <div class="container">
     <h1>Vacunas</h1>
 
-    <div class="text-center mb-3">
+    <div class="mb-3">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarVacuna">
           Agregar nueva vacuna
         </button>
     </div>
-    <table id="tablaVacunas" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Nombre</th>
-                <th class="text-primary">Via Aplicacion</th>
-                <th class="text-primary">Marca</th>
-                <th class="text-primary">Enfermedad</th>
-                <th class="text-primary">✏</th>
-                <th class="text-primary">❌</th>
-            </tr>
-        </thead>
-        <tbody id="vacunas">
-            <!-- Los datos se insertarán aquí -->
-        </tbody>
-    </table>
-
+    <!-- Tabla de vacunas -->
+    <div class="card shadow-sm rounded-3 mb-3">
+        <div class="card-body table-responsive">
+            <table id="tablaVacunas" class="table table-striped table-hover align-middle mb-0 bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Nombre</th>
+                        <th class="text-primary">Vía Aplicación</th>
+                        <th class="text-primary">Marca</th>
+                        <th class="text-primary">Enfermedad</th>
+                        <th class="text-primary">✏</th>
+                        <th class="text-primary">❌</th>
+                    </tr>
+                </thead>
+                <tbody id="vacunas">
+                    <!-- Los datos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
     <!-- Modal agregar Vacuna -->
     <div class="modal fade" id="agregarVacuna" tabindex="-1" aria-labelledby="newVacunaModal" aria-hidden="true">
         <div class="modal-dialog">

@@ -35,20 +35,23 @@ $body = <<<HTML
             </div>
         </div>
         
-        <div class="card card-body text-dark">
-            <table id="tablaTiposMant" class="table table-bordered bg-white">
-                <thead class="table-light">
-                    <tr>
-                        <th class="text-primary">ID</th>
-                        <th class="text-primary">Descripción</th>
-                        <th class="text-primary">✏</th>
-                        <th class="text-primary">❌</th>
-                    </tr>
-                </thead>
-                <tbody id="tipoMant">
-                    <!-- Los datos se insertarán aquí -->
-                </tbody>
-            </table>
+        <!-- Tabla de tipos de mantenimiento -->
+        <div class="card shadow-sm rounded-3 mb-3">
+            <div class="card-body table-responsive">
+                <table id="tablaTiposMant" class="table table-striped table-hover align-middle mb-0 bg-white">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-primary">ID</th>
+                            <th class="text-primary">Descripción</th>
+                            <th class="text-primary">✏</th>
+                            <th class="text-primary">❌</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tipoMant">
+                        <!-- Los datos se insertarán aquí -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

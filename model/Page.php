@@ -39,9 +39,9 @@ class Page
                 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet">
                 <!-- Select2 CSS -->
                 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
                 <!-- jQuery -->
                 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+                <link href="https://cdn.datatables.net/2.0.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
             </head>
             <body class="bg-dark text-white">
             <div>';
@@ -211,15 +211,17 @@ private function setMenu($_menu = ""){
                     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
                     <!-- Select2 JS -->
                     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js" defer></script>
-                    <!-- DataTables -->
-                    <script src="js/DataTables/datatables.min.js"></script>
-                    <link href="js/DataTables/datatables.min.css" rel="stylesheet">
+                    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.min.js"></script>
+                    <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.min.js"></script>
                     <script>
                     $(document).ready(function() {
                         $.extend(true, $.fn.dataTable.defaults, {
                             language: {
-                            url: "js/DataTables/Spanish.json"
-                            }
+                                url: "js/DataTables/Spanish.json"
+                            },
+                            responsive: true,       // <-- hace que todas las tablas sean responsive
+                            autoWidth: false,       // opcional, evita que DataTables calcule anchos automáticamente
+                            scrollX: false          // opcional, desactiva scroll horizontal por defecto si usás responsive
                         });
                     });
                     </script>

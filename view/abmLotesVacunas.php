@@ -16,21 +16,26 @@ $body = <<<HTML
         <div class="invalid-feedback">Debe elegir una vacuna.</div>
     </div>
 
-    <!-- Tabla de lotes de la vacuna -->
-    <table id="tablaLotesVacuna" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th>ID</th>
-                <th>Número de Lote</th>
-                <th>Fecha Compra</th>
-                <th>Cantidad comprada</th>
-                <th>Cantidad disponible</th>
-                <th>Vencimiento</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="lotesVacuna"></tbody>
-    </table>
+  <!-- Tabla de lotes de la vacuna -->
+  <div class="card shadow-sm rounded-3 mb-3">
+      <div class="card-body table-responsive">
+          <table id="tablaLotesVacuna" class="table table-striped table-hover align-middle mb-0 bg-white">
+              <thead class="table-light">
+                  <tr>
+                      <th class="text-primary">ID</th>
+                      <th class="text-primary">Número de Lote</th>
+                      <th class="text-primary">Fecha Compra</th>
+                      <th class="text-primary">Cantidad comprada</th>
+                      <th class="text-primary">Cantidad disponible</th>
+                      <th class="text-primary">Vencimiento</th>
+                      <th class="text-primary">Acciones</th>
+                  </tr>
+              </thead>
+              <tbody id="lotesVacuna"></tbody>
+          </table>
+      </div>
+  </div>
+
 </div>
 
 <div class="modal fade" id="modalAgregarLote" tabindex="-1">
@@ -46,6 +51,7 @@ $body = <<<HTML
           <div class="mb-3">
             <label>Número de Lote</label>
             <input type="text" name="numeroLote" class="form-control" required>
+            
           </div>
           <div class="mb-3">
             <label>Fecha Compra</label>
@@ -166,6 +172,7 @@ function cargarLotesVacuna(idVacuna) {
                 '</td>';
             tbody.appendChild(row);
         });
+        $('#tablaLotesVacuna').DataTable()
     });
 }
 

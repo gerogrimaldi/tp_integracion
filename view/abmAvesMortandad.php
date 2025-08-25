@@ -33,18 +33,23 @@ $body = <<<HTML
     </div>
 
     <!-- Tabla de registros de mortandad -->
-    <table id="tablaMortandad" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Fecha</th>
-                <th class="text-primary">Causa</th>
-                <th class="text-primary">Cantidad</th>
-                <th class="text-primary">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="mortandadAves"></tbody>
-    </table>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body">
+            <table id="tablaMortandad" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Fecha</th>
+                        <th class="text-primary">Causa</th>
+                        <th class="text-primary">Cantidad</th>
+                        <th class="text-primary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="mortandadAves"></tbody>
+            </table>
+        </div>
+    </div>
+    
 </div>
 
 <!-- Modal Registrar Mortandad -->

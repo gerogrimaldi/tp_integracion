@@ -35,19 +35,24 @@ $body .= <<<HTML
         </div>
     </div>
 
-    <table id="tablaMantGalpon" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Fecha</th>
-                <th class="text-primary">Mantenimiento</th>
-                <th class="text-primary">❌</th>
-            </tr>
-        </thead>
-        <tbody id="mantGalpon">
-            <!-- Los datos se insertarán aquí -->
-        </tbody>
-    </table>
+    <!-- Tabla de mantenimiento de galpones -->
+    <div class="card shadow-sm rounded-3 mb-3">
+        <div class="card-body table-responsive">
+            <table id="tablaMantGalpon" class="table table-striped table-hover align-middle mb-0 bg-white">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Fecha</th>
+                        <th class="text-primary">Mantenimiento</th>
+                        <th class="text-primary">❌</th>
+                    </tr>
+                </thead>
+                <tbody id="mantGalpon">
+                    <!-- Los datos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal agregar Mantenimiento Galpon -->

@@ -28,17 +28,22 @@ $body = <<<HTML
     </div>
 
     <!-- Tabla de cambios de ubicación -->
-    <table id="tablaUbicaciones" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Galpón</th>
-                <th class="text-primary">Fecha Inicio</th>
-                <th class="text-primary">Fecha Fin</th>
-            </tr>
-        </thead>
-        <tbody id="ubicacionesLote"></tbody>
-    </table>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaUbicaciones" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Galpón</th>
+                        <th class="text-primary">Fecha Inicio</th>
+                        <th class="text-primary">Fecha Fin</th>
+                    </tr>
+                </thead>
+                <tbody id="ubicacionesLote"></tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- Modal Registrar Cambio de Ubicación -->
@@ -61,7 +66,7 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="fechaInicio" class="form-label">Fecha Inicio</label>
                         <input type="date" id="fechaInicio" class="form-control" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <input type="hidden" id="idLoteSeleccionado" name="idLoteAves">
                 </form>

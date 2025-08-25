@@ -3,28 +3,34 @@ $body = <<<HTML
 <div class="container">
     <h1>Granjas</h1>
 
-    <div class="text-center mb-3">
+    <div class="mb-3">
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#agregarGranja">
           Agregar nueva granja
         </button>
     </div>
 
-    <table id="tablaGranjas" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID</th>
-                <th class="text-primary">Nombre</th>
-                <th class="text-primary">SENASA Nº</th>
-                <th class="text-primary">m²</th>
-                <th class="text-primary">Ubicación</th> 
-                <th class="text-primary">✏</th>
-                <th class="text-primary">❌</th>
-            </tr>
-        </thead>
-        <tbody id="granjas">
-            <!-- Los datos se insertarán aquí -->
-        </tbody>
-    </table>
+    <!-- Tabla de granjas -->
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaGranjas" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID</th>
+                        <th class="text-primary">Nombre</th>
+                        <th class="text-primary">SENASA Nº</th>
+                        <th class="text-primary">m²</th>
+                        <th class="text-primary">Ubicación</th> 
+                        <th class="text-primary">✏</th>
+                        <th class="text-primary">❌</th>
+                    </tr>
+                </thead>
+                <tbody id="granjas">
+                    <!-- Los datos se insertarán aquí -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
 
 <!-- Modal popUp Agregar Granja -->

@@ -12,19 +12,23 @@ $body = <<<HTML
     </div>
 
     <!-- Tabla de bajas -->
-    <table id="tablaBajas" class="table table-bordered bg-white">
-        <thead class="table-light">
-            <tr>
-                <th class="text-primary">ID Baja</th>
-                <th class="text-primary">Lote</th>
-                <th class="text-primary">Fecha Baja</th>
-                <th class="text-primary">Precio Venta</th>
-                <th class="text-primary">Motivo</th>
-                <th class="text-primary">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="tbodyBajas"></tbody>
-    </table>
+    <div class="card shadow-sm rounded-3">
+        <div class="card-body table-responsive">
+            <table id="tablaBajas" class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-primary">ID Baja</th>
+                        <th class="text-primary">Lote</th>
+                        <th class="text-primary">Fecha Baja</th>
+                        <th class="text-primary">Precio Venta</th>
+                        <th class="text-primary">Motivo</th>
+                        <th class="text-primary">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tbodyBajas"></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- Modal Registrar Baja -->
@@ -45,14 +49,17 @@ $body = <<<HTML
                     <div class="mb-3">
                         <label for="fechaBaja" class="form-label">Fecha de Baja</label>
                         <input type="date" id="fechaBaja" name="fechaBaja" class="form-control" required>
+                        <div class="invalid-feedback">La fecha válida, no puede ser futura.</div>
                     </div>
                     <div class="mb-3">
                         <label for="precioVenta" class="form-label">Precio de Venta (si corresponde)</label>
                         <input type="number" step="0.01" id="precioVenta" name="precioVenta" class="form-control" value="0" required>
+                        <div class="invalid-feedback">Ingrese un precio válido (0 o más).</div>
                     </div>
                     <div class="mb-3">
                         <label for="motivo" class="form-label">Motivo</label>
                         <input type="text" id="motivo" name="motivo" class="form-control" placeholder="Ejemplo: Venta a frigorífico">
+                        <div class="invalid-feedback">Máximo 200 caracteres.</div>
                     </div>
                 </form>
             </div>
@@ -68,6 +75,11 @@ $body = <<<HTML
 const lotePreseleccionado = $idLoteAves;
 // === Cargar bajas ===
 function cargarBajas() {
+    if ($.fn.DataTable.isDataTable('#tablaBajas')) {
+        $('#tablaBajas').DataTable().destroy();
+    }
+    var tablaBajasTbody = document.getElementById("tbodyBajas");
+    tablaBajasTbody.innerHTML = '';
     fetch('index.php?opt=lotesAves&ajax=getBajas')
     .then(r => r.json())
     .then(data => {
@@ -85,6 +97,7 @@ function cargarBajas() {
                     '<td><button class="btn btn-sm btn-success" onclick="revertirBaja(' + b.idBajaLoteAves + ')">Revertir</button></td>';
                 tbody.appendChild(row);
             });
+            $('#tablaMortandad').DataTable();
         } else {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay bajas registradas</td></tr>';
         }

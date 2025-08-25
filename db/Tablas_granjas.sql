@@ -158,7 +158,7 @@ CREATE TABLE galpon_loteAves (
 );
 
 CREATE TABLE loteVacuna_loteAve (
-    idloteVacuna_loteAve INT NOT NULL,
+    idloteVacuna_loteAve INT NOT NULL AUTO_INCREMENT,
     idLoteAves INT,
     idLoteVacuna INT,
     fecha DATE,
