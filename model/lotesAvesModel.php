@@ -493,7 +493,7 @@ class LoteAves{
                     INNER JOIN galpon g ON gl.idGalpon = g.idGalpon
                     INNER JOIN granja gr ON g.idGranja = gr.idGranja
                     WHERE gl.idLoteAves = ?
-                    ORDER BY gl.fechaInicio ASC";
+                    ORDER BY gl.fechaInicio, gl.idGalpon_loteAve ASC ";
 
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) {

@@ -14,7 +14,7 @@ $body = <<<HTML
 
     <!-- Administrativo / Mantenimientos y Compras -->
     <h4 class="mb-3">Administrativo</h4>
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
+    <div class="d-grid gap-3 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="col">
             <a href="index.php?opt=granjas" class="text-decoration-none">
                 <div class="card h-100 text-center bg-success text-white shadow">
@@ -109,7 +109,7 @@ $body = <<<HTML
 
     <!-- Lotes de Aves / Operaciones -->
     <h4 class="mb-3">Operaciones con Aves</h4>
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-4">
+    <div class="d-grid gap-3 mb-4" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
         <div class="col">
             <a href="index.php?opt=lotesAves" class="text-decoration-none">
                 <div class="card h-100 text-center bg-primary text-white shadow">

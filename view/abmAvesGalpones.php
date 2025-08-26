@@ -58,14 +58,14 @@ $body = <<<HTML
                 <form id="formCambioUbicacion" class="needs-validation" novalidate>
                     <div class="mb-4">
                         <label for="selectGalpon" class="form-label">Galpón</label>
-                        <select id="selectGalpon" class="form-select" style="width:100%" required>
+                        <select id="selectGalpon" class="form-select" name="selectGalpon" style="width:100%" required>
                             <!-- opciones cargadas por JS -->
                         </select>
                         <div class="invalid-feedback">Seleccione un galpón.</div>
                     </div>
                     <div class="mb-4">
                         <label for="fechaInicio" class="form-label">Fecha Inicio</label>
-                        <input type="date" id="fechaInicio" class="form-control" required>
+                        <input type="date" id="fechaInicio" name="fechaInicio" class="form-control" required>
                         <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <input type="hidden" id="idLoteSeleccionado" name="idLoteAves">
@@ -163,7 +163,11 @@ document.getElementById('btnGuardarUbicacion').addEventListener('click', functio
         showToastError('Complete todos los campos.');
         return;
     }
-
+    const form = document.getElementById('formCambioUbicacion');
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     fetch('index.php?opt=lotesAves&ajax=editUbicacionAve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -204,7 +208,36 @@ window.addEventListener('load', function() {
     });
 
     const today = new Date().toISOString().split('T')[0];
-    $('#fechaInicio').val(today);
+    document.getElementById('fechaInicio').value = today;
+});
+</script>
+
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("formCambioUbicacion", {
+        selectGalpon: (value) => {
+            if (!value) return "Debe seleccionar un galpón.";
+            return true;
+        },
+        fechaInicio: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        idLoteSeleccionado: (value) => {
+            if (!value) return "Debe seleccionar un lote.";
+            return true;
+        }
+    });
 });
 </script>
 HTML;

@@ -20,13 +20,6 @@ CREATE TABLE granja (
     PRIMARY KEY (idGranja)
 );
 
-CREATE TABLE compuesto (
-    idCompuesto INT NOT NULL,
-    nombre VARCHAR(80) NOT NULL,
-    proveedor VARCHAR(80),
-	PRIMARY KEY (idCompuesto)
-);
-
 CREATE TABLE tipoAve (
     idTipoAve INT NOT NULL,
     nombre VARCHAR(80),
@@ -138,10 +131,20 @@ CREATE TABLE mortandadAves (
     PRIMARY KEY (idMortandad)
 );
 
+CREATE TABLE compuesto (
+    idCompuesto INT NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(80) NOT NULL,
+    proveedor VARCHAR(80),
+	PRIMARY KEY (idCompuesto)
+);
+
 CREATE TABLE compra (
-    idGranja INT,
-    idCompuesto INT,
-    PRIMARY KEY (idGranja, idCompuesto),
+    idCompraCompuesto INT NOT NULL AUTO_INCREMENT,
+    idGranja INT NOT NULL,
+    idCompuesto INT NOT NULL,
+    cantidad DECIMAL(10,2),
+    precioCompra DECIMAL(10,2),
+    PRIMARY KEY (idCompraCompuesto),
     FOREIGN KEY (idGranja) REFERENCES granja(idGranja),
     FOREIGN KEY (idCompuesto) REFERENCES compuesto(idCompuesto)
 );

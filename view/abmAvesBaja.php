@@ -49,7 +49,7 @@ $body = <<<HTML
                     <div class="mb-3">
                         <label for="fechaBaja" class="form-label">Fecha de Baja</label>
                         <input type="date" id="fechaBaja" name="fechaBaja" class="form-control" required>
-                        <div class="invalid-feedback">La fecha válida, no puede ser futura.</div>
+                        <div class="invalid-feedback">La fecha no es válida, no puede ser futura.</div>
                     </div>
                     <div class="mb-3">
                         <label for="precioVenta" class="form-label">Precio de Venta (si corresponde)</label>
@@ -97,7 +97,7 @@ function cargarBajas() {
                     '<td><button class="btn btn-sm btn-success" onclick="revertirBaja(' + b.idBajaLoteAves + ')">Revertir</button></td>';
                 tbody.appendChild(row);
             });
-            $('#tablaMortandad').DataTable();
+            $('#tablaBajas').DataTable();
         } else {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay bajas registradas</td></tr>';
         }
@@ -130,13 +130,12 @@ function cargarLotesActivos() {
 // === Guardar nueva baja ===
 document.getElementById('btnGuardarBaja').addEventListener('click', function() {
     const form = document.getElementById('formBaja');
-    if (!form.checkValidity()) {
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
         form.classList.add('was-validated');
         return;
     }
-
     const formData = new URLSearchParams(new FormData(form)).toString();
-
     fetch('index.php?opt=lotesAves&ajax=baja', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -190,6 +189,38 @@ window.addEventListener('load', function() {
     }
 });
 </script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("formBaja", {
+        fechaBaja: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day); // local time
+
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        precioVenta: (value) => {
+            if (value < 0) return "Debe ser 0 o mayor.";
+            return true;
+        },
+        motivo: (value) => {
+            if (value.length > 200) return "Máximo 200 caracteres.";
+            return true;
+        }
+    });
+});
+</script>
+
 HTML;
 
 include 'view/toast.php';
