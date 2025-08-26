@@ -65,17 +65,17 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="fechaMortandad" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="fechaMortandad" name="fecha" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida, no puede ser futura.</div>
                     </div>
                     <div class="mb-4">
                         <label for="causaMortandad" class="form-label">Causa</label>
-                        <input type="text" class="form-control" id="causaMortandad" name="causa" maxlength="100" required>
-                        <div class="invalid-feedback">Ingrese una causa válida.</div>
+                        <input type="text" class="form-control" id="causaMortandad" name="causa" maxlength="100" minlength="3" required>
+                        <div class="invalid-feedback">La causa debe tener al menos 3 caracteres.</div>
                     </div>
                     <div class="mb-4">
                         <label for="cantidadMortandad" class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="cantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">La cantidad debe ser mayor a 0 y no puede exceder la cantidad original del lote.</div>
                     </div>
                     <input type="hidden" id="idLoteSeleccionado" name="idLoteAves">
                 </form>
@@ -102,17 +102,17 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="editFechaMortandad" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="editFechaMortandad" name="fecha" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida, no puede ser futura.</div>
                     </div>
                     <div class="mb-4">
                         <label for="editCausaMortandad" class="form-label">Causa</label>
-                        <input type="text" class="form-control" id="editCausaMortandad" name="causa" maxlength="100" required>
-                        <div class="invalid-feedback">Ingrese una causa válida.</div>
+                        <input type="text" class="form-control" id="editCausaMortandad" name="causa" maxlength="100" minlength="3" required>
+                        <div class="invalid-feedback">La causa debe tener al menos 3 caracteres.</div>
                     </div>
                     <div class="mb-4">
                         <label for="editCantidadMortandad" class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="editCantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">La cantidad debe ser mayor a 0 y no puede exceder la cantidad original del lote.</div>
                     </div>
                 </form>
             </div>
@@ -276,10 +276,63 @@ document.addEventListener('click', function(event) {
 });
 
 function agregarMortandad() {
+    const form = document.getElementById('formMortandad');
+    
+    // Usar las validaciones del archivo clientValidation.js
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    
+    // Validaciones adicionales específicas
     const idLote = document.getElementById('idLoteSeleccionado').value;
     const fecha = document.getElementById('fechaMortandad').value;
     const causa = document.getElementById('causaMortandad').value;
     const cantidad = document.getElementById('cantidadMortandad').value;
+    
+    let isValid = true;
+    
+    // Validar que se haya seleccionado un lote
+    if (!idLote) {
+        showToastError('Debe seleccionar un lote antes de registrar mortandad.');
+        isValid = false;
+    }
+    
+    // Validar fecha
+    if (fecha) {
+        const fechaObj = new Date(fecha);
+        const hoy = new Date();
+        if (fechaObj > hoy) {
+            document.getElementById('fechaMortandad').classList.add('is-invalid');
+            isValid = false;
+        }
+    }
+    
+    // Validar causa
+    if (causa && causa.trim().length < 3) {
+        document.getElementById('causaMortandad').classList.add('is-invalid');
+        isValid = false;
+    }
+    
+    // Validar cantidad
+    if (cantidad) {
+        const cantidadNum = parseInt(cantidad);
+        const cantidadOriginal = parseInt(document.getElementById('datoCantidadOriginal').textContent) || 0;
+        
+        if (cantidadNum <= 0) {
+            document.getElementById('cantidadMortandad').classList.add('is-invalid');
+            isValid = false;
+        } else if (cantidadNum > cantidadOriginal) {
+            document.getElementById('cantidadMortandad').classList.add('is-invalid');
+            showToastError(`La cantidad no puede ser mayor a \${cantidadOriginal} aves (cantidad original del lote).`);
+            isValid = false;
+        }
+    }
+    
+    if (!isValid) {
+        form.classList.add('was-validated');
+        return;
+    }
 
     fetch('index.php?opt=lotesAves&ajax=addMuertes', {
         method: 'POST',
@@ -295,6 +348,9 @@ function agregarMortandad() {
             $('#modalMortandad').modal('hide');
             cargarMortandad(idLote);
             cargarDatosLote(idLote);
+            // Limpiar formulario
+            form.reset();
+            form.classList.remove('was-validated');
         } else {
             showToastError(data.msg);
         }
@@ -303,10 +359,57 @@ function agregarMortandad() {
 }
 
 function editarMortandad() {
+    const form = document.getElementById('formEditarMortandad');
+    
+    // Usar las validaciones del archivo clientValidation.js
+    if (!form.checkValidity()) {
+        form.classList.add('was-validated');
+        return;
+    }
+    
+    // Validaciones adicionales específicas
     const idMortandad = document.getElementById('editIdMortandad').value;
     const fecha = document.getElementById('editFechaMortandad').value;
     const causa = document.getElementById('editCausaMortandad').value;
     const cantidad = document.getElementById('editCantidadMortandad').value;
+    
+    let isValid = true;
+    
+    // Validar fecha
+    if (fecha) {
+        const fechaObj = new Date(fecha);
+        const hoy = new Date();
+        if (fechaObj > hoy) {
+            document.getElementById('editFechaMortandad').classList.add('is-invalid');
+            isValid = false;
+        }
+    }
+    
+    // Validar causa
+    if (causa && causa.trim().length < 3) {
+        document.getElementById('editCausaMortandad').classList.add('is-invalid');
+        isValid = false;
+    }
+    
+    // Validar cantidad
+    if (cantidad) {
+        const cantidadNum = parseInt(cantidad);
+        const cantidadOriginal = parseInt(document.getElementById('datoCantidadOriginal').textContent) || 0;
+        
+        if (cantidadNum <= 0) {
+            document.getElementById('editCantidadMortandad').classList.add('is-invalid');
+            isValid = false;
+        } else if (cantidadNum > cantidadOriginal) {
+            document.getElementById('editCantidadMortandad').classList.add('is-invalid');
+            showToastError(`La cantidad no puede ser mayor a \${cantidadOriginal} aves (cantidad original del lote).`);
+            isValid = false;
+        }
+    }
+    
+    if (!isValid) {
+        form.classList.add('was-validated');
+        return;
+    }
 
     fetch('index.php?opt=lotesAves&ajax=editMuertes', {
         method: 'POST',
@@ -322,6 +425,8 @@ function editarMortandad() {
             $('#modalEditarMortandad').modal('hide');
             cargarMortandad(idLote);
             cargarDatosLote(idLote);
+            // Limpiar formulario
+            form.classList.remove('was-validated');
         } else {
             showToastError(data.msg);
         }
@@ -361,6 +466,21 @@ window.addEventListener('load', function() {
     // Configurar la fecha actual por defecto
     const today = new Date().toISOString().split('T')[0];
     $('#fechaMortandad').val(today);
+
+    // Limpiar validaciones cuando se cierra el modal
+    $('#modalMortandad').on('hidden.bs.modal', function () {
+        const form = document.getElementById('formMortandad');
+        form.reset();
+        form.classList.remove('was-validated');
+        clearValidations(form);
+    });
+
+    $('#modalEditarMortandad').on('hidden.bs.modal', function () {
+        const form = document.getElementById('formEditarMortandad');
+        form.classList.remove('was-validated');
+        clearValidations(form);
+    });
+
 });
 
 </script>
@@ -368,4 +488,7 @@ HTML;
 
 include 'view/toast.php';
 $body .= $toast;
+
+// Incluir el archivo de validaciones
+$body .= '<script src="js/clientValidation.js"></script>';
 ?>

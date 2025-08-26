@@ -451,4 +451,7 @@ HTML;
 // Para mostrar notificaciones
 include 'view/toast.php';
 $body .= $toast;
+
+// Incluir el archivo de validaciones
+$body .= '<script src="js/clientValidation.js"></script>';
 ?>

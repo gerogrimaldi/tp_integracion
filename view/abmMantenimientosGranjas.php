@@ -348,5 +348,8 @@ window.addEventListener('load', function() {
 </script>
 
 HTML;
+
+// Incluir el archivo de validaciones
+$body .= '<script src="js/clientValidation.js"></script>';
 ?>
 
