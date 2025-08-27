@@ -132,8 +132,12 @@ private function setMenu($_menu = ""){
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 <li><span class="dropdown-item-text fw-bold"><i class="bi bi-person me-1"></i>
-                                    Ha iniciado sesión como ' . $userName . ' ('. $userEmail .')
-                                </span></li>
+                                    Ha iniciado sesión como ' . $userName . '
+                                </span>
+                                <span class="dropdown-item-text">
+                                    ('. $userEmail .')
+                                </span>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="#" id="logoutBtn"><i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión</a></li>
                             </ul>

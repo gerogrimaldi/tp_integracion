@@ -179,6 +179,12 @@ document.getElementById('newMantGranjaForm').addEventListener('submit', function
 <!-------- MANT GRANJAS - AGREGAR NUEVO --------->  
 <!-----------------------------------------------> 
 function agregarMantGranja() {
+    const form = document.getElementById('newMantGranjaForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const fechaMant = document.getElementById('fechaMant').value;
     const tipoMantenimiento = document.getElementById('selectTipoMantGranja').value;
     const idGranja = document.getElementById('idGranja').value;
@@ -344,9 +350,35 @@ window.addEventListener('load', function() {
     document.getElementById('fechaDesde').value = formatDate(fechaDesde);
     document.getElementById('fechaHasta').value = formatDate(fechaHasta);
 });
-
 </script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("newMantGranjaForm", {
+    fechaMantenimiento : (value) => {
+        if (!value) return "Debe ingresar una fecha.";
 
+        // Tomar solo la parte de la fecha (YYYY-MM-DD)
+        const soloFecha = value.split("T")[0];
+        const [year, month, day] = soloFecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
+
+        if (isNaN(fecha.getTime())) return "Fecha inválida.";
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        fecha.setHours(0,0,0,0);
+
+        if (fecha > hoy) return "La fecha no puede ser futura.";
+        return true;
+    },
+        tipoMantenimiento : (value) => {
+            if (!value) return "Debe seleccionar un tipo.";
+            return true;
+        }
+    });
+});
+</script>
 HTML;
 ?>
 

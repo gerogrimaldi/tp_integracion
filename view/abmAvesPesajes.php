@@ -118,9 +118,21 @@ var idLote = $idLoteAves;
 
 // Listeners botones
 document.getElementById('btnGuardarPesaje').addEventListener('click', function() {
+    const form = document.getElementById('formPesaje');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     agregarPesaje();
 });
 document.getElementById('btnActualizarPesaje').addEventListener('click', function() {
+    const form = document.getElementById('formEditarPesaje');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     editarPesaje();
 });
 
@@ -322,6 +334,45 @@ window.addEventListener('load', function() {
 
     const today = new Date().toISOString().split('T')[0];
     $('#fechaPesaje').val(today);
+});
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("formPesaje", { //fecha causa y cantidad
+        fecha: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        peso: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        }});
+    initFormValidator("formEditarPesaje", { //fecha causa y cantidad
+        fecha: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        peso: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        }});
 });
 </script>
 HTML;

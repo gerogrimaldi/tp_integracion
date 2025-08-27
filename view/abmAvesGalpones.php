@@ -211,8 +211,6 @@ window.addEventListener('load', function() {
     document.getElementById('fechaInicio').value = today;
 });
 </script>
-
-</script>
 <script src="js/formValidator.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {

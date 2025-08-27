@@ -65,7 +65,7 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="fechaMortandad" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="fechaMortandad" name="fecha" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="causaMortandad" class="form-label">Causa</label>
@@ -75,7 +75,7 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="cantidadMortandad" class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="cantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">La cantidad no puede ser 0, ni superar las aves vivas.</div>
                     </div>
                     <input type="hidden" id="idLoteSeleccionado" name="idLoteAves">
                 </form>
@@ -102,7 +102,7 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="editFechaMortandad" class="form-label">Fecha</label>
                         <input type="date" class="form-control" id="editFechaMortandad" name="fecha" required>
-                        <div class="invalid-feedback">Seleccione una fecha válida.</div>
+                        <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-4">
                         <label for="editCausaMortandad" class="form-label">Causa</label>
@@ -112,7 +112,7 @@ $body = <<<HTML
                     <div class="mb-4">
                         <label for="editCantidadMortandad" class="form-label">Cantidad</label>
                         <input type="number" class="form-control" id="editCantidadMortandad" name="cantidad" min="1" required>
-                        <div class="invalid-feedback">Ingrese una cantidad válida.</div>
+                        <div class="invalid-feedback">La cantidad no puede ser 0, ni superar las aves vivas.</div>
                     </div>
                 </form>
             </div>
@@ -126,13 +126,26 @@ $body = <<<HTML
 
 <script>
 var idLote = $idLoteAves;
+var cantidadEdicion = 0;
 //------------------------------------------------
 // Listeners de botones principales
 //------------------------------------------------
 document.getElementById('btnGuardarMortandad').addEventListener('click', function() {
+    const form = document.getElementById('formMortandad');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     agregarMortandad();
 });
 document.getElementById('btnActualizarMortandad').addEventListener('click', function() {
+    const form = document.getElementById('formEditarMortandad');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     editarMortandad();
 });
 
@@ -157,6 +170,8 @@ document.addEventListener('click', function (event) {
         const fecha = event.target.getAttribute('data-fecha');
         const causa = event.target.getAttribute('data-causa');
         const cantidad = event.target.getAttribute('data-cantidad');
+        
+        cantidadEdicion = event.target.getAttribute('data-cantidad'); //Esto se utiliza esto en la validacion solamente
 
         document.getElementById('editIdMortandad').value = id;
         document.getElementById('editFechaMortandad').value = fecha;
@@ -363,6 +378,57 @@ window.addEventListener('load', function() {
     $('#fechaMortandad').val(today);
 });
 
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("formMortandad", { //fecha causa y cantidad
+        causa: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        fecha: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        cantidad: (value) => {
+            const cantidadActual = parseInt(document.getElementById('datoCantidadActual').textContent, 10);
+            if (value <= 0) return "Debe ser mayor a 0.";
+            if (value > cantidadActual) return `No puede superar la cantidad de aves vivas.`;
+            return true;
+        }});
+    initFormValidator("formEditarMortandad", { //fecha causa y cantidad
+        causa: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        fecha: (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        cantidad: (value) => {
+            const cantidadActual = parseInt(document.getElementById('datoCantidadActual').textContent, 10);
+            if (value <= 0) return "Debe ser mayor a 0.";
+            if (value > (Number(cantidadEdicion) + Number(cantidadActual))) return `No puede superar la cantidad de aves vivas.`;
+            return true;
+        }});
+});
 </script>
 HTML;
 

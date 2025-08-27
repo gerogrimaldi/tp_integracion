@@ -51,19 +51,22 @@ $body = <<<HTML
           <div class="mb-3">
             <label>Número de Lote</label>
             <input type="text" name="numeroLote" class="form-control" required>
-            
+            <div class="invalid-feedback">Ingrese el identificador del lote.</div>
           </div>
           <div class="mb-3">
             <label>Fecha Compra</label>
             <input type="date" name="fechaCompra" class="form-control" required>
+            <div class="invalid-feedback">Seleccione una fecha de compra (no futura).</div>
           </div>
           <div class="mb-3">
             <label>Cantidad</label>
             <input type="number" name="cantidad" class="form-control" min="1" required>
+            <div class="invalid-feedback">Ingrese una cantidad, mayor a cero.</div>
           </div>
           <div class="mb-3">
             <label>Vencimiento</label>
             <input type="date" name="fechaVencimiento" class="form-control" required>
+            <div class="invalid-feedback">Seleccione una fecha de vencimiento.</div>
           </div>
         </form>
       </div>
@@ -88,18 +91,22 @@ $body = <<<HTML
           <div class="mb-3">
             <label>Número de Lote</label>
             <input type="text" name="numeroLote" class="form-control" required>
+            <div class="invalid-feedback">Ingrese el identificador del lote.</div>
           </div>
           <div class="mb-3">
             <label>Fecha Compra</label>
             <input type="date" name="fechaCompra" class="form-control" required>
+            <div class="invalid-feedback">Seleccione una fecha de compra (no futura).</div>
           </div>
           <div class="mb-3">
             <label>Cantidad</label>
             <input type="number" name="cantidad" class="form-control" min="1" required>
+            <div class="invalid-feedback">Ingrese una cantidad, mayor a cero.</div>
           </div>
           <div class="mb-3">
             <label>Vencimiento</label>
             <input type="date" name="fechaVencimiento" class="form-control" required>
+            <div class="invalid-feedback">Seleccione una fecha de vencimiento.</div>
           </div>
         </form>
       </div>
@@ -179,6 +186,10 @@ function cargarLotesVacuna(idVacuna) {
 // Agregar Lote
 document.getElementById('btnAgregarLote').addEventListener('click', function() {
     const form = document.getElementById('formAgregarLote');
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const data = new URLSearchParams(new FormData(form));
     fetch('index.php?opt=vacunas&ajax=addLoteVacuna', {
         method: 'POST',
@@ -226,6 +237,10 @@ document.addEventListener('click', function(event) {
 
 document.getElementById('btnEditarLote').addEventListener('click', function() {
     const form = document.getElementById('formEditarLote');
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const data = new URLSearchParams(new FormData(form));
     fetch('index.php?opt=vacunas&ajax=editLoteVacuna', {
         method: 'POST',
@@ -261,6 +276,60 @@ window.addEventListener('load', function() {
         idVacuna = $(this).val();
         if (idVacuna) {
             cargarLotesVacuna(idVacuna);
+        }
+    });
+});
+</script>
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("formAgregarLote", {
+        numeroLote : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        cantidad : (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        fechaCompra : (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        fechaVencimiento: (value, field) => {return true;
+        }
+    });
+    initFormValidator("formEditarLote", {
+        numeroLote : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        cantidad : (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        fechaCompra : (value, field) => {
+            if (!value) return "Debe ingresar una fecha.";
+            // Parseo manual YYYY-MM-DD para evitar desfase UTC
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        fechaVencimiento: (value, field) => {return true;
         }
     });
 });

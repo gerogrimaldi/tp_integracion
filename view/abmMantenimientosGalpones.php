@@ -81,7 +81,7 @@ $body .= <<<HTML
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
                         <div class="invalid-feedback">
-                            La habilitación debe tener al menos 3 caracteres.
+                            Seleccione un tipo de mantenimiento.
                         </div>
                     </div>
                     <input type="hidden" id="idGalpon" name="idGalpon">
@@ -181,6 +181,12 @@ document.getElementById('newMantGalponForm').addEventListener('submit', function
 <!-------- MANT. Galpon - AGREGAR NUEVO --------->  
 <!-----------------------------------------------> 
 function agregarMantGalpon() {
+    const form = document.getElementById('newMantGalponForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const fechaMant = document.getElementById('fechaMantGalpon').value;
     const tipoMantenimiento = document.getElementById('selectTipoMantGalpon').value;
     const idGalpon = document.getElementById('idGalpon').value;
@@ -344,9 +350,35 @@ window.addEventListener('load', function() {
     document.getElementById('fechaDesdeGalpon').value = formatDate(fechaDesde);
     document.getElementById('fechaHastaGalpon').value = formatDate(fechaHasta);
 });
-
 </script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("newMantGalponForm", {
+    fechaMantenimiento : (value) => {
+        if (!value) return "Debe ingresar una fecha.";
 
+        // Tomar solo la parte de la fecha (YYYY-MM-DD)
+        const soloFecha = value.split("T")[0];
+        const [year, month, day] = soloFecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
+
+        if (isNaN(fecha.getTime())) return "Fecha inválida.";
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        fecha.setHours(0,0,0,0);
+
+        if (fecha > hoy) return "La fecha no puede ser futura.";
+        return true;
+    },
+        tipoMantenimiento : (value) => {
+            if (!value) return "Debe seleccionar un tipo.";
+            return true;
+        }
+    });
+});
+</script>
 HTML;
 ?>
 

@@ -28,12 +28,15 @@ $body = <<<HTML
                 <li class="list-group-item"><strong>Fecha de Compra:</strong> <span id="datoFechaCompra"></span></li>
                 <li class="list-group-item"><strong>Granja:</strong> <span id="datoGranja"></span></li>
                 <li class="list-group-item"><strong>Galpón:</strong> <span id="datoGalpon"></span></li>
+            <div class="mt-3 d-flex justify-content-end">
+                <button id="btnReporteVacunas" class="btn btn-success">Generar Reporte</button>
+            </div>
             </ul>
         </div>
     </div>
 
     <!-- Tabla de aplicaciones de vacunas -->
-    <div class="card shadow-sm rounded-3">
+    <div class="card shadow-sm rounded-3 mb-4">
         <div class="card-body table-responsive">
             <table id="tablaVacunas" class="table table-striped table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -48,9 +51,8 @@ $body = <<<HTML
                 </thead>
                 <tbody id="aplicacionesVacunas"></tbody>
             </table>
-        </div>
+        </div>        
     </div>
-
 </div>
 
 <!-- Modal Aplicar Vacuna -->
@@ -79,12 +81,12 @@ $body = <<<HTML
                     </div>
                     <div class="mb-3">
                         <label for="fechaVacuna" class="form-label">Fecha</label>
-                        <input type="date" class="form-control" id="fechaVacuna" required>
+                        <input type="date" class="form-control" id="fechaVacuna" name="fecha" required>
                         <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
                     </div>
                     <div class="mb-3">
                         <label for="cantidadVacuna" class="form-label">Cantidad</label>
-                        <input type="number" class="form-control" id="cantidadVacuna" min="1" required>
+                        <input type="number" class="form-control" id="cantidadVacuna" name="cantidad" min="1" required>
                         <div class="invalid-feedback">Ingrese una cantidad válida.</div>
                     </div>
                 </form>
@@ -99,6 +101,7 @@ $body = <<<HTML
 
 <script>
 var idLoteAves = $idLoteAves;
+var cantidadActualLoteVacuna = 0; // Variable para almacenar la cantidad disponible del lote de vacuna
 
 //------------------------------------------------
 // Cargar Lotes de Aves en select principal
@@ -148,7 +151,6 @@ function cargarAplicacionesVacunas(idLote) {
     fetch('index.php?opt=lotesAves&ajax=getVacunas&idLoteAves=' + idLote)
     .then(r => r.json())
     .then(data => {
-        console.log(data);
         var tbody = $('#aplicacionesVacunas');
         tbody.empty();
         data.forEach(v => {
@@ -188,13 +190,109 @@ $(document).on('click', '.btn-delete', function () {
 });
 
 //------------------------------------------------
+// Generar reporte imprimible de vacunas con datos exactos de la card
+//------------------------------------------------
+$(document).on('click', '#btnReporteVacunas', function() {
+    var loteNombre = $('#selectLote option:selected').text().trim();
+    if (!loteNombre) {
+        showToastError("Debe seleccionar un lote primero");
+        return;
+    }
+    var ultimoPeso = (document.getElementById('datoUltimoPeso') && document.getElementById('datoUltimoPeso').textContent) ? document.getElementById('datoUltimoPeso').textContent.trim() : '';
+    var cantidadOriginal = (document.getElementById('datoCantidadOriginal') && document.getElementById('datoCantidadOriginal').textContent) ? document.getElementById('datoCantidadOriginal').textContent.trim() : '';
+    var cantidadActual = (document.getElementById('datoCantidadActual') && document.getElementById('datoCantidadActual').textContent) ? document.getElementById('datoCantidadActual').textContent.trim() : '';
+    var tipoAve = (document.getElementById('datoTipoAve') && document.getElementById('datoTipoAve').textContent) ? document.getElementById('datoTipoAve').textContent.trim() : '';
+    var fechaNacimiento = (document.getElementById('datoFechaNacimiento') && document.getElementById('datoFechaNacimiento').textContent) ? document.getElementById('datoFechaNacimiento').textContent.trim() : '';
+    var fechaCompra = (document.getElementById('datoFechaCompra') && document.getElementById('datoFechaCompra').textContent) ? document.getElementById('datoFechaCompra').textContent.trim() : '';
+    var granja = (document.getElementById('datoGranja') && document.getElementById('datoGranja').textContent) ? document.getElementById('datoGranja').textContent.trim() : '';
+    var galpon = (document.getElementById('datoGalpon') && document.getElementById('datoGalpon').textContent) ? document.getElementById('datoGalpon').textContent.trim() : '';
+
+    // Construir filas de la tabla de aplicaciones desde el tbody actual
+    var rows = "";
+    document.querySelectorAll("#aplicacionesVacunas tr").forEach(function(tr) {
+        var tds = tr.querySelectorAll("td");
+        if (tds.length >= 5) { // asegurar que sea una fila data
+            rows += "<tr>"
+                + "<td>" + tds[0].innerText.trim() + "</td>"
+                + "<td>" + tds[1].innerText.trim() + "</td>"
+                + "<td>" + tds[2].innerText.trim() + "</td>"
+                + "<td>" + tds[3].innerText.trim() + "</td>"
+                + "<td>" + tds[4].innerText.trim() + "</td>"
+                + "</tr>";
+        }
+    });
+
+    if (rows === "") {
+        rows = "<tr><td colspan='5' style='text-align:center'>No hay aplicaciones registradas</td></tr>";
+    }
+
+    var reporte = ""
+    + "<html>"
+    + "<head>"
+    + "  <meta charset='utf-8'>"
+    + "  <title>Reporte Aplicación de Vacunas - " + loteNombre + "</title>"
+    + "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>"
+    + "  <style>"
+    + "    body { padding: 18px; font-size: 13px; color: #000; }"
+    + "    h2, h4 { text-align: center; margin: 6px 0 14px 0; }"
+    + "    .ficha { width:100%; max-width:900px; margin: 0 auto 12px auto; border-collapse: collapse; }"
+    + "    .ficha th, .ficha td { padding:6px 8px; vertical-align: top; }"
+    + "    .ficha th { text-align: left; width: 220px; }"
+    + "    table.data { width:100%; border-collapse: collapse; margin-top: 12px; }"
+    + "    table.data th, table.data td { border: 1px solid #000; padding:6px 8px; text-align:left; }"
+    + "  </style>"
+    + "</head>"
+    + "<body>"
+    + "  <h2>Reporte de Aplicaciones de Vacunas</h2>"
+    + "  <h4>" + loteNombre + "</h4>"
+
+    // Ficha con los datos exactos de la card (2 columnas)
+    + "  <table class='ficha'>"
+    + "    <tr><th>Último peso registrado (kg):</th><td>" + (ultimoPeso || "-") + "</td><th>Tipo de Ave:</th><td>" + (tipoAve || "-") + "</td></tr>"
+    + "    <tr><th>Cantidad de Aves Compradas:</th><td>" + (cantidadOriginal || "-") + "</td><th>Cantidad Actual:</th><td>" + (cantidadActual || "-") + "</td></tr>"
+    + "    <tr><th>Fecha de Nacimiento:</th><td>" + (fechaNacimiento || "-") + "</td><th>Fecha de Compra:</th><td>" + (fechaCompra || "-") + "</td></tr>"
+    + "    <tr><th>Granja:</th><td>" + (granja || "-") + "</td><th>Galpón:</th><td>" + (galpon || "-") + "</td></tr>"
+    + "  </table>"
+
+    // Tabla de aplicaciones
+    + "  <table class='data'>"
+    + "    <thead>"
+    + "      <tr><th>ID</th><th>Vacuna</th><th>Lote</th><th>Fecha</th><th>Cantidad</th></tr>"
+    + "    </thead>"
+    + "    <tbody>" + rows + "</tbody>"
+    + "  </table>"
+    + "</body>"
+    + "</html>";
+
+    var ventana = window.open("", "_blank");
+    ventana.document.open();
+    ventana.document.write(reporte);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+});
+
+
+
+
+//------------------------------------------------
 // Inicialización Select2 y eventos
 //------------------------------------------------
 $(document).ready(function() {
     $('#selectLote').select2({ theme: 'bootstrap-5', placeholder: "Seleccione un lote...", width: 'resolve' });
-    $('#selectVacunaModal').select2({ theme: 'bootstrap-5', placeholder: "Seleccione una vacuna...", width: '100%' });
-    $('#selectLoteVacunaModal').select2({ theme: 'bootstrap-5', placeholder: "Seleccione un lote...", width: '100%' });
+    $('#selectVacunaModal').select2({ 
+        theme: 'bootstrap-5', 
+        placeholder: "Seleccione una vacuna...", 
+        width: '100%',
+        dropdownParent: $('#modalAplicarVacuna')
+    });
 
+    $('#selectLoteVacunaModal').select2({ 
+        theme: 'bootstrap-5', 
+        placeholder: "Seleccione un lote...", 
+        width: '100%',
+        dropdownParent: $('#modalAplicarVacuna')
+    });
     cargarLotes();
 
     $('#selectLote').on('change', function() {
@@ -244,25 +342,54 @@ $(document).ready(function() {
         const idVacuna = $(this).val();
         const selectLote = $('#selectLoteVacunaModal');
         selectLote.empty().append('<option value="">Seleccione un lote...</option>');
+        
+        // Resetear la cantidad disponible
+        cantidadActualLoteVacuna = 0;
+        $('#mensajeDisponible').text('');
+        
         if (idVacuna) {
             fetch('index.php?opt=vacunas&ajax=getLotesVacuna&idVacuna=' + idVacuna)
             .then(r => r.json())
             .then(lotes => {
-                console.log("Vacunas recibidas:", lotes); // debug
-                lotes.forEach(l => selectLote.append(new Option(l.numeroLote, l.idLoteVacuna)));
+                lotes.forEach(l => {
+                    // Crear option con data attribute para la cantidad disponible
+                    const option = new Option(
+                         l.numeroLote + ' (Disponible: ' + l.cantidadDisponible +')', 
+                        l.idLoteVacuna
+                    );
+                    // Agregar data attribute con la cantidad disponible
+                    $(option).data('cantidad-disponible', l.cantidadDisponible);
+                    selectLote.append(option);
+                });
                 selectLote.prop('disabled', false).trigger('change');
             });
         } else {
             selectLote.prop('disabled', true);
         }
     });
-
+    //------------------------------------------------
+    // Selección de lote de vacuna -> capturar cantidad disponible
+    //------------------------------------------------
+    $('#selectLoteVacunaModal').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        cantidadActualLoteVacuna = selectedOption.data('cantidad-disponible') || 0;
+        // Actualizar mensaje informativo
+        $('#mensajeDisponible').text('Cantidad disponible: '+ cantidadActualLoteVacuna);
+        // Establecer el máximo permitido en el input de cantidad
+        $('#cantidadVacuna').attr('max', cantidadActualLoteVacuna);
+    });
     //------------------------------------------------
     // Guardar aplicación de vacuna
     //------------------------------------------------
     $('#btnGuardarVacuna').on('click', function() {
-        const idLoteAves = $('#selectLote').val(); // ✅ ahora toma el lote de aves
-        const idLoteVacuna = $('#selectLoteVacunaModal').val(); // este es el lote de vacuna seleccionado
+        const form = document.getElementById('formAplicarVacuna');
+        // ejecutar las validaciones
+        if (!form.validateAll()) {
+            form.classList.add('was-validated');
+            return;
+        }
+        const idLoteAves = $('#selectLote').val(); 
+        const idLoteVacuna = $('#selectLoteVacunaModal').val(); 
         const fecha = $('#fechaVacuna').val();
         const cantidad = $('#cantidadVacuna').val();
 
@@ -291,6 +418,36 @@ $(document).ready(function() {
             cargarAplicacionesVacunas(idLoteAves);
         });
     });
+});
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+initFormValidator("formAplicarVacuna", {
+    selectVacunaModal: (value) => {
+        if (!value) return "Seleccione una vacuna.";
+        return true;
+    },
+    selectLoteVacunaModal: (value) => {
+        if (!value) return "Seleccione un lote de vacuna.";
+        return true;
+    },
+    fecha: (value) => {
+        if (!value) return "Debe ingresar una fecha.";
+        const [year, month, day] = value.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
+        if (isNaN(fecha.getTime())) return "Fecha inválida.";
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        fecha.setHours(0,0,0,0);
+        if (fecha > hoy) return "La fecha no puede ser futura.";
+        return true;
+    },
+    cantidad: (value) => {
+        if (value <= 0) return "Debe ser mayor a 0.";
+        // Validar contra la cantidad disponible del lote de vacuna
+        if (value > Number(cantidadActualLoteVacuna)) return 'No puede superar la cantidad disponible ('+cantidadActualLoteVacuna+').';
+        return true;
+    }
 });
 </script>
 HTML;

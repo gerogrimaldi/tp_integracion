@@ -93,9 +93,9 @@ if (isset($_GET['ajax']))
             }
             exit();
         break;
-/*
+
     // ------------------------------------
-    // SOLICITUDES AJAX - MANTENIMIENTOS DE GRANJA
+    // SOLICITUDES AJAX - COMPRAS COMPUESTOS
     // ------------------------------------
 
         case 'newMantGranja':
@@ -175,87 +175,6 @@ if (isset($_GET['ajax']))
             exit();
         break;
 
-    // ------------------------------------
-    // SOLICITUDES AJAX - MANTENIMIENTOS GALPONES
-    // ------------------------------------
-
-        case 'newMantGalpon':
-            header('Content-Type: application/json');
-            try {
-                if( empty($_POST['fechaMant']) || ( !isset($_POST['idGalpon']) || $_POST['idGalpon'] === '' ) || 
-                (!isset($_POST['tipoMantenimiento']) || $_POST['tipoMantenimiento'] === ''))
-                {
-                    http_response_code(400);
-                    echo json_encode(['msg' => 'Error: hay campos vacíos.']);
-                    exit();
-                }
-                $oMantenimientoGalpon = new mantenimientoGalpon();
-                $oMantenimientoGalpon->setMaxIDMantGalpon();
-                $oMantenimientoGalpon->setFecha( $_POST['fechaMant']);
-                $oMantenimientoGalpon->setIdGalpon( $_POST['idGalpon'] );
-                $oMantenimientoGalpon->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] ); 
-                if ($oMantenimientoGalpon->save()) {
-                    http_response_code(200);
-                    echo json_encode(['msg' => 'Mantenimiento agregado correctamente']);
-                }
-            }catch (RuntimeException $e) {
-                    http_response_code(400);
-                    echo json_encode(['error' => 'Error al ingresar mantenimiento']);
-            }
-            exit();
-        break;
-        
-        case 'getMantGalpon':
-            header('Content-Type: application/json');
-            try {
-                if( !isset($_GET['idGalpon']) || $_GET['idGalpon'] === '' )
-                {
-                    http_response_code(400);
-                    echo json_encode(['msg' => 'Error: no se ha seleccionado un galpón.']);
-                    exit();
-                }
-                If (!isset($_GET['desde']) || $_GET['desde'] === '' || !isset($_GET['hasta']) || $_GET['hasta'] === '') {
-                    http_response_code(400);
-                    echo json_encode(['msg' => 'Error: rango de fechas no válido.']);
-                    exit();
-                }
-                $oMantenimientoGalpon = new mantenimientoGalpon();
-                if ($mantGalpon = $oMantenimientoGalpon->getMantGalpon($_GET['idGalpon'], $_GET['desde'], $_GET['hasta'])) {
-                    http_response_code(200);
-                    echo json_encode($mantGalpon);
-                }else{
-                    http_response_code(200);
-                    echo '[]';
-                }
-            } catch (RuntimeException $e) {
-                    http_response_code(400);
-                    //echo json_encode(['msg' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al obtener mantenimientos.']);
-            }
-            exit();
-
-        case 'delMantGalpon': 
-            header('Content-Type: application/json');
-            try {
-                if( !isset($_GET['idMantenimientoGalpon']) || $_GET['idMantenimientoGalpon'] === '' )
-                {
-                    http_response_code(400);
-                    echo json_encode(['msg' => 'Error: mantenimiento no seleccionado.']);
-                    exit();
-                }
-                $oMantenimientoGalpon = new mantenimientoGalpon();
-                if ($oMantenimientoGalpon->deleteMantenimientoGalponId($_GET['idMantenimientoGalpon'])) {
-                    http_response_code(200);
-                    echo json_encode(['msg' => 'Eliminado correctamente.']);
-                }
-            } catch (RuntimeException $e) {
-                http_response_code(400);
-                //echo json_encode(['msg' => $e->getMessage()]);
-                echo json_encode(['msg' => 'Error al eliminar']);
-            }
-            exit();
-        break;
-*/
         default:
             exit();
         break;

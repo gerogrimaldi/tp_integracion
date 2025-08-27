@@ -222,9 +222,7 @@ document.getElementById("agregarGalpon").addEventListener("show.bs.modal", funct
         showToastError('Debe seleccionar una granja primero');
         return;
     }
-    // Set the hidden input value
     document.querySelector("#agregarGalponForm #idGranja").value = selectedGranjaId;
-    document.querySelector("#editarGalponForm #idGranja").value = selectedGranjaId;
 });
 <!---- Cambiar la acción del botón enviar y enter ---->  
 document.getElementById('btnAgregarGalpon').addEventListener('click', function() {
@@ -272,6 +270,12 @@ function eliminarGalpon(idGalpon) {
 <!---------- GALPONES - AGREGAR NUEVO ----------->  
 <!-----------------------------------------------> 
 function agregarGalpon() {
+    const form = document.getElementById('agregarGalponForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const identificacion = document.getElementById('identificacion').value;
     const capacidad = document.getElementById('capacidad').value;
     const idGranja = document.getElementById('idGranja').value;
@@ -307,6 +311,12 @@ function agregarGalpon() {
 <!-------------- GALPONES - EDITAR ---------------->
 <!-------------------------------------------------> 
 function editarGalpon() {
+    const form = document.getElementById('editarGalponForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const identificacion = document.getElementById('identificacionEditar').value;
     const capacidad = document.getElementById('capacidadEditar').value;
     const idGranja = document.getElementById('idGranjaEditar').value;
@@ -396,22 +406,17 @@ document.getElementById('selectGranja').addEventListener('change', function(e) {
 <!-------------------------------------------------> 
 <!--------- TIPOS DE AVES - CARGAR SELECT --------->
 <!-------------------------------------------------> 
-function cargarSelectTipoAves(select) {
-    //Iniciar tabla, cargar opción por default.
-    const selectTipoAves = document.getElementById(select);
+function cargarSelectTipoAves(selectId, selectedValue = "") {
+    const selectTipoAves = document.getElementById(selectId);
     selectTipoAves.innerHTML = '';
+
     const defaultOption = document.createElement('option');
-        defaultOption.text = 'Seleccione el tipo de ave';
-        defaultOption.value = '';
-        selectTipoAves.appendChild(defaultOption);
+    defaultOption.text = 'Seleccione el tipo de ave';
+    defaultOption.value = '';
+    selectTipoAves.appendChild(defaultOption);
 
     fetch('index.php?opt=galpones&ajax=getTipoAves')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Error en la solicitud: ' + response.statusText);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(tipoAves => {
         tipoAves.forEach(tipoAve => {
             const optionAgregar = document.createElement('option');
@@ -419,6 +424,11 @@ function cargarSelectTipoAves(select) {
             optionAgregar.text = tipoAve.nombre;
             selectTipoAves.appendChild(optionAgregar);
         });
+
+        // 👇 acá se asigna el valor después de cargar las opciones
+        if (selectedValue) {
+            selectTipoAves.value = selectedValue;
+        }
     })
     .catch(error => {
         console.error('Error al cargar tipos de aves:', error);
@@ -430,14 +440,13 @@ function cargarSelectTipoAves(select) {
 <!-------------------------------------------------> 
 document.getElementById("editarGalpon").addEventListener("show.bs.modal", function (event) {
     // Botón que activó el modal
-    cargarSelectTipoAves(idTipoAveEditar);
     const button = event.relatedTarget;
     // Extraer datos del atributo data-* del botón que abrió el modal
     const idGalpon = button.getAttribute("data-id");
     const identificacion = button.getAttribute("data-identificacion");
     const idTipoAve = button.getAttribute("data-idTipoAve");
     const capacidad = button.getAttribute("data-capacidad");
-    const idGranja = button.getAttribute("data-idGranja");  // Asegúrate de tener este atributo en el botón
+    const idGranja = button.getAttribute("data-idGranja"); 
     // Asignar los valores a los campos del formulario
     document.querySelector("#editarGalponForm #identificacionEditar").value = identificacion;
     document.querySelector("#editarGalponForm #capacidadEditar").value = capacidad;
@@ -445,40 +454,65 @@ document.getElementById("editarGalpon").addEventListener("show.bs.modal", functi
     document.querySelector("#editarGalponForm #idGalponEditar").value = idGalpon;
     // Asignar el valor del campo hidden idGranja
     document.querySelector("#editarGalponForm #idGranjaEditar").value = idGranja;
+    cargarSelectTipoAves("idTipoAveEditar",idTipoAve);
 });
 <!-------------------------------> 
 <!------- CARGAR EL VIEW -------->
 <!-------------------------------> 
 window.addEventListener('load', function() {
     cargarSelectGranja();
-    cargarTablaGalpones();
+    //cargarTablaGalpones();
+    $('#tablaGalpones').DataTable()
+
     cargarSelectTipoAves('idTipoAve');
     cargarSelectTipoAves('idTipoAveEditar');
 });
-
-<!-----------------------------------------> 
-<!------------ VALIDACIONES   ------------->
-<!-----------------------------------------> 
-// Activar validaciones al enviar el formulario
-document.querySelectorAll('.needs-validation').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("agregarGalponForm", {
+        identificacion: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        capacidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        selectGalpon: (value) => {
+            if (!value) return "Debe seleccionar un galpón.";
+            return true;
+        },
+        idTipoAve: (value) => {
+            if (!value) return "Debe seleccionar un tipo de ave.";
+            return true;
+        },
+        idGranja: (value) => {
+            if (!value) return "Debe seleccionar una granja.";
+            return true;
         }
-        form.classList.add('was-validated');
-    }, false);
-});
-
-// Validar campos en tiempo real
-document.querySelectorAll('input, select, textarea').forEach(function (input) {
-    input.addEventListener('input', function () {
-        if (input.checkValidity()) {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-        } else {
-            input.classList.remove('is-valid');
-            input.classList.add('is-invalid');
+    });
+    initFormValidator("editarGalponForm", {
+        identificacion: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        capacidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        selectGalpon: (value) => {
+            if (!value) return "Debe seleccionar un galpón.";
+            return true;
+        },
+        idTipoAve: (value) => {
+            if (!value) return "Debe seleccionar un tipo de ave.";
+            return true;
+        },
+        idGranja: (value) => {
+            if (!value) return "Debe seleccionar una granja.";
+            return true;
         }
     });
 });

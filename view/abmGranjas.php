@@ -304,6 +304,12 @@ function eliminarGranja(idGranja) {
 <!---------- GRANJAS - AGREGAR NUEVA ---------->  
 <!-----------------------------------------------> 
 function agregarGranja() {
+    const form = document.getElementById('agregarGranjaForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const nombre = document.getElementById('nombre').value;
     const metrosCuadrados = document.getElementById('metrosCuadrados').value;
     const habilitacion = document.getElementById('habilitacion').value;
@@ -339,6 +345,12 @@ function agregarGranja() {
 <!------------ GRANJAS - EDITAR   ------------->
 <!-------------------------------------------------> 
 function editarGranja() {
+    const form = document.getElementById('editarGranjaForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const idGranja = document.getElementById('editarIdGranja').value;
     const nombre = document.getElementById('editarNombre').value;
     const metrosCuadrados = document.getElementById('editarMetros').value;
@@ -373,49 +385,53 @@ function editarGranja() {
     });
 }
 <!-------------------------------------------------> 
-<!------------ VALIDACIONES   ------------->
-<!-------------------------------------------------> 
-// Activar validaciones al enviar el formulario
-document.querySelectorAll('.needs-validation').forEach(function (form) {
-    form.addEventListener('submit', function (event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-    }, false);
-});
-
-// Validar campos en tiempo real
-document.querySelectorAll('input, select, textarea').forEach(function (input) {
-    input.addEventListener('input', function () {
-        if (input.checkValidity()) {
-            input.classList.remove('is-invalid');
-            input.classList.add('is-valid');
-        } else {
-            input.classList.remove('is-valid');
-            input.classList.add('is-invalid');
-        }
-    });
-});
-    
-document.getElementById("metrosCuadrados").addEventListener("input", function (e) {
-    const input = e.target;
-    if (input.value < 1) {
-        input.setCustomValidity("El valor debe ser un número positivo.");
-    } else {
-        input.setCustomValidity(""); // Limpia el mensaje si el valor es válido
-    }
-});
-
-<!-------------------------------------------------> 
 <!---  FUNCIONES A EJECUTAR AL CARGAR LA PÁGINA --->
 <!-------------------------------------------------> 
 window.addEventListener('load', function() {
         cargarTablaGranjas()
 });
 </script>
-
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("agregarGranjaForm", {
+        nombre : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        metrosCuadrados : (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        habilitacion : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        ubicacion : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        }
+    });
+    initFormValidator("editarGranjaForm", {
+        nombre : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        metrosCuadrados : (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        habilitacion  : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        ubicacion : (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        }
+    });
+});
+</script>
 HTML;
 
 // Agregar las funciones y el contenedor de los toast
