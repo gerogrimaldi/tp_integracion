@@ -17,8 +17,8 @@ Requisitos de información
 ✔ IRQ-11 - Mortandad
 
 Requisitos de RESTRICCIÓN de información
-❌ CRQ-01 - Restricción a los datos de mortandad 
-❌ CRQ-02 - Restricción al valor del pesaje de lotes 
+✔ CRQ-01 - Restricción a los datos de mortandad 
+✔ CRQ-02 - Restricción al valor del pesaje de lotes 
 
 Requisitos NO funcionales 
 ✔ NFR-01 - Seguridad de los usuarios -> Encriptación de contraseña
@@ -40,6 +40,6 @@ Requisitos generales del sistema
 ✔ RG-07 - Gestión de vacunas: ABM
 ✔ RG-07.1 - Gestión de lotes de vacunas.
 ✔ RG-08 - Aplicación de vacunas: registro  de  vacunas  aplicadas a un lote de aves, indicando el lote utilizado. 
-❌ RG-08.1 - Reporte de vacunas aplicadas: reporte  que  detalle  las vacunas aplicadas a un lote de aves. 
+✔ RG-08.1 - Reporte de vacunas aplicadas: reporte  que  detalle  las vacunas aplicadas a un lote de aves. 
 ✔ RG-09 - Mortandad de las aves: registro  de  aves  que mueran de un lote y sus detalles. 
 ✔ RG-10 - Gestión de copias de seguridad: crear y restaurar base de datos

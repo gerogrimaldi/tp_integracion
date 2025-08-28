@@ -272,9 +272,6 @@ $(document).on('click', '#btnReporteVacunas', function() {
     ventana.print();
 });
 
-
-
-
 //------------------------------------------------
 // Inicialización Select2 y eventos
 //------------------------------------------------

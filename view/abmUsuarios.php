@@ -271,9 +271,16 @@ document.addEventListener('click', function(e) {
         const campo = btn.getAttribute('data-campo');
         const spanDato = document.getElementById('dato' + campo.charAt(0).toUpperCase() + campo.slice(1));
         
-        // Si está en modo edición → guardar
+
         if (btn.classList.contains('modo-edicion')) {
-            const nuevoValor = spanDato.querySelector('input').value;
+            let nuevoValor;
+            if (campo === 'tipoUsuario') {
+                // Si el campo es 'tipoUsuario', buscamos el elemento <select>
+                nuevoValor = spanDato.querySelector('select').value;
+            } else {
+                // Para todos los demás campos, buscamos el elemento <input>
+                nuevoValor = spanDato.querySelector('input').value;
+            }
             actualizarCampoUsuario(campo, nuevoValor, btn, spanDato);
         } else {
             // Cambiar a modo edición
@@ -282,6 +289,14 @@ document.addEventListener('click', function(e) {
             // Si el valor viene con hora (YYYY-MM-DDTHH:MM:SS), cortamos la fecha
             const valorSoloFecha = valorActual.includes('T') ? valorActual.split('T')[0] : valorActual;
                 spanDato.innerHTML = '<input type="date" class="form-control form-control-sm" value="' + valorSoloFecha + '">';
+            } else if (campo === "tipoUsuario") {
+                const options = ['Encargado', 'Propietario'];
+                let selectHtml = '<select class="form-control form-control-sm">';
+                options.forEach(option => {
+                    selectHtml += '<option value="' + option + '" ' + (valorActual === option ? 'selected' : '') + '>' + option + '</option>';
+                });
+                selectHtml += '</select>';
+                spanDato.innerHTML = selectHtml;
             } else {
                 spanDato.innerHTML = '<input type="text" class="form-control form-control-sm" value="' + valorActual + '">';
             }

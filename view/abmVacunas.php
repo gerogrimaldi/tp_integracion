@@ -53,39 +53,21 @@ $body = <<<HTML
                     <form id="agregarVacunaForm" class="needs-validation" novalidate>
                         <div class="mb-4">
                         <label for="nombre" class="form-label">Nombre comercial</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="nombre" 
-                               name="nombre" 
-                               placeholder="Nombre"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="nombre" name="nombre" placeholder="Nombre" minlength="3" required>
                             <div class="invalid-feedback">
                                 El nombre debe tener al menos 3 caracteres.
                             </div>
                         </div>
                         <div class="mb-4">
                         <label for="marca" class="form-label">Marca</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="marca" 
-                               name="marca" 
-                               placeholder="Marca"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="marca" name="marca" placeholder="Marca" minlength="3" required>
                             <div class="invalid-feedback">
                                 La marca debe tener al menos 3 carácteres.
                             </div>
                         </div>
                         <div class="mb-4">
                         <label for="enfermedad" class="form-label">Enfermedad</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="enfermedad" 
-                               name="enfermedad" 
-                               placeholder="Enfermedad"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="enfermedad" name="enfermedad" placeholder="Enfermedad" minlength="3" required>
                             <div class="invalid-feedback">
                                 La enfermedad debe tener al menos 3 carácteres.
                             </div>
@@ -121,39 +103,21 @@ $body = <<<HTML
                     <form id="editarVacunaForm" class="needs-validation" novalidate>
                         <div class="mb-4">
                         <label for="nombre" class="form-label">Nombre comercial</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="editarNombre" 
-                               name="nombre" 
-                               placeholder="Nombre"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="editarNombre" name="nombre" placeholder="Nombre" minlength="3" required>
                             <div class="invalid-feedback">
                                 El nombre debe tener al menos 3 caracteres.
                             </div>
                         </div>
                         <div class="mb-4">
                         <label for="marca" class="form-label">Marca</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="editarMarca" 
-                               name="marca" 
-                               placeholder="Marca"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="editarMarca" name="marca" placeholder="Marca" minlength="3" required>
                             <div class="invalid-feedback">
                                 La marca debe tener al menos 3 carácteres.
                             </div>
                         </div>
                         <div class="mb-4">
                         <label for="enfermedad" class="form-label">Enfermedad</label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="editarEnfermedad" 
-                               name="enfermedad" 
-                               placeholder="Enfermedad"
-                               minlength="3"
-                               required>
+                        <input type="text" class="form-control" id="editarEnfermedad" name="enfermedad" placeholder="Enfermedad" minlength="3" required>
                             <div class="invalid-feedback">
                                 La enfermedad debe tener al menos 3 carácteres.
                             </div>
@@ -284,6 +248,12 @@ function eliminarVacuna(idVacuna) {
 <!--------- VACUNAS - AGREGAR NUEVA --------->  
 <!-------------------------------------------> 
 function agregarVacuna() {
+    const form = document.getElementById('agregarVacunaForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const nombre = document.getElementById('nombre').value;
     const marca = document.getElementById('marca').value;
     const enfermedad = document.getElementById('enfermedad').value;
@@ -319,6 +289,12 @@ function agregarVacuna() {
 <!----------- VACUNAS - EDITAR   ------------>
 <!-------------------------------------------> 
 function editarVacuna() {
+    const form = document.getElementById('editarVacunaForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const idVacuna = document.getElementById('editarIdVacuna').value;
     const nombre = document.getElementById('editarNombre').value;
     const marca = document.getElementById('editarMarca').value;
@@ -442,10 +418,47 @@ window.addEventListener('load', function() {
     });
 });
 </script>
-
-
-
-
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("editarVacunaForm", {
+        nombre: (value) => {
+            if (value.length <= 0) return "Ingrese el nombre comercial.";
+            return true;
+        },
+        marca: (value) => {
+            if (value.length <= 0) return "Ingrese una marca válida.";
+            return true;
+        },
+        enfermedad: (value) => {
+            if (value.length <= 0) return "Ingrese una enfermedad válida.";
+            return true;
+        },
+        viaAplicacion : (value) => {
+            if (!value) return "Debe seleccionar una vía.";
+            return true;
+        }
+    });
+    initFormValidator("agregarVacunaForm", {
+        nombre: (value) => {
+            if (value.length <= 0) return "Ingrese el nombre comercial.";
+            return true;
+        },
+        marca: (value) => {
+            if (value.length <= 0) return "Ingrese una marca válida.";
+            return true;
+        },
+        enfermedad: (value) => {
+            if (value.length <= 0) return "Ingrese una enfermedad válida.";
+            return true;
+        },
+        viaAplicacion : (value) => {
+            if (!value) return "Debe seleccionar una vía.";
+            return true;
+        }
+    });
+});
+</script>
 HTML;
 // Agregar las funciones y el contenedor de los toast
 // Para mostrar notificaciones

@@ -27,7 +27,7 @@ $body = <<<HTML
                             placeholder="Ejemplo: Corte de césped"
                             min="1" required>
                         <div class="invalid-feedback">
-                            Debe contar con al menos 3 letras.
+                            Debe contar con al menos 3 carácteres.
                         </div>
                     </div>
                     <button type="button" class="btn btn-primary" id="btnAgregarTipoMant">Agregar</button>
@@ -75,7 +75,7 @@ $body = <<<HTML
                         placeholder="Ejemplo: Corte de césped"
                         min="1" required>
                     <div class="invalid-feedback">
-                        Debe contar con al menos 3 letras.
+                        Debe contar con al menos 3 carácteres.
                     </div>
                 </div>
                     <input type="hidden" id="idTipoMant" name="idTipoMant">
@@ -128,6 +128,12 @@ document.getElementById('editarTipoMantForm').addEventListener('submit', functio
 <!------- TIPOS DE MANTENIMIENTOS - RESOLUCIÓN ABM ------->  
 <!--------------------------------------------------------> 
 function agregarTipoMant() {
+    const form = document.getElementById('agregarTipoMantForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const nombreMant = document.getElementById('nombreMant').value;
 
     fetch('index.php?opt=mantenimientos&ajax=addTipoMant', {
@@ -157,6 +163,12 @@ function agregarTipoMant() {
 }
 
 function editarTipoMant() {
+    const form = document.getElementById('editarTipoMantForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const idTipoMant = document.getElementById('idTipoMant').value;
     const nombreMantEdit = document.getElementById('nombreMantEdit').value;
 
@@ -295,7 +307,23 @@ function cargarTablaTipoMant() {
         $('#tablaTiposMant').DataTable();
     });
 }
-
+</script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("agregarTipoMantForm", {
+        nombreMant : (value) => {
+            if (value.length < 3) return "Ingrese los datos solicitados.";
+            return true;
+        }
+    });
+    initFormValidator("editarTipoMantForm", {
+        nombreMantEdit : (value) => {
+            if (value.length < 3) return "Ingrese los datos solicitados.";
+            return true;
+        }
+    });
+});
 </script>
 HTML;
 // Agregar las funciones y el contenedor de los toast

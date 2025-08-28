@@ -323,7 +323,7 @@ $body .= <<<HTML
                     </div>
                     <div class="mb-4">
                         <label for="cantidad" class="form-label">Cantidad de Aves</label>
-                        <input type="number" class="form-control" id="cantidad" name="cantidad" required>
+                        <input type="number" step="1" class="form-control" id="cantidad" name="cantidad" required>
                         <div class="invalid-feedback">Ingrese una cantidad válida (1 o más).</div>
                     </div>
                     <div class="mb-4">
@@ -380,7 +380,7 @@ $body .= <<<HTML
                     </div-->
                     <div class="mb-4">
                         <label for="editCantidad" class="form-label">Cantidad de Aves</label>
-                        <input type="number" class="form-control" id="editCantidad" name="cantidad" required>
+                        <input type="number" step="1" class="form-control" id="editCantidad" name="cantidad" required>
                         <div class="invalid-feedback">Ingrese una cantidad válida (1 o más).</div>
                     </div>
                     <div class="mb-4">
@@ -499,6 +499,12 @@ document.getElementById('newLoteAvesForm').addEventListener('submit', function(e
 });
 // === Agregar lote ===
 function agregarLote() {
+    const form = document.getElementById('newLoteAvesForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const identificador = document.getElementById('identificador').value;
     const fechaNac = document.getElementById('fechaNacimiento').value;
     const fechaCompra = document.getElementById('fechaCompra').value;
@@ -673,6 +679,12 @@ function editarLote(idLote){
 document.getElementById('btnGuardarCambios').addEventListener('click', guardarCambios);
 document.getElementById('editLoteAvesForm').addEventListener('submit', function(e){ e.preventDefault(); guardarCambios(); });
 function guardarCambios(){
+    const form = document.getElementById('editLoteAvesForm');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
+        return;
+    }
     const idLote = document.getElementById('editIdLote').value;
     const identificador = document.getElementById('editIdentificador').value;
     const fechaNac = document.getElementById('editFechaNacimiento').value;
@@ -720,6 +732,104 @@ window.addEventListener("load", function(){
     document.getElementById("fechaNacimientoHasta").value = formatDate(fechaHasta);
     $('#tablaLotes').DataTable();
 });
-
 </script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => { //identificacion capacidad idTipoAve idGranja
+    initFormValidator("newLoteAvesForm", {
+        fechaNacimiento : (value) => {
+            if (!value) return "Debe ingresar una fecha.";
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        fechaCompra : (value) => {
+            if (!value) return "Debe ingresar una fecha.";
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        identificador: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        capacidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        galpon: (value) => {
+            if (!value) return "Debe seleccionar un galpón.";
+            return true;
+        },
+        tipoAve: (value) => {
+            if (!value) return "Debe seleccionar un tipo de ave.";
+            return true;
+        },
+        cantidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        precioCompra: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        }
+    });
+    initFormValidator("editLoteAvesForm", {
+        fechaNacimiento : (value) => {
+            if (!value) return "Debe ingresar una fecha.";
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        fechaCompra : (value) => {
+            if (!value) return "Debe ingresar una fecha.";
+            const [year, month, day] = value.split("-").map(Number);
+            const fecha = new Date(year, month - 1, day);
+            if (isNaN(fecha.getTime())) return "Fecha inválida.";
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            fecha.setHours(0,0,0,0);
+            if (fecha > hoy) return "La fecha no puede ser futura.";
+            return true;
+        },
+        identificador: (value) => {
+            if (value.length = 0) return "Ingrese los datos solicitados.";
+            return true;
+        },
+        capacidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        tipoAve: (value) => {
+            if (!value) return "Debe seleccionar un tipo de ave.";
+            return true;
+        },
+        cantidad: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        },
+        precioCompra: (value) => {
+            if (value <= 0) return "Debe ser mayor a 0.";
+            return true;
+        }
+    });
+});
+</script>
+
+
 HTML;
