@@ -102,23 +102,29 @@ if (isset($_GET['ajax']))
             header('Content-Type: application/json');
             try {
                 if( !isset($_POST['idGranja']) || $_POST['idGranja'] === '' || 
-                !isset($_POST['idcompuesto']) || $_POST['idcompuesto'] === ''|| 
-                !isset($_POST['cantidad']) || $_POST['cantidad'] === ''|| 
-                !isset($_POST['preciocompra']) || $_POST['preciocompra'] === '')
-                {
+                    !isset($_POST['idcompuesto']) || $_POST['idcompuesto'] === ''|| 
+                    !isset($_POST['cantidad']) || $_POST['cantidad'] === ''|| 
+                    !isset($_POST['preciocompra']) || $_POST['preciocompra'] === ''||
+                    !isset($_POST['fechaCompra']) || $_POST['fechaCompra'] === ''
+                ){
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
                     exit();
-                }//$idGranja, $idCompuesto, $cantidad, $preciocompra
+                }
                 $oComprasCompuesto = new ComprasCompuesto();
-                if ($oComprasCompuesto->save($_POST['idGranja'], $_POST['idcompuesto'], $_POST['cantidad'], $_POST['preciocompra'])) {
+                if ($oComprasCompuesto->save(
+                    $_POST['idGranja'],
+                    $_POST['idcompuesto'],
+                    $_POST['cantidad'],
+                    $_POST['preciocompra'],
+                    $_POST['fechaCompra']
+                )) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Compra cargada correctamente']);
                 }
             }catch (RuntimeException $e) {
-                    http_response_code(400);
-                    //echo json_encode(['msg' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al ingresar compra de compuesto.']);
+                http_response_code(400);
+                echo json_encode(['msg' => 'Error al ingresar compra de compuesto.']);
             }
             exit();
         break;
@@ -133,32 +139,32 @@ if (isset($_GET['ajax']))
                     exit();
                 }
                 $oComprasCompuesto = new comprascompuesto();
-                $listadoComprasComp = $oComprasCompuesto->getComprasCompuesto($_POST['idGranja'], 
-                                $_POST['idcompuesto'], $_POST['cantidad'], $_POST['preciocompra']);
+                $listadoComprasComp = $oComprasCompuesto->getComprasCompuesto($_GET['idGranja']);
                 if ($listadoComprasComp){
                     http_response_code(200);
                     echo json_encode($listadoComprasComp);
-                }else{
-                    http_response_code(200);
+                } else {
                     echo '[]';
                 }
             } catch (RuntimeException $e) {
-                    http_response_code(400);
-                    //echo json_encode(['msg' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al obtener compras.']);
+                http_response_code(400);
+                echo json_encode(['error' => $e->getMessage()]);
+                //echo json_encode(['msg' => 'Error al obtener compras.']);
             }
             exit();
+        break;
+
 
         case 'delCompra': 
             header('Content-Type: application/json');
             try {
-                if( !isset($_GET['idcomprascompuesto']) || $_GET['idcomprascompuesto'] === '' ){
+                if( !isset($_GET['idCompraCompuesto']) || $_GET['idCompraCompuesto'] === '' ){
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: compra no seleccionada.']);
                     exit();
                 }
                 $oComprasCompuesto = new comprascompuesto();
-                if ($oComprasCompuesto->deleteComprasCompuestoId($_GET['idcomprascompuesto'])) {
+                if ($oComprasCompuesto->deleteComprasCompuestoId($_GET['idCompraCompuesto'])) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Eliminado correctamente.']);
                 }

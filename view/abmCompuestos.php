@@ -55,9 +55,9 @@ $body = <<<HTML
     </div>
 </div>
 
-<!------------------------------------------------> 
-<!-- MODAL: EDITAR TIPO DE MANTENIMIENTO -->
-<!------------------------------------------------> 
+<!----------------------------> 
+<!-- MODAL: Edit Compuestos -->
+<!----------------------------> 
 <div class="modal fade" id="editarCompuesto" tabindex="-1" aria-labelledby="editarCompuestoModal" aria-hidden="true">
     <div class="modal-dialog">
        <div class="modal-content bg-dark text-white">
@@ -246,11 +246,9 @@ function cargarSelectTipoMant(select) {
 function recargarCompuestos() {
     //Recargar secciones de la página cuando se cambia un tipo mant.
     cargarTablaCompuestos();
-    //cargarTablaMantGalpon();
-    cargarTablaMantGranja()
+    cargarTablaComprasCom();
 }
 
-<!-- JS Para rellenar tabla tipo mantenimientos -->
 function cargarTablaCompuestos() {
     // Vaciar tabla
     if ($.fn.DataTable.isDataTable('#tablaCompuesto')) {
@@ -301,7 +299,7 @@ function cargarTablaCompuestos() {
 HTML;
 $body .= <<<HTML
 <div class="container">
-    <h2>Granjas</h2>
+    <h2>Compras por granjas</h2>
 
     <div class="input-group mb-3">
         <select id="selectGranja" name="selectGranja" class="form-select rounded-start" required>
@@ -315,27 +313,17 @@ $body .= <<<HTML
         </div>
     </div>
 
-    <!-- Filtros de fechas + botones -->
-    <div class="row mb-3 g-2"> <!-- g-2 agrega un gap entre columnas -->
-       
-       
-        <div class="col-12 col-md-3 d-flex align-items-end">
-            <button id="btnFiltrar" class="btn btn-primary w-100">Filtrar</button>
-        </div>
-        <div class="col-12 col-md-3 d-flex align-items-end">
-            <button id="btnReporte" class="btn btn-success w-100">Generar Reporte</button>
-        </div>
-    </div>
     <!-- Tabla de mantenimiento de granjas -->
     <div class="card shadow-sm rounded-3 mb-3">
         <div class="card-body table-responsive">
-            <table id="tablaMantGranja" class="table table-striped table-hover align-middle mb-0 bg-white">
+            <table id="tablaComprasCom" class="table table-striped table-hover align-middle mb-0 bg-white">
                 <thead class="table-light">
                     <tr>
                         <th class="text-primary">ID</th>
                         <th class="text-primary">Compuesto</th>
                         <th class="text-primary">Cantidad</th>
                         <th class="text-primary">Precio</th>
+                        <th class="text-primary">Fecha</th>
                         <th class="text-primary">❌</th>
                     </tr>
                 </thead>
@@ -347,35 +335,45 @@ $body .= <<<HTML
     </div>
 </div>
 
-<!-- Modal agregar Mantenimiento GRANJA -->
-<!-- TO DO: SI NO SE FILTRA UNA GRANJA ANTES, DA ERROR EL SQL -->
+<!-- Modal agregar compra de compuesto -->
 <div class="modal fade" id="newMantGranja" tabindex="-1" aria-labelledby="newMantGranjaModal" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark text-white">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5" id="newMantGranjaModal">Agregar nueva compra de compuesto</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="newMantGranjaForm" class="needs-validation" novalidate>
-                    <div class="mb-4">
-                        <label for="tipoMant" class="form-label">Compras de compuesto</label>
-                        <select id="selectTipoMantGranja" name="tipoMantenimiento" class="form-control">
-                            <!-- Las opciones se agregarán aquí con JavaScript -->
-                        </select>
-                        <div class="invalid-feedback">
-                            La habilitación debe tener al menos 3 caracteres.
-                        </div>
-                    </div>
-                    <input type="hidden" id="idGranja" name="idGranja">
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-primary" id="btnAgregarMantGranja">Finalizar</button>
-            </div>
-        </div>
+  <div class="modal-dialog">
+    <div class="modal-content bg-dark text-white">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5">Agregar nueva compra de compuesto</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <form id="newCompraComp" class="needs-validation" novalidate>
+          <div class="mb-3">
+            <label for="idcompuesto" class="form-label">Compuesto</label>
+            <select id="idcompuesto" name="idcompuesto" class="form-select" required></select>
+            <div class="invalid-feedback">Seleccione un compuesto.</div>
+          </div>
+          <div class="mb-3">
+            <label for="cantidad" class="form-label">Cantidad</label>
+            <input type="number" id="cantidad" name="cantidad" class="form-control" required>
+            <div class="invalid-feedback">Ingrese una cantidad válida (1 o más).</div>
+          </div>
+          <div class="mb-3">
+            <label for="fechaCompra" class="form-label">Fecha de compra</label>
+            <input type="date" id="fechaCompra" name="fechaCompra" class="form-control" required>
+            <div class="invalid-feedback">Seleccione una fecha válida (no futura).</div>
+          </div>
+          <div class="mb-3">
+            <label for="preciocompra" class="form-label">Precio</label>
+            <input type="number" id="preciocompra" name="preciocompra" step="0.01" class="form-control" required>
+            <div class="invalid-feedback">Ingrese un precio válido (0 o más).</div>
+          </div>
+          <input type="hidden" id="idGranja" name="idGranja">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary" id="btnAgregarCompra">Guardar</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <script>
@@ -422,214 +420,177 @@ function cargarSelectGranja() {
         showToastError('Error al cargar las granjas');
     });
 }
-<!-- Listado GRANJAS - eliminar datos de la tabla al presionar el select -->
-document.getElementById('selectGranja').addEventListener('change', function(e) {
-    if ($.fn.DataTable.isDataTable('#tablaMantGranja')) {
-        $('#tablaMantGranja').DataTable().clear().draw();
-    }
-});
-<!-------------------------------------------------> 
-<!------ RELLENAR TABLA MANT GRANJAS - AJAX ------->
-<!-------------------------------------------------> 
-function cargarTablaMantGranja() {
-$('#tablaMantGranja').DataTable();
+
+// === Cargar select de compuestos ===
+function cargarSelectCompuestos(selectId) {
+    const select = document.getElementById(selectId);
+    select.innerHTML = '';
+    fetch('index.php?opt=compuestos&ajax=getCompuestos')
+    .then(res => res.json())
+    .then(data => {
+        data.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.idCompuesto;
+            opt.text = c.nombre + " (" + c.proveedor + ")";
+            select.appendChild(opt);
+        });
+    })
+    .catch(err => console.error("Error cargando compuestos:", err));
 }
-<!-----------------------------------------------------> 
-<!--------- MANT GRANJAS - FORMULARIO AGREGAR --------->  
-<!-----------------------------------------------------> 
-<!--- Pasar al formulario el ID Granja seleccionado --->  
-<!------- y presentar error si no hay seleccion ------->  
+
+// === Abrir modal compras ===
 document.getElementById("newMantGranja").addEventListener("show.bs.modal", function (event) {
-    // Get the currently selected granja ID
-    const selectedGranjaId = document.getElementById('selectGranja').value;
-    if (!selectedGranjaId) {
+    const selectedGranja = document.getElementById("selectGranja").value;
+    if (!selectedGranja) {
         event.preventDefault();
-        showToastError('Debe seleccionar una granja primero');
-        return;
-    }
-    // Set the hidden input value
-    document.querySelector("#newMantGranjaForm #idGranja").value = selectedGranjaId;
-    cargarSelectTipoMant('selectTipoMantGranja');
-});
-<!---- Cambiar la acción del botón enviar y enter ---->  
-document.getElementById('btnAgregarMantGranja').addEventListener('click', function() {
-    agregarMantGranja();
-});
-document.getElementById('newMantGranjaForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the default form submission
-    agregarMantGranja();
-});
-<!-----------------------------------------------> 
-<!-------- MANT GRANJAS - AGREGAR NUEVO --------->  
-<!-----------------------------------------------> 
-function agregarMantGranja() {
-    const fechaMant = document.getElementById('fechaMant').value;
-    const tipoMantenimiento = document.getElementById('selectTipoMantGranja').value;
-    const idGranja = document.getElementById('idGranja').value;
-
-    fetch('index.php?opt=mantenimientos&ajax=newMantGranja', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: 'fechaMant=' + encodeURIComponent(fechaMant) +
-              '&tipoMantenimiento=' + encodeURIComponent(tipoMantenimiento) +
-              '&idGranja=' + encodeURIComponent(idGranja)
-    })
-    .then(response => {
-        return response.json().then(data => {
-            if (response.ok) {
-                document.getElementById("btnFiltrar").click();
-                $('#newMantGranja').modal('hide');
-                showToastOkay(data.msg);
-            } else {
-                showToastError(data.msg);
-            }
-        });
-    })
-    .catch(error => {
-        console.error('Error en la solicitud AJAX:', error);
-        showToastError('Error en la solicitud AJAX: ' + error.message);
-    });
-}
-<!-----------------------------------------------> 
-<!----------- MANT GRANJAS - ELIMINAR ----------->  
-<!-----------------------------------------------> 
-function eliminarMantGranja(idMantenimientoGranja) {
-    // Realizar la solicitud AJAX
-    fetch('index.php?opt=mantenimientos&ajax=delMantGranja&idMantenimientoGranja=' + idMantenimientoGranja, {
-        method: 'GET'
-    })
-    .then(response => {
-        return response.json().then(data => {
-            if (response.ok) {
-                // Si la eliminación fue exitosa, recargar la tabla y los select
-                document.getElementById("btnFiltrar").click();
-                showToastOkay(data.msg);
-            } else {
-                showToastError(data.msg);
-            }
-        });
-    })
-    .catch(error => {
-        console.error('Error en la solicitud AJAX:', error);
-        showToastError('Error desconocido.');
-    });
-}
-// === FILTRAR POR FECHAS ===
-document.getElementById("btnFiltrar").addEventListener("click", function() {
-    var idGranja = document.getElementById("selectGranja").value;
-    var desde = document.getElementById("fechaDesde").value;
-    var hasta = document.getElementById("fechaHasta").value;
-
-    if (!idGranja) {
         showToastError("Debe seleccionar una granja primero");
         return;
     }
-    if (!desde || !hasta) {
-        showToastError("Debe seleccionar fechas Desde y Hasta");
+    document.getElementById("idGranja").value = selectedGranja;
+    cargarSelectCompuestos("idcompuesto");
+});
+
+
+// === Guardar compra ===
+document.getElementById("btnAgregarCompra").addEventListener("click", function () {
+    const form = document.getElementById('newCompraComp');
+    // ejecutar las validaciones
+    if (!form.validateAll()) {
+        form.classList.add('was-validated');
         return;
     }
-
-    // Vaciar y recargar la tabla con las fechas
-    if ($.fn.DataTable.isDataTable('#tablaMantGranja')) {
-        $('#tablaMantGranja').DataTable().destroy();
-    }
-    document.getElementById("mantGranja").innerHTML = "";
-
-    fetch('index.php?opt=mantenimientos&ajax=getMantGranja&idGranja=' + encodeURIComponent(idGranja) +
-          '&desde=' + encodeURIComponent(desde) +
-          '&hasta=' + encodeURIComponent(hasta))
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
-        data.forEach(function(m) {
-            var row = '<tr class="table-light">' +
-                        '<td>' + m.idMantenimientoGranja + '</td>' +
-                        '<td>' + m.fecha + '</td>' +
-                        '<td>' + m.nombre + '</td>' +
-                        '<td>' +
-                            '<button type="button" class="btn btn-danger btn-sm" onclick="eliminarMantGranja(' + m.idMantenimientoGranja + ')">Borrar</button>' +
-                        '</td>' +
-                      '</tr>';
-            document.getElementById("mantGranja").insertAdjacentHTML("beforeend", row);
-        });
-        $('#tablaMantGranja').DataTable();
+    const data = new URLSearchParams(new FormData(form));
+    fetch("index.php?opt=compuestos&ajax=addCompra", {
+        method: "POST",
+        body: data
     })
-    .catch(function(err) {
-        console.error("Error:", err);
-        $('#tablaMantGranja').DataTable();
+    .then(async response => {
+        let resData;
+        try {
+            resData = await response.json();
+        } catch (e) {
+            resData = { msg: response.statusText };
+        }
+
+        if (response.ok) {
+            showToastOkay(resData.msg);
+            $('#newMantGranja').modal('hide');
+            cargarTablaComprasCom();
+        } else {
+            showToastError(resData.msg || "Error desconocido: " + response.status);
+        }
+    })
+    .catch(error => {
+        console.error("Error en la solicitud AJAX:", error);
+        showToastError("Error en la solicitud AJAX: " + error.message);
     });
 });
 
-// === GENERAR REPORTE IMPRIMIBLE ===
-document.getElementById("btnReporte").addEventListener("click", function() {
-    var desde = document.getElementById("fechaDesde").value;
-    var hasta = document.getElementById("fechaHasta").value;
-    var granjaNombre = document.querySelector("#selectGranja option:checked").text;
+// === Tabla de compras ===
+function cargarTablaComprasCom() {
+    const idGranja = document.getElementById("selectGranja").value;
+    if (!idGranja) return;
 
-    if (!desde || !hasta) {
-        showToastError("Debe seleccionar fechas Desde y Hasta");
-        return;
+    if ($.fn.DataTable.isDataTable('#tablaComprasCom')) {
+        $('#tablaComprasCom').DataTable().destroy();
     }
-
-    var rows = "";
-    document.querySelectorAll("#mantGranja tr").forEach(function(tr) {
-        var tds = tr.querySelectorAll("td");
-        rows += '<tr>' +
-                    '<td>' + tds[0].innerText + '</td>' +
-                    '<td>' + tds[1].innerText + '</td>' +
-                    '<td>' + tds[2].innerText + '</td>' +
-                '</tr>';
+    document.getElementById("comprasCompuesto").innerHTML = "";
+    fetch("index.php?opt=compuestos&ajax=getComprascompuesto&idGranja=" + encodeURIComponent(idGranja))
+    .then(res => res.json())
+    .then(data => {
+        data.forEach(c => {
+            var row = '<tr class="table-light">' +
+                '<td>' + c.idCompraCompuesto + '</td>' +
+                '<td>' + c.nombre + '</td>' +
+                '<td>' + c.cantidad + '</td>' +
+                '<td>' + c.precioCompra + '</td>' +
+                '<td>' + c.fechaCompra + '</td>' +
+                '<td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarCompra(' + c.idCompraCompuesto + ')">Borrar</button></td>' +
+            '</tr>';
+            document.getElementById("comprasCompuesto").insertAdjacentHTML("beforeend", row);
+        });
+        $('#tablaComprasCom').DataTable();
+    })
+    .catch(err => {
+        console.error("Error cargando compras:", err);
+        $('#tablaComprasCom').DataTable();
     });
+}
 
-    var reporte = '<html>' +
-                   '<head>' +
-                   '<title>Reporte Mantenimientos</title>' +
-                   '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">' +
-                   '<style>' +
-                     'body { padding: 20px; }' +
-                     'h2, h4 { text-align: center; margin-bottom: 20px; }' +
-                     'table { width: 100%; border-collapse: collapse; margin-top: 20px; }' +
-                     'th, td { border: 1px solid #000; padding: 8px; text-align: left; }' +
-                   '</style>' +
-                   '</head>' +
-                   '<body>' +
-                   '<h2>' + granjaNombre + '</h2>' +
-                   '<h4>Listado de mantenimientos de granja</h4>' +
-                   '<p><strong>Desde:</strong> ' + desde + ' &nbsp;&nbsp; <strong>Hasta:</strong> ' + hasta + '</p>' +
-                   '<table>' +
-                   '<thead>' +
-                     '<tr><th>ID</th><th>Fecha</th><th>Descripción</th></tr>' +
-                   '</thead>' +
-                   '<tbody>' + rows + '</tbody>' +
-                   '</table>' +
-                   '</body>' +
-                   '</html>';
+// === Eliminar compra ===
+function eliminarCompra(id) {
+    fetch("index.php?opt=compuestos&ajax=delCompra&idCompraCompuesto=" + id)
+    .then(res => res.json())
+    .then(data => {
+        showToastOkay(data.msg);
+        cargarTablaComprasCom();
+    })
+    .catch(err => showToastError("Error al eliminar compra: " + err));
+}
 
-    var ventana = window.open("", "_blank");
-    ventana.document.write(reporte);
-    ventana.document.close();
-    ventana.print();
+<!-- Listado GRANJAS - Filtrar al presionar opción del select -->
+document.getElementById('selectGranja').addEventListener('change', function(e) {
+    this.setAttribute('data-selected', e.target.value);
+    if (e.target.value) {
+        cargarTablaComprasCom();
+    } else {
+        // Limpiar la tabla si no hay granja seleccionada
+        if ($.fn.DataTable.isDataTable('#tablaComprasCom')) {
+            $('#tablaComprasCom').DataTable().clear().draw();
+        }
+    }
 });
 
 window.addEventListener('load', function() {
     cargarSelectGranja();
     cargarTablaCompuestos();
-    cargarTablaMantGranja();
+    $('#tablaComprasCom').DataTable();
 
-    // === Configurar fechas por defecto ===
-    const fechaHasta = new Date();
-    const fechaDesde = new Date();
-    fechaDesde.setMonth(fechaHasta.getMonth() - 1);
-
+    // === Configurar fecha por defecto ===
+    const hoy = new Date();
     function formatDate(d) {
         return d.toISOString().split('T')[0]; // yyyy-mm-dd
     }
-    document.getElementById('fechaDesde').value = formatDate(fechaDesde);
-    document.getElementById('fechaHasta').value = formatDate(fechaHasta);
+    document.getElementById('fechaCompra').value = formatDate(hoy);
 });
-
 </script>
+<script src="js/formValidator.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    initFormValidator("newCompraComp", {
+    fechaCompra : (value) => {
+        if (!value) return "Debe ingresar una fecha.";
+
+        // Tomar solo la parte de la fecha (YYYY-MM-DD)
+        const soloFecha = value.split("T")[0];
+        const [year, month, day] = soloFecha.split("-").map(Number);
+        const fecha = new Date(year, month - 1, day);
+
+        if (isNaN(fecha.getTime())) return "Fecha inválida.";
+
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        fecha.setHours(0,0,0,0);
+
+        if (fecha > hoy) return "La fecha no puede ser futura.";
+        return true;
+    },
+    cantidad: (value) => {
+        if (value <= 0) return "Debe ser mayor a 0.";
+        return true;
+    },
+    precioCompra: (value) => {
+        if (value <= 0) return "Debe ser mayor a 0.";
+        return true;
+    },
+    idcompuesto : (value) => {
+        if (!value) return "Debe seleccionar un tipo.";
+        return true;
+    }
+    });
+});
+</script>
+
 
 HTML;
 

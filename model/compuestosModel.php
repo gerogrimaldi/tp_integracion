@@ -136,47 +136,35 @@ class compuesto{
     }
 }
 
-/*
-CREATE TABLE compra (
-    idCompraCompuesto INT NOT NULL AUTO_INCREMENT,
-    idGranja INT NOT NULL,
-    idCompuesto INT NOT NULL,
-    cantidad DECIMAL(10,2),
-    precioCompra DECIMAL(10,2),
-    PRIMARY KEY (idCompraCompuesto),
-    FOREIGN KEY (idGranja) REFERENCES granja(idGranja),
-    FOREIGN KEY (idCompuesto) REFERENCES compuesto(idCompuesto)
-);
-*/
-class ComprasCompuesto{
+class ComprasCompuesto {
     private $idCompraCompuesto;
     private $idGranja;
-	private $idCompuesto;
+    private $idCompuesto;
     private $cantidad;
     private $precioCompra;
+    private $fechaCompra;
     private $mysqli;
     
-    public function __construct()
-    {
-    require_once 'includes/config.php';
-        $this->mysqli = new mysqli(DB_HOST,DB_USER,DB_PASS,DB_NAME);
-        if ($this->mysqli->connect_error) { die("Error de conexión a la base de datos: " . $this->mysqli->connect_error); }
+    public function __construct() {
+        require_once 'includes/config.php';
+        $this->mysqli = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        if ($this->mysqli->connect_error) {
+            die("Error de conexión a la base de datos: " . $this->mysqli->connect_error);
+        }
     }
 
-    public function __destruct()
-    {
+    public function __destruct() {
         if ($this->mysqli !== null) {
             $this->mysqli->close();
         }
     }
-    
-    public function setIdcompracompuesto($idCompraCompuesto){$this->idCompraCompuesto = (int)$idCompraCompuesto;}
-    public function setIdGranja($idGranja){$this->idGranja = (int)$idGranja;}
-    public function setIdCompuesto($idCompuesto){$this->idCompuesto = $idCompuesto;}
 
-    public function setCantidad($cantidad){$this->cantidad = $cantidad;}
-    public function setPrecioCompra($precioCompra)
-    {
+    public function setIdCompraCompuesto($idCompraCompuesto){ $this->idCompraCompuesto = (int)$idCompraCompuesto; }
+    public function setIdGranja($idGranja){ $this->idGranja = (int)$idGranja; }
+    public function setIdCompuesto($idCompuesto){ $this->idCompuesto = (int)$idCompuesto; }
+    public function setCantidad($cantidad){ $this->cantidad = $cantidad; }
+
+    public function setPrecioCompra($precioCompra) {
         if (is_numeric($precioCompra) && $precioCompra >= 0) {
             $this->precioCompra = $precioCompra;
         } else {
@@ -184,122 +172,83 @@ class ComprasCompuesto{
         }
     }
 
-    public function getComprasCompuesto($idCompraCompuesto, $idGranja, $idCompuesto, $cantidad, $precioCompra)
-    {
-        try {
-            if ($this->mysqli === null) {
-                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-            }
-            if (!is_numeric($idCompraCompuesto)) {
-                throw new RuntimeException('El ID de la compra debe ser un numero.');
-            }
-            // Preparar la consulta con rango de fechas
-            $sql = "SELECT cc.idcomprascompuesto, cc.idgranja, cc.idcompuesto, cc.cantidad, cc.preciocompra
-                    FROM Comprascompuesto cc
-                    INNER JOIN granja ON granja.idgranja = cc.idgranja
-                    INNER JOIN compuesto ON compuesto.idcompuesto = cc.idcompuesto
-                    WHERE cc.idGranja = ?";
-
-            $stmt = $this->mysqli->prepare($sql);
-            if (!$stmt) { throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error);}
-            $stmt->bind_param("i", $this->idGranja);
-            if (!$stmt->execute()) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-            }
-            $result = $stmt->get_result();
-            if ($result === false) {throw new RuntimeException('Error al obtener el resultado: ' . $stmt->error);}
-            $data = [];
-            while ($row = $result->fetch_assoc()) {
-                $data[] = $row;
-            }
-            $stmt->close();
-            return $data;
-        } catch (RuntimeException $e) {
-            throw $e;
+    public function setFechaCompra($fechaCompra) {
+        // Validar formato YYYY-MM-DD
+        $d = DateTime::createFromFormat('Y-m-d', $fechaCompra);
+        if ($d && $d->format('Y-m-d') === $fechaCompra) {
+            $this->fechaCompra = $fechaCompra;
+        } else {
+            throw new RuntimeException('Fecha inválida. Formato esperado: YYYY-MM-DD.');
         }
     }
 
-    public function save($idGranja, $idCompuesto, $cantidad, $preciocompra)
-    {
+    public function getComprasCompuesto($idGranja) {
+        $this->idGranja = (int)$idGranja;
+        $sql = "SELECT c.idCompraCompuesto, c.idGranja, c.idCompuesto, 
+                       c.cantidad, c.precioCompra, c.fechaCompra, cp.nombre
+                FROM compra c
+                INNER JOIN granja g ON g.idGranja = c.idGranja
+                INNER JOIN compuesto cp ON cp.idCompuesto = c.idCompuesto
+                WHERE c.idGranja = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error); }
+        $stmt->bind_param("i", $this->idGranja);
+        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        $result = $stmt->get_result();
+        $data = [];
+        while ($row = $result->fetch_assoc()) {
+            $data[] = $row;
+        }
+        $stmt->close();
+        return $data;
+    }
+
+    public function save($idGranja, $idCompuesto, $cantidad, $precioCompra, $fechaCompra) {
         $this->setIdGranja($idGranja); 
         $this->setIdCompuesto($idCompuesto);
         $this->setCantidad($cantidad);
-        $this->setPrecioCompra($preciocompra);
-        try{
-            if ($this->mysqli === null) {
-                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-            }
-            // Inserción de ComprasCompuesto, no es necesario chequear existencia
-            $sql = "INSERT INTO comprascompuesto (idcomprascompuesto, idgranja, idcompuesto, cantidad, preciocompra) VALUES (?, ?, ?, ?, ?)";
-            $stmt = $this->mysqli->prepare($sql);
-            if (!$stmt) {
-                throw new RuntimeException("Error en la preparación de la consulta de inserción: " . $this->mysqli->error);
-            }
-            // Enlaza los parámetros y ejecuta la consulta
-            $stmt->bind_param("iiidd", $this->Idcompracompuesto, $this->IdCompuesto, $this->IdGranja, $this->Cantidad, $this->PrecioCompra);
-            if (!$stmt->execute()) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-            }
-            // Cerrar la consulta
-            $stmt->close();
-            return true;
-        }catch(RuntimeException $e) {
-            throw $e;
-        }
+        $this->setPrecioCompra($precioCompra);
+        $this->setFechaCompra($fechaCompra);
+
+        $sql = "INSERT INTO compra (idGranja, idCompuesto, cantidad, precioCompra, fechaCompra) 
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { throw new RuntimeException("Error en la preparación de la consulta: " . $this->mysqli->error); }
+        $stmt->bind_param("iidds", $this->idGranja, $this->idCompuesto, $this->cantidad, $this->precioCompra, $this->fechaCompra);
+        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        $stmt->close();
+        return true;
     }
 
-    public function update($idComprasCompuesto, $idGranja, $idCompuesto, $cantidad, $preciocompra)
-    {
-        $this->setIdcompracompuesto($idComprasCompuesto);
+    public function update($idCompraCompuesto, $idGranja, $idCompuesto, $cantidad, $precioCompra, $fechaCompra) {
+        $this->setIdCompraCompuesto($idCompraCompuesto);
         $this->setIdGranja($idGranja); 
         $this->setIdCompuesto($idCompuesto);
         $this->setCantidad($cantidad);
-        $this->setPrecioCompra($preciocompra);
-        try{
-            if ($this->mysqli === null) {
-                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-            }
-            $sql = "UPDATE Comprascompuesto SET idgranja = ?, idcompuesto = ?,
-            cantidad = ?, preciocompra = ? WHERE idcomprascompuesto = ?";
-            $stmt = $this->mysqli->prepare($sql);
-            if (!$stmt) {
-                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
-            }
-            // Enlazar parámetros y ejecutar la consulta
-            $stmt->bind_param("iiddi", $this->$IdGranja, $this->$IdCompuesto, $this->$Cantidad, 
-                            $this->$PrecioCompra, $this->$Idcompracompuesto);
-            if (!$stmt->execute()) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
-            }
-            $stmt->close();
-            return true;
-        } catch (RuntimeException $e) {
-            throw $e;
-        }
+        $this->setPrecioCompra($precioCompra);
+        $this->setFechaCompra($fechaCompra);
+
+        $sql = "UPDATE compra 
+                SET idGranja = ?, idCompuesto = ?, cantidad = ?, precioCompra = ?, fechaCompra = ? 
+                WHERE idCompraCompuesto = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error); }
+        $stmt->bind_param("iiddsi", $this->idGranja, $this->idCompuesto, $this->cantidad, $this->precioCompra, $this->fechaCompra, $this->idCompraCompuesto);
+        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        $stmt->close();
+        return true;
     }
 
-    public function deleteComprasCompuestoId($idCompraCompuesto)
-    {
-        try{
-            if ($this->mysqli === null) { 
-                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
-            }
-            if (!is_numeric($idCompraCompuesto)) {
-                throw new RuntimeException('El ID de la compra debe ser un número.');
-            }
-            $sql = "DELETE FROM comprascompuesto WHERE idcomprascompuesto = ?";
-            $stmt = $this->mysqli->prepare($sql);
-            if ($stmt === false) {
-                throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error);
-            }
-            $stmt->bind_param('i', $idCompraCompuesto);
-            if (!$stmt->execute()) {
-                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); 
-            }
-            $stmt->close();
-            return true;
-        } catch (runtimeException $e) {
-            throw $e;
+    public function deleteComprasCompuestoId($idCompraCompuesto) {
+        if (!is_numeric($idCompraCompuesto)) {
+            throw new RuntimeException('El ID de la compra debe ser un número.');
         }
+        $sql = "DELETE FROM compra WHERE idCompraCompuesto = ?";
+        $stmt = $this->mysqli->prepare($sql);
+        if (!$stmt) { throw new RuntimeException('Error al preparar la consulta: ' . $this->mysqli->error); }
+        $stmt->bind_param('i', $idCompraCompuesto);
+        if (!$stmt->execute()) { throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error); }
+        $stmt->close();
+        return true;
     }
 }

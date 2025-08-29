@@ -144,6 +144,7 @@ CREATE TABLE compra (
     idCompuesto INT NOT NULL,
     cantidad DECIMAL(10,2),
     precioCompra DECIMAL(10,2),
+    fechaCompra Date,
     PRIMARY KEY (idCompraCompuesto),
     FOREIGN KEY (idGranja) REFERENCES granja(idGranja),
     FOREIGN KEY (idCompuesto) REFERENCES compuesto(idCompuesto)
