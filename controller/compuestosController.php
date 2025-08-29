@@ -98,34 +98,32 @@ if (isset($_GET['ajax']))
     // SOLICITUDES AJAX - COMPRAS COMPUESTOS
     // ------------------------------------
 
-        case 'newMantGranja':
+        case 'addCompra':
             header('Content-Type: application/json');
             try {
-                if( empty($_POST['fechaMant']) || (!isset($_POST['idGranja']) || $_POST['idGranja'] === '') || 
-                (!isset($_POST['tipoMantenimiento']) || $_POST['tipoMantenimiento'] === ''))
+                if( !isset($_POST['idGranja']) || $_POST['idGranja'] === '' || 
+                !isset($_POST['idcompuesto']) || $_POST['idcompuesto'] === ''|| 
+                !isset($_POST['cantidad']) || $_POST['cantidad'] === ''|| 
+                !isset($_POST['preciocompra']) || $_POST['preciocompra'] === '')
                 {
                     http_response_code(400);
                     echo json_encode(['msg' => 'Error: hay campos vacíos.']);
                     exit();
-                }
-                $oMantenimientoGranja = new mantenimientoGranja();
-                $oMantenimientoGranja->setMaxIDMantGranja();
-                $oMantenimientoGranja->setFecha( $_POST['fechaMant']);
-                $oMantenimientoGranja->setIdGranja( $_POST['idGranja'] );
-                $oMantenimientoGranja->setIdTipoMantenimiento( $_POST['tipoMantenimiento'] );
-                if ($oMantenimientoGranja->save()) {
+                }//$idGranja, $idCompuesto, $cantidad, $preciocompra
+                $oComprasCompuesto = new ComprasCompuesto();
+                if ($oComprasCompuesto->save($_POST['idGranja'], $_POST['idcompuesto'], $_POST['cantidad'], $_POST['preciocompra'])) {
                     http_response_code(200);
-                    echo json_encode(['msg' => 'Mantenimiento agregado correctamente']);
+                    echo json_encode(['msg' => 'Compra cargada correctamente']);
                 }
             }catch (RuntimeException $e) {
                     http_response_code(400);
                     //echo json_encode(['msg' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al ingresar mantenimiento']);
+                    echo json_encode(['msg' => 'Error al ingresar compra de compuesto.']);
             }
             exit();
         break;
 
-        case 'getMantGranja':
+        case 'getComprascompuesto':
             header('Content-Type: application/json');
             try {
                 if( !isset($_GET['idGranja']) || $_GET['idGranja'] === '' )
@@ -134,15 +132,12 @@ if (isset($_GET['ajax']))
                     echo json_encode(['msg' => 'Error: no se ha seleccionado una granja.']);
                     exit();
                 }
-                If (!isset($_GET['desde']) || $_GET['desde'] === '' || !isset($_GET['hasta']) || $_GET['hasta'] === '') {
-                    http_response_code(400);
-                    echo json_encode(['msg' => 'Error: rango de fechas no válido.']);
-                    exit();
-                }
-                $oMantenimientoGranja = new MantenimientoGranja();
-                if ($mantGranjas = $oMantenimientoGranja->getMantGranjas($_GET['idGranja'], $_GET['desde'], $_GET['hasta'])){
+                $oComprasCompuesto = new comprascompuesto();
+                $listadoComprasComp = $oComprasCompuesto->getComprasCompuesto($_POST['idGranja'], 
+                                $_POST['idcompuesto'], $_POST['cantidad'], $_POST['preciocompra']);
+                if ($listadoComprasComp){
                     http_response_code(200);
-                    echo json_encode($mantGranjas);
+                    echo json_encode($listadoComprasComp);
                 }else{
                     http_response_code(200);
                     echo '[]';
@@ -150,20 +145,20 @@ if (isset($_GET['ajax']))
             } catch (RuntimeException $e) {
                     http_response_code(400);
                     //echo json_encode(['msg' => $e->getMessage()]);
-                    echo json_encode(['msg' => 'Error al obtener mantenimientos.']);
+                    echo json_encode(['msg' => 'Error al obtener compras.']);
             }
             exit();
 
-        case 'delMantGranja': 
+        case 'delCompra': 
             header('Content-Type: application/json');
             try {
-                if( !isset($_GET['idMantenimientoGranja']) || $_GET['idMantenimientoGranja'] === '' ){
+                if( !isset($_GET['idcomprascompuesto']) || $_GET['idcomprascompuesto'] === '' ){
                     http_response_code(400);
-                    echo json_encode(['msg' => 'Error: mantenimiento no seleccionado.']);
+                    echo json_encode(['msg' => 'Error: compra no seleccionada.']);
                     exit();
                 }
-                $oMantenimientoGranja = new mantenimientoGranja();
-                if ($oMantenimientoGranja->deleteMantenimientoGranjaId($_GET['idMantenimientoGranja'])) {
+                $oComprasCompuesto = new comprascompuesto();
+                if ($oComprasCompuesto->deleteComprasCompuestoId($_GET['idcomprascompuesto'])) {
                     http_response_code(200);
                     echo json_encode(['msg' => 'Eliminado correctamente.']);
                 }

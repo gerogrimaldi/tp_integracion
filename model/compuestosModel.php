@@ -174,14 +174,7 @@ class ComprasCompuesto{
     public function setIdGranja($idGranja){$this->idGranja = (int)$idGranja;}
     public function setIdCompuesto($idCompuesto){$this->idCompuesto = $idCompuesto;}
 
-    public function setCantidad($cantidad)
-    {
-        if (is_numeric($cantidad) && $cantidad >= 0) {
-            $this->cantidad = $cantidad;
-        } else {
-            throw new RuntimeException('Cantidad inválida. Debe ser un número no negativo.');
-        }
-    }
+    public function setCantidad($cantidad){$this->cantidad = $cantidad;}
     public function setPrecioCompra($precioCompra)
     {
         if (is_numeric($precioCompra) && $precioCompra >= 0) {
@@ -226,8 +219,12 @@ class ComprasCompuesto{
         }
     }
 
-    public function save()
+    public function save($idGranja, $idCompuesto, $cantidad, $preciocompra)
     {
+        $this->setIdGranja($idGranja); 
+        $this->setIdCompuesto($idCompuesto);
+        $this->setCantidad($cantidad);
+        $this->setPrecioCompra($preciocompra);
         try{
             if ($this->mysqli === null) {
                 throw new RuntimeException('La conexión a la base de datos no está inicializada.');
@@ -247,6 +244,36 @@ class ComprasCompuesto{
             $stmt->close();
             return true;
         }catch(RuntimeException $e) {
+            throw $e;
+        }
+    }
+
+    public function update($idComprasCompuesto, $idGranja, $idCompuesto, $cantidad, $preciocompra)
+    {
+        $this->setIdcompracompuesto($idComprasCompuesto);
+        $this->setIdGranja($idGranja); 
+        $this->setIdCompuesto($idCompuesto);
+        $this->setCantidad($cantidad);
+        $this->setPrecioCompra($preciocompra);
+        try{
+            if ($this->mysqli === null) {
+                throw new RuntimeException('La conexión a la base de datos no está inicializada.');
+            }
+            $sql = "UPDATE Comprascompuesto SET idgranja = ?, idcompuesto = ?,
+            cantidad = ?, preciocompra = ? WHERE idcomprascompuesto = ?";
+            $stmt = $this->mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new RuntimeException("Error en la preparación de la consulta de actualización: " . $this->mysqli->error);
+            }
+            // Enlazar parámetros y ejecutar la consulta
+            $stmt->bind_param("iiddi", $this->$IdGranja, $this->$IdCompuesto, $this->$Cantidad, 
+                            $this->$PrecioCompra, $this->$Idcompracompuesto);
+            if (!$stmt->execute()) {
+                throw new RuntimeException('Error al ejecutar la consulta: ' . $stmt->error);
+            }
+            $stmt->close();
+            return true;
+        } catch (RuntimeException $e) {
             throw $e;
         }
     }

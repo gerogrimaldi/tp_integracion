@@ -303,12 +303,12 @@ $body .= <<<HTML
 <div class="container">
     <h2>Granjas</h2>
 
-    <div class="input-group">
+    <div class="input-group mb-3">
         <select id="selectGranja" name="selectGranja" class="form-select rounded-start" required>
             <!-- opciones -->
         </select>
         <button type="button" class="btn btn-primary rounded-end" data-bs-toggle="modal" data-bs-target="#newMantGranja">
-            Agregar mantenimiento
+            Agregar compra
         </button>
         <div class="invalid-feedback">
             Debe elegir una opción.
@@ -317,14 +317,8 @@ $body .= <<<HTML
 
     <!-- Filtros de fechas + botones -->
     <div class="row mb-3 g-2"> <!-- g-2 agrega un gap entre columnas -->
-        <div class="col-12 col-md-3">
-            <label for="fechaDesde" class="form-label">Desde:</label>
-            <input type="date" id="fechaDesde" class="form-control">
-        </div>
-        <div class="col-12 col-md-3">
-            <label for="fechaHasta" class="form-label">Hasta:</label>
-            <input type="date" id="fechaHasta" class="form-control">
-        </div>
+       
+       
         <div class="col-12 col-md-3 d-flex align-items-end">
             <button id="btnFiltrar" class="btn btn-primary w-100">Filtrar</button>
         </div>
@@ -339,12 +333,13 @@ $body .= <<<HTML
                 <thead class="table-light">
                     <tr>
                         <th class="text-primary">ID</th>
-                        <th class="text-primary">Fecha</th>
-                        <th class="text-primary">Mantenimiento</th>
+                        <th class="text-primary">Compuesto</th>
+                        <th class="text-primary">Cantidad</th>
+                        <th class="text-primary">Precio</th>
                         <th class="text-primary">❌</th>
                     </tr>
                 </thead>
-                <tbody id="mantGranja">
+                <tbody id="comprasCompuesto">
                     <!-- Los datos se insertarán aquí -->
                 </tbody>
             </table>
@@ -358,22 +353,13 @@ $body .= <<<HTML
     <div class="modal-dialog">
         <div class="modal-content bg-dark text-white">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="newMantGranjaModal">Agregar mantenimiento realizado</h1>
+                <h1 class="modal-title fs-5" id="newMantGranjaModal">Agregar nueva compra de compuesto</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="newMantGranjaForm" class="needs-validation" novalidate>
                     <div class="mb-4">
-                        <label for="fechaMant" class="form-label">Fecha y hora de realización</label>
-                        <input type="datetime-local" class="form-control" 
-                            id="fechaMant" name="fechaMantenimiento"
-                            required>
-                        <div class="invalid-feedback">
-                            Seleccione una fecha y hora válidos.
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label for="tipoMant" class="form-label">Tipo de mantenimiento</label>
+                        <label for="tipoMant" class="form-label">Compras de compuesto</label>
                         <select id="selectTipoMantGranja" name="tipoMantenimiento" class="form-control">
                             <!-- Las opciones se agregarán aquí con JavaScript -->
                         </select>
