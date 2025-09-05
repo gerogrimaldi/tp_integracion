@@ -413,6 +413,7 @@ $(document).ready(function() {
 
             // Recargar tabla con el lote correcto
             cargarAplicacionesVacunas(idLoteAves);
+            
         });
     });
 });

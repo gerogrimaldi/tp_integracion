@@ -119,6 +119,7 @@ if (isset($_GET['ajax']))
                     echo json_encode(['msg' => 'Error: datos incompletos para actualizar.']);
                     exit();
                 }
+                if ($_POST['campo'] === "domicilio"){ $_POST['campo'] = "direccion";}
                 $oUser = new Usuario();
                 $oUser->setidUsuario($_POST['idUsuario']);
                 if ($oUser->updateCampo($_POST['campo'], $_POST['valor'])) {

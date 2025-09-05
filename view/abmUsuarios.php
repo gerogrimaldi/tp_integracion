@@ -308,6 +308,9 @@ document.addEventListener('click', function(e) {
 
 function actualizarCampoUsuario(campo, valor, btn, spanDato) {
     const idUsuario = document.getElementById('selectUsuario').value;
+    console.log('idUsuario=' + encodeURIComponent(idUsuario) +
+              '&campo=' + encodeURIComponent(campo) +
+              '&valor=' + encodeURIComponent(valor));
     fetch('index.php?opt=usuarios&ajax=updateCampo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
