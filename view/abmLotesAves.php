@@ -153,7 +153,6 @@ function agregarTipoAve() {
 function editarTipoAve() {
     const idTipoAve = document.getElementById('idTipoAve').value;
     const nombreTipoEdit = document.getElementById('nombreTipoEdit').value;
-
     fetch('index.php?opt=lotesAves&ajax=editTipoAve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -690,7 +689,7 @@ function guardarCambios(){
     const fechaNac = document.getElementById('editFechaNacimiento').value;
     const fechaCompra = document.getElementById('editFechaCompra').value;
     const tipoAve = document.getElementById('editSelectTipoAve').value;
-    const galpon = document.getElementById('editSelectGalpon').value;
+
     const cantidad = document.getElementById('editCantidad').value;
     const precioCompra = document.getElementById('editPrecioCompra').value;
    fetch('index.php?opt=lotesAves&ajax=editLoteAves', {
@@ -701,7 +700,7 @@ function guardarCambios(){
             +'&fechaNac='+encodeURIComponent(fechaNac)
             +'&fechaCompra='+encodeURIComponent(fechaCompra)
             +'&idTipoAve='+encodeURIComponent(tipoAve)
-            +'&idGalpon='+encodeURIComponent(galpon)
+
             +'&cantidadAves='+encodeURIComponent(cantidad)
             +'&precioCompra='+encodeURIComponent(precioCompra)
     })

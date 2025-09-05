@@ -309,10 +309,10 @@ class LoteAves{
 
             // === Inserción del nuevo lote ===
             $sql = "INSERT INTO loteAves (idLoteAves, identificador, fechaNacimiento, fechaCompra, cantidadAves, idTipoAve, precioCompra)
-                    VALUES (?, ?, ?, ?, ?, ?)";
+                    VALUES (?, ?, ?, ?, ?, ?, ?)";
             $stmt = $this->mysqli->prepare($sql);
             if (!$stmt) throw new RuntimeException("Error en la preparación de inserción: " . $this->mysqli->error);
-            $stmt->bind_param("isssid", $this->idLoteAves, $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve, $this->precioCompra);
+            $stmt->bind_param("isssdid", $this->idLoteAves, $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve, $this->precioCompra);
             if (!$stmt->execute()) throw new RuntimeException('Error al ejecutar la inserción: ' . $stmt->error);
             $stmt->close();
 
@@ -356,7 +356,7 @@ class LoteAves{
             }
 
             // Verificar registros en otras tablas asociadas
-            $tablas = ['mortandadAves', 'pesajeLoteAves', 'ventaLoteAves'];
+            $tablas = ['mortandadAves', 'pesajeLoteAves', 'bajaloteaves'];
             foreach ($tablas as $tabla) {
                 $sql = "SELECT COUNT(*) AS cnt FROM $tabla WHERE idLoteAves = ?";
                 $stmt = $this->mysqli->prepare($sql);
@@ -538,12 +538,13 @@ class LoteAves{
             $stmt->bind_param("sssiidi", $this->identificador, $this->fechaNacimiento, $this->fechaCompra, $this->cantidadAves, $this->idTipoAve, $this->precioCompra, $this->idLoteAves);
 
             $stmt->bind_param(
-                "sssiii",
+                "sssiidi",
                 $this->identificador,
                 $this->fechaNacimiento,
                 $this->fechaCompra,
                 $this->cantidadAves,
                 $this->idTipoAve,
+                $this->precioCompra,
                 $this->idLoteAves
             );
             if (!$stmt->execute()) {

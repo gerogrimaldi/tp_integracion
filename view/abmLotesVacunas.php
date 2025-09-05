@@ -47,7 +47,7 @@ $body = <<<HTML
       </div>
       <div class="modal-body">
         <form id="formAgregarLote" class="needs-validation" novalidate>
-          <input type="hidden" id="idVacunaAgregar" name="idVacuna" value="$idVacuna">
+          <input type="hidden" id="idVacunaAgregar" name="idVacuna" value=idVacuna>
           <div class="mb-3">
             <label>Número de Lote</label>
             <input type="text" name="numeroLote" class="form-control" required>
@@ -68,6 +68,8 @@ $body = <<<HTML
             <input type="date" name="fechaVencimiento" class="form-control" required>
             <div class="invalid-feedback">Seleccione una fecha de vencimiento.</div>
           </div>
+
+
         </form>
       </div>
       <div class="modal-footer">
@@ -190,6 +192,7 @@ document.getElementById('btnAgregarLote').addEventListener('click', function() {
         form.classList.add('was-validated');
         return;
     }
+    form.idVacuna.value = idVacuna;
     const data = new URLSearchParams(new FormData(form));
     fetch('index.php?opt=vacunas&ajax=addLoteVacuna', {
         method: 'POST',
@@ -274,6 +277,7 @@ window.addEventListener('load', function() {
 
     $('#selectVacuna').on('change', function() {
         idVacuna = $(this).val();
+        $('#idLoteVacuna').val(idVacuna);
         if (idVacuna) {
             cargarLotesVacuna(idVacuna);
         }
